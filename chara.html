@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>生徒名簿 | とりの丘学園</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="chara-page">
+    <header class="mini-header">
+        <nav class="premium-nav">
+            <a href="index.html" class="nav-item"><i class="fas fa-home"></i> HOME</a>
+            <a href="chara.html" class="nav-item active"><i class="fas fa-users"></i> 生徒名簿</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-address-book"></i> 生徒名簿</h2>
+            <div class="filter-tabs">
+                <button class="filter-btn active" onclick="filterChars('all')">全校生徒</button>
+                <button class="filter-btn" onclick="filterChars('高等部')">高等部</button>
+                <button class="filter-btn" onclick="filterChars('中等部')">中等部</button>
+                <button class="filter-btn" onclick="filterChars('初等部')">初等部</button>
+            </div>
+            <div id="char-grid" class="char-grid">
+                <!-- ここにキャラが表示されるよ！ -->
+            </div>
+        </section>
+    </main>
+
+    <!-- プロフモーダル -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeProfile()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>とりの丘学園 | 総合ポータル</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="home-page">
+    <header class="main-header">
+        <div class="header-overlay">
+            <div class="logo-area">
+                <h1><i class="fas fa-feather-alt"></i> とりの丘学園</h1>
+                <p class="sub-title">Torinooka Academy Portal</p>
+            </div>
+            <nav class="premium-nav">
+                <a href="index.html" class="nav-item active"><i class="fas fa-home"></i> HOME</a>
+                <a href="chara.html" class="nav-item"><i class="fas fa-users"></i> 生徒名簿</a>
+                <a href="#" class="nav-item"><i class="fas fa-book"></i> ストーリー</a>
+                <a href="#" class="nav-item"><i class="fas fa-gamepad"></i> コンテンツ</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- 教育理念 -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-university"></i> 学園理念</h2>
+            <div class="philosophy-box">
+                <p class="main-philo" id="school-philosophy"></p>
+                <p class="concept-text" id="school-concept"></p>
+            </div>
+        </section>
+
+        <!-- 今日のとり -->
+        <section id="today-pickup" class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-star"></i> 今日のとり</h2>
+            <div id="random-char-display" class="pickup-content">
+                <!-- script.jsから入るよ -->
+            </div>
+        </section>
+
+        <!-- 制服 -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-tshirt"></i> 制服コレクション</h2>
+            <div class="uniform-grid" id="uniform-display">
+                <!-- script.jsから入るよ -->
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

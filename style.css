@@ -1,0 +1,112 @@
+:root {
+    --gold: #d4af37;
+    --navy: #1a2a6c;
+    --sakura: #ffecf2;
+    --white: #ffffff;
+    --shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+body {
+    margin: 0;
+    font-family: 'Times New Roman', serif;
+    background: #fdfdfd;
+    color: #333;
+}
+
+/* ヘッダー豪華版 */
+.main-header {
+    height: 300px;
+    background: linear-gradient(rgba(26,42,108,0.7), rgba(26,42,108,0.7)), url('img/school_bg.jpg') center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    text-align: center;
+}
+
+.logo-area h1 { font-size: 3rem; margin: 0; letter-spacing: 0.2rem; }
+.sub-title { font-size: 1rem; opacity: 0.8; }
+
+/* ナビゲーション（青線回避！ボタン風） */
+.premium-nav {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: var(--white);
+    padding: 10px 25px;
+    border: 1px solid var(--white);
+    border-radius: 50px;
+    transition: all 0.3s;
+    background: rgba(255,255,255,0.1);
+}
+
+.nav-item:hover, .nav-item.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--navy);
+    font-weight: bold;
+}
+
+/* 豪華なタイトル */
+.gold-title {
+    text-align: center;
+    color: var(--navy);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+}
+
+.luxury-section {
+    background: var(--white);
+    padding: 40px;
+    margin-bottom: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    border-top: 5px solid var(--gold);
+}
+
+/* 今日のとりカード */
+.pickup-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    background: var(--sakura);
+    padding: 20px;
+    border-radius: 15px;
+}
+
+.pickup-img {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 4px solid var(--gold);
+    object-fit: cover;
+}
+
+/* キャラクターグリッド */
+.char-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.char-card {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid #eee;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.char-card:hover { transform: translateY(-5px); box-shadow: var(--shadow); border-color: var(--gold); }
+.char-card img { width: 100%; border-radius: 8px; margin-bottom: 10px; }
+
+/* モーダル */
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
+.modal-content { background: white; margin: 10% auto; padding: 20px; width: 80%; max-width: 600px; border-radius: 15px; }
