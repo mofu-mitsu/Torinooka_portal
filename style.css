@@ -110,3 +110,436 @@ body {
 /* モーダル */
 .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
 .modal-content { background: white; margin: 10% auto; padding: 20px; width: 80%; max-width: 600px; border-radius: 15px; }
+
+/* 投票グリッド */
+.vote-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.vote-btn {
+    background: var(--white);
+    border: 2px solid var(--gold);
+    color: var(--navy);
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.vote-btn:hover {
+    background: var(--gold);
+    color: var(--white);
+}
+
+/* お手紙フォーム */
+.letter-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.letter-form select, .letter-form textarea {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.letter-form textarea { height: 100px; }
+
+.premium-btn {
+    background: var(--navy);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* ヘッダー背景を画像から高級感のあるグラデーションに変更 */
+.main-header {
+    height: 350px;
+    /* 画像がなくても綺麗に見えるネイビー×パープルのグラデーション */
+    background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    text-align: center;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+}
+
+/* 投票ボタン（詳細プロフ内）の豪華版 */
+.vote-btn-big {
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 20px;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+}
+
+.vote-btn-big:hover {
+    transform: scale(1.05);
+    background: #e5c158;
+}
+
+/* クラス選択ラベルのデザイン */
+.vote-class-tabs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.filter-btn {
+    background: #fff;
+    border: 1px solid var(--gold);
+    color: var(--navy);
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-weight: bold;
+}
+
+.filter-btn:hover, .filter-btn.active {
+    background: var(--gold);
+    color: white;
+}
+
+/* キャラクター投票エリア（横スクロール対応） */
+#vote-char-display {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto; /* 横スクロールを許可 */
+    padding: 20px 10px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 横スクロールバーをお洒落に */
+#vote-char-display::-webkit-scrollbar {
+    height: 8px;
+}
+#vote-char-display::-webkit-scrollbar-thumb {
+    background: var(--gold);
+    border-radius: 10px;
+}
+
+.vote-btn {
+    flex: 0 0 140px; /* 幅を固定して横に並べる */
+    height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 2px solid #eee;
+    border-radius: 15px;
+    transition: 0.3s;
+}
+
+.vote-btn:hover {
+    border-color: var(--gold);
+    transform: translateY(-5px);
+}
+
+.vote-btn i {
+    font-size: 2rem;
+    color: #ff4d6d;
+    margin-bottom: 10px;
+}
+
+/* 投票セクションのレイアウト調整 */
+#vote-section p {
+    margin-bottom: 10px; /* 距離を縮める */
+}
+
+.vote-class-tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: nowrap; /* 1行に並べる */
+    overflow-x: auto; /* ラベル自体もスマホで見やすいようにスクロール */
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+/* キャラクター横スクロールエリア */
+#vote-char-display {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto; 
+    padding: 15px 5px;
+    min-height: 200px;
+    /* スクロールを滑らかに */
+    scroll-snap-type: x proximity;
+}
+
+.vote-btn {
+    flex: 0 0 160px; /* カードの幅 */
+    scroll-snap-align: start;
+    background: linear-gradient(135deg, #ffffff, #fffafa);
+    border: 2px solid var(--gold);
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* スクロールバーのデザイン（ゴールド） */
+#vote-char-display::-webkit-scrollbar { height: 6px; }
+#vote-char-display::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+/* クラス選択ラベル（ピル型） */
+.vote-class-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 10px 0;
+    margin-bottom: 5px;
+}
+
+.class-pill {
+    background: #f0f0f0;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 20px;
+    white-space: nowrap;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+
+.class-pill.active {
+    background: var(--gold);
+    color: white;
+}
+
+/* キャラ選択横スクロール */
+.vote-scroll-container {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 15px 5px;
+    background: #fffafb;
+    border-radius: 10px;
+}
+
+.vote-mini-card {
+    flex: 0 0 100px;
+    text-align: center;
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.vote-mini-card img {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 5px;
+}
+
+.vote-mini-card button {
+    background: #ff4d6d;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    cursor: pointer;
+}
+
+/* ランキング表示 */
+.ranking-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.rank-num {
+    font-weight: bold;
+    color: var(--gold);
+    width: 30px;
+}
+
+.rank-name { flex: 1; }
+.rank-count { font-size: 0.8rem; color: #888; }
+
+/* --- クラス選択ボタン（ピル型）の修正 --- */
+.vote-class-tabs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 10px;
+}
+
+.class-pill {
+    flex: 0 0 auto; /* 縦長にならないように固定 */
+    background: #eee;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.class-pill.active {
+    background: var(--gold);
+    color: white;
+}
+
+/* --- 投票カードの修正（名前の改行防止・画像追加） --- */
+.vote-scroll-container {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding: 20px 10px;
+    background: rgba(255, 240, 245, 0.5);
+    border-radius: 15px;
+}
+
+.vote-mini-card {
+    flex: 0 0 120px; /* カード幅を固定 */
+    background: white;
+    padding: 15px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.vote-mini-card img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--gold);
+    margin-bottom: 10px;
+}
+
+.vote-mini-card span {
+    font-size: 0.9rem;
+    font-weight: bold;
+    white-space: nowrap; /* これで「もも / か」を防ぐ！ */
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* --- トースト通知 --- */
+#toast-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+}
+
+.toast {
+    background: rgba(26, 42, 108, 0.9);
+    color: white;
+    padding: 12px 25px;
+    border-radius: 50px;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    animation: fadeInUp 0.3s ease-out;
+}
+
+/* --- ローディングアニメーション --- */
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ランキングボード */
+#ranking-board {
+    background: #fff;
+    border: 2px solid #eee;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 40px auto; /* 上下に余白 */
+    max-width: 600px;
+}
+
+.ranking-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #f9f9f9;
+}
+
+.rank-num {
+    background: var(--gold);
+    color: white;
+    width: 25px; height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* プレースホルダーテキスト */
+.placeholder-text {
+    width: 100%;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 20px;
+}
+
+/* ストーリーカード */
+.story-card {
+    background: white;
+    border-left: 8px solid #ddd;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 0 15px 15px 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: 0.3s;
+}
+
+/* タグごとに色を変える（例：重い話はダークに） */
+.tag-重い { border-left-color: #4a4a4a; background: #fdfafb; }
+.tag-日常 { border-left-color: #87ceeb; }
+.tag-事件 { border-left-color: #ff4500; }
+
+.story-header { display: flex; gap: 10px; margin-bottom: 10px; }
+.story-tag { background: #eee; padding: 2px 10px; border-radius: 10px; font-size: 0.8rem; }
+.story-stage { color: var(--gold); font-size: 0.8rem; font-weight: bold; }
+
+.story-preview { color: #666; margin: 10px 0; line-height: 1.4; }
+.read-more { background: none; border: none; color: var(--navy); font-weight: bold; cursor: pointer; text-decoration: underline; }
