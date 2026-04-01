@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>ストーリー | とりの丘学園</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="story-page">
+    <header class="mini-header">
+        <nav class="premium-nav">
+            <a href="index.html" class="nav-item">HOME</a>
+            <a href="chara.html" class="nav-item">生徒名簿</a>
+            <a href="story.html" class="nav-item active">ストーリー</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- 投稿ボタン -->
+        <div style="text-align: right; margin-bottom: 20px;">
+            <button onclick="toggleStoryForm()" class="premium-btn"><i class="fas fa-pen-nib"></i> ストーリーを書く</button>
+        </div>
+
+        <!-- 投稿フォーム（初期は非表示） -->
+        <section id="story-form-area" class="luxury-section" style="display: none;">
+            <h2 class="gold-title">新規投稿</h2>
+            <div class="letter-form">
+                <input type="text" id="story-title" placeholder="タイトル">
+                <select id="story-stage">
+                    <option value="高等部">高等部</option>
+                    <option value="中等部">中等部</option>
+                    <option value="初等部">初等部</option>
+                    <option value="共通">共通</option>
+                </select>
+                <input type="text" id="story-chars" placeholder="登場キャラ（例：のりおみ, くう）">
+                <select id="story-tag">
+                    <option value="日常">日常</option>
+                    <option value="軽い">軽い</option>
+                    <option value="重い">重い</option>
+                    <option value="事件">事件</option>
+                    <option value="恋愛">恋愛</option>
+                </select>
+                <textarea id="story-content" placeholder="物語の内容..." style="height: 300px;"></textarea>
+                <button onclick="sendStory()" class="premium-btn">学園史に刻む（投稿）</button>
+            </div>
+        </section>
+
+        <!-- フィルタ機能 -->
+        <section class="luxury-section">
+            <div class="filter-tabs" id="story-filters">
+                <button class="filter-btn active" onclick="filterStories('all')">すべて</button>
+                <button class="filter-btn" onclick="filterStories('日常')">日常</button>
+                <button class="filter-btn" onclick="filterStories('重い')">重い</button>
+                <button class="filter-btn" onclick="filterStories('事件')">事件</button>
+            </div>
+            
+            <div id="story-list" class="story-grid">
+                <!-- ここに物語が並びます -->
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
