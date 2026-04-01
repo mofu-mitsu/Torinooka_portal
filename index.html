@@ -22,8 +22,9 @@
         </div>
     </header>
 
+    <!-- ... (ヘッダーなどは共通) ... -->
     <main class="container">
-        <!-- 教育理念 -->
+        <!-- 学園理念（制服と分離） -->
         <section class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-university"></i> 学園理念</h2>
             <div class="philosophy-box">
@@ -31,7 +32,12 @@
                 <p class="concept-text" id="school-concept"></p>
             </div>
         </section>
-
+        <!-- 制服紹介（専用の説明文を追加） -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-tshirt"></i> 制服コレクション</h2>
+            <p id="uniform-policy" class="policy-text"></p>
+            <div class="uniform-grid" id="uniform-display"></div>
+        </section>
         <!-- 今日のとり -->
         <section id="today-pickup" class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-star"></i> 今日のとり</h2>
@@ -40,13 +46,44 @@
             </div>
         </section>
 
-        <!-- 制服 -->
-        <section class="luxury-section">
-            <h2 class="gold-title"><i class="fas fa-tshirt"></i> 制服コレクション</h2>
-            <div class="uniform-grid" id="uniform-display">
-                <!-- script.jsから入るよ -->
+        <!-- 人気投票セクション -->
+        <section id="vote-section" class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-crown"></i> 月間人気投票</h2>
+            <p style="text-align:center;">お気に入りの生徒にエールを送りましょう！</p>
+            <div id="quick-vote-area" class="vote-grid">
+                <!-- JSで上位キャラを表示 -->
             </div>
         </section>
+        <div id="ranking-board" style="margin-top: 30px;">
+            <h3><i class="fas fa-trophy"></i> 今月の人気ランキング</h3>
+            <div id="ranking-display" class="ranking-container">
+                <!-- GASから読み込まれます -->
+            </div>
+        </div>
+    <section id="letter-section" class="luxury-section">
+        <h2 class="gold-title"><i class="fas fa-envelope-open-text"></i> 生徒へのお手紙</h2>
+        
+        <!-- お手紙フォーム -->
+        <div class="letter-form">
+            <select id="letter-class-select" onchange="updateLetterCharSelect()">
+                <option value="">クラスを選択</option>
+            </select>
+            <select id="letter-to">
+                <option value="">先にクラスを選んでね</option>
+            </select>
+            <textarea id="letter-content" placeholder="メッセージをどうぞ..."></textarea>
+            <button onclick="sendLetter()" class="premium-btn">手紙を送る</button>
+        </div>
+
+        <!-- お返事掲示板 -->
+        <div id="reply-board">
+            <h3 class="gold-title" style="margin-top: 40px;"><i class="fas fa-comment-dots"></i> 学園からの返信</h3>
+            <div id="reply-display" class="reply-container">
+                <!-- ここにお返事が出ます -->
+            </div>
+        </div>
+    </section>
+
     </main>
 
     <script src="data.js"></script>
