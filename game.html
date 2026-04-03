@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>学園コンテンツ | とりの丘学園</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="world-page">
+    <header class="mini-header">
+        <nav class="premium-nav">
+            <a href="index.html" class="nav-item">HOME</a>
+            <a href="chara.html" class="nav-item">生徒名簿</a>
+            <a href="story.html" class="nav-item">ストーリー</a>
+            <a href="world.html" class="nav-item">世界観</a>
+            <a href="games.html" class="nav-item active">コンテンツ</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-gamepad"></i> 学園公式コンテンツ</h2>
+            <p class="u-note">とりの丘学園の生徒たちと遊べる外部ツール・ゲーム一覧です。</p>
+            <div id="game-list" class="game-grid">
+                <!-- script.jsで描画 -->
+            </div>
+        </section>
+
+        <!-- サイト限定・追加コンテンツ用（案） -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-magic"></i> サイト限定：とりの丘診断</h2>
+            <div class="coming-soon">
+                <p>準備中：あなたのMBTIを入力すると、学園での「親友」や「ライバル」が判定されるツールを開発中……？</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>世界観・相関図 | とりの丘学園</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="world-page">
+    <header class="mini-header">
+        <nav class="premium-nav">
+            <a href="index.html" class="nav-item">HOME</a>
+            <a href="chara.html" class="nav-item">生徒名簿</a>
+            <a href="story.html" class="nav-item">ストーリー</a>
+            <a href="world.html" class="nav-item active">世界観・相関図</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- 相関図セクション -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-project-diagram"></i> 人物相関図</h2>
+            <p class="u-note">※主要キャラクターの複雑な関係性を可視化しています。</p>
+            
+            <!-- 視覚的な図（画像があればimg、なければ簡易的なリストを表示） -->
+            <div id="relation-visual" class="relation-container">
+                <!-- script.jsで関係性をカード形式で出すよ -->
+            </div>
+        </section>
+
+        <!-- 用語集セクション -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-book-open"></i> 用語集・設定</h2>
+            <div class="search-box">
+                <input type="text" id="term-search" placeholder="用語を検索..." onkeyup="filterTerms()">
+            </div>
+            <div id="term-list" class="term-grid">
+                <!-- ここに用語が表示されます -->
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
