@@ -14,10 +14,11 @@
                 <p class="sub-title">Torinooka Academy Portal</p>
             </div>
             <nav class="premium-nav">
-                <a href="index.html" class="nav-item active"><i class="fas fa-home"></i> HOME</a>
-                <a href="chara.html" class="nav-item"><i class="fas fa-users"></i> 生徒名簿</a>
-                <a href="#" class="nav-item"><i class="fas fa-book"></i> ストーリー</a>
-                <a href="#" class="nav-item"><i class="fas fa-gamepad"></i> コンテンツ</a>
+                <a href="index.html" class="nav-item">HOME</a>
+                <a href="chara.html" class="nav-item">生徒名簿</a>
+                <a href="story.html" class="nav-item">ストーリー</a> <!-- # から story.html に変更 -->
+                <a href="world.html" class="nav-item active">世界観・相関図</a>
+                <a href="#" class="nav-item">コンテンツ</a>
             </nav>
         </div>
     </header>
@@ -45,7 +46,26 @@
                 <!-- script.jsから入るよ -->
             </div>
         </section>
+        <!-- 今日のとり の下あたりに追加 -->
+        <section class="luxury-section">
+            <div class="two-column">
+                <!-- 今日のメニュー -->
+                <div class="menu-section">
+                    <h2 class="gold-title"><i class="fas fa-utensils"></i> 本日の学食・購買</h2>
+                    <div id="today-menu-display"></div>
+                </div>
 
+                <!-- 掲示板 -->
+                <div class="bulletin-section">
+                    <h2 class="gold-title"><i class="fas fa-clipboard"></i> 学園掲示板</h2>
+                    <div class="bulletin-input-area">
+                        <input type="text" id="bulletin-input" placeholder="学園生活の一言をどうぞ...">
+                        <button onclick="sendBulletin()">投稿</button>
+                    </div>
+                    <div id="bulletin-board-display" class="bulletin-scroll"></div>
+                </div>
+            </div>
+        </section>
         <!-- 人気投票セクション -->
         <section id="vote-section" class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-crown"></i> 月間人気投票</h2>
