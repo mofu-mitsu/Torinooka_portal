@@ -45,14 +45,24 @@
             </div>
         </section>
 
-        <!-- フィルタ機能 -->
         <section class="luxury-section">
-            <div class="filter-tabs" id="story-filters">
-                <button class="filter-btn active" onclick="filterStories('all')">すべて</button>
-                <button class="filter-btn" onclick="filterStories('日常')">日常</button>
-                <button class="filter-btn" onclick="filterStories('重い')">重い</button>
-                <button class="filter-btn" onclick="filterStories('事件')">事件</button>
+            <h2 class="gold-title"><i class="fas fa-search"></i> 物語を探す</h2>
+            <div class="story-search-grid">
+                <input type="text" id="search-text" placeholder="キーワード・キャラ名で検索" onkeyup="executeStorySearch()" class="premium-select" style="border-radius:10px">
+                
+                <select id="filter-tag" class="premium-select" onchange="executeStorySearch()">
+                    <option value="all">すべてのタグ</option>
+                </select>
+
+                <select id="filter-class" class="premium-select" onchange="executeStorySearch()">
+                    <option value="all">すべての学年/クラス</option>
+                </select>
             </div>
+            
+            <div id="story-list" class="story-grid">
+                <!-- 物語がここに並びます -->
+            </div>
+        </section>
             
             <div id="story-list" class="story-grid">
                 <!-- ここに物語が並びます -->
