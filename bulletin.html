@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>学園掲示板 | とりの丘学園</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="world-page">
+    <header class="mini-header">
+        <nav class="premium-nav">
+            <a href="index.html" class="nav-item">HOME</a>
+            <a href="bulletin.html" class="nav-item active">掲示板</a>
+        </nav>
+    </header>
+    <main class="container">
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-clipboard"></i> 学園自由掲示板</h2>
+            <div class="bulletin-input-area large">
+                <textarea id="bulletin-input" placeholder="学園生活の一言をどうぞ...（管理者は削除可能）"></textarea>
+                <button onclick="sendBulletin()" class="premium-btn">投稿する</button>
+            </div>
+            <div id="bulletin-board-display" class="bulletin-full-list">
+                <!-- ここに全書き込みが表示される -->
+            </div>
+        </section>
+    </main>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
