@@ -1,9 +1,10 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxthuc1uG6szzcRHCQj6hkNQREn2su_BB1iQIC2M33l-eyFXGP-4JiZZWTerp43xOXzqg/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwbAFy6stfjJfkcTAMmPKsjauTq09z92YpBkKuEsz0jKuZsiOSTw_Gea5giYQDxmKsh-g/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
+    // 共通データの準備
     const classList = [...new Set(schoolData.characters.map(c => c.class))].sort();
 
-    // 各ページの初期化（要素がある場合のみ実行）
+    // --- HOME (index.html) ---
     if (document.getElementById('school-philosophy')) {
         document.getElementById('school-philosophy').innerText = schoolData.info.philosophy;
         document.getElementById('school-concept').innerText = schoolData.info.concept;
@@ -12,40 +13,73 @@ document.addEventListener('DOMContentLoaded', () => {
         showTodayPickup();
         loadReplies();
         loadRanking();
+        showTodayMenu();
+        loadBulletin();
     }
 
+    // --- 生徒名簿 (chara.html) ---
     if (document.getElementById('char-grid')) {
         renderClassFilters(classList); 
         renderCharacters('all');
     }
 
+    // --- ストーリー (story.html) ---
     if (document.getElementById('story-list')) {
         loadStories();
     }
 
-    // 世界観ページの初期化
+    // --- 世界観 (world.html) ---
     if (document.getElementById('term-list')) {
         renderTerms();
-        renderRelations(); // ← ここでエラーが出てたのを修正
+        renderRelations();
     }
 
-    // コンテンツページの初期化
+    // --- コンテンツ (games.html) ---
     if (document.getElementById('game-list')) {
         renderGames();
     }
-    // 全ページのナビゲーションリンクを確実に修正
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach(item => {
+
+    // --- 共通パーツ (全ページ共通) ---
+    // カレンダー表示
+    showCalendar();
+
+    // リンクの自動修正
+    document.querySelectorAll('.nav-item').forEach(item => {
         if (item.innerText.includes("コンテンツ")) item.href = "games.html";
     });
 
-    // HOMEページ限定の初期化
-    if (document.getElementById('school-philosophy')) {
-        showTodayMenu(); // メニュー表示
-        loadBulletin();  // 掲示板読み込み
+    // アクティブタブの装飾
+    const activeNav = document.querySelector('.nav-item.active');
+    if (activeNav && !document.body.classList.contains('home-page')) {
+        activeNav.style.backgroundColor = "var(--wine)";
+        activeNav.style.color = "white";
     }
+
+    // イースターエッグ
+    setInterval(spawnGohobi, 20000);
+    const logo = document.querySelector('.logo-area h1');
+    if(logo) logo.onclick = secretClick;
+
+    // luxury-section のフェードイン演出
+    const sections = document.querySelectorAll('.luxury-section');
+    sections.forEach((sec, index) => {
+        setTimeout(() => sec.classList.add('show'), index * 150);
+    });
 });
 
+// ==========================================
+// 2. 画像 ＆ 丸枠 ＆ Coming Soon の鉄壁ガード
+// ==========================================
+function getCharImgHTML(char, sizeClass = 'char-circle-small') {
+    const defaultImg = "images/coming_soon.png"; // みつきが用意する画像名
+    const charImg = (char && char.img && char.img.trim() !== "") ? `images/${char.img}` : defaultImg;
+
+    return `
+        <div class="img-container ${sizeClass}">
+            <img src="${charImg}" alt="character" onerror="this.src='${defaultImg}'">
+        </div>
+    `;
+}
 // --- 今日の学食メニュー（いちごメロンパン対応） ---
 function showTodayMenu() {
     const menuArea = document.getElementById('today-menu-display');
@@ -95,9 +129,13 @@ async function loadBulletin() {
             return;
         }
 
+        // loadBulletin内のmap処理の一部
         board.innerHTML = posts.map(p => `
             <div class="bulletin-post">
-                <span class="post-date">${new Date(p.date).toLocaleString()}</span>
+                <div class="post-header">
+                    <span class="post-date">${new Date(p.date).toLocaleString()}</span>
+                    <button class="delete-btn" onclick="deletePost('${p.date}')"><i class="fas fa-trash-alt"></i> 削除</button>
+                </div>
                 <p class="post-content">${p.content}</p>
             </div>
         `).join('');
@@ -105,7 +143,38 @@ async function loadBulletin() {
         board.innerHTML = "<p>掲示板の読み込みに失敗しました。</p>";
     }
 }
+// ストーリー用フィルター初期化
+function renderStoryFilters() {
+    const tagSelect = document.getElementById('filter-tag');
+    const classSelect = document.getElementById('filter-class');
+    if (!tagSelect || !classSelect) return;
 
+    // タグを動的に取得してプルダウンへ（みつきが自由に設定したタグを拾う）
+    const tags = [...new Set(allStories.map(s => s.tag))].filter(t => t);
+    tagSelect.innerHTML = '<option value="all">すべてのタグ</option>' + 
+                          tags.map(t => `<option value="${t}">${t}</option>`).join('');
+
+    // クラス一覧も取得
+    const classes = [...new Set(schoolData.characters.map(c => c.class))].sort();
+    classSelect.innerHTML = '<option value="all">すべてのクラス</option>' + 
+                            classes.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+// 高度な検索実行
+function executeStorySearch() {
+    const textQuery = document.getElementById('search-text').value.toLowerCase();
+    const tagQuery = document.getElementById('filter-tag').value;
+    const classQuery = document.getElementById('filter-class').value;
+
+    const filtered = allStories.filter(s => {
+        const matchText = s.title.toLowerCase().includes(textQuery) || s.chars.toLowerCase().includes(textQuery);
+        const matchTag = (tagQuery === 'all' || s.tag === tagQuery);
+        const matchClass = (classQuery === 'all' || s.stage === classQuery); // stageをクラス/学年として判定
+        return matchText && matchTag && matchClass;
+    });
+
+    renderStoryCards(filtered);
+}
 // 掲示板への書き込み
 async function sendBulletin() {
     const content = document.getElementById('bulletin-input').value;
@@ -124,7 +193,17 @@ async function sendBulletin() {
     } catch (e) { showToast("失敗しちゃった..."); }
 }
 
+async function deletePost(dateStr) {
+    const key = prompt("管理用合言葉を入れてね：");
+    if (key !== "momoka11") return alert("合言葉が違うゾ！");
 
+    showToast("削除依頼中...");
+    try {
+        await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ type: "delete_bulletin", date: dateStr }) });
+        showToast("消去したゾ！");
+        location.reload();
+    } catch (e) { showToast("失敗だゾ..."); }
+}
 function renderRelations() {
     const container = document.getElementById('relation-visual');
     if (!container) return;
@@ -337,37 +416,23 @@ function toggleLoading(elementId, show) {
 function renderVoteClassButtons(classList) {
     const area = document.getElementById('quick-vote-area');
     if (!area) return;
-    area.innerHTML = '<p class="small-title"><i class="fas fa-search"></i> クラスを選んで投票：</p>';
-    
-    const btnContainer = document.createElement('div');
-    btnContainer.className = 'vote-class-tabs';
-
-    classList.forEach(className => {
-        const btn = document.createElement('button');
-        btn.className = 'class-pill';
-        btn.innerText = className;
-        btn.onclick = (e) => {
-            document.querySelectorAll('.class-pill').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            showVoteCharsByClass(className);
-        };
-        btnContainer.appendChild(btn);
-    });
-    area.appendChild(btnContainer);
-    
-    const charArea = document.createElement('div');
-    charArea.id = 'vote-char-display';
-    charArea.className = 'vote-scroll-container';
-    // 初期メッセージを表示
-    charArea.innerHTML = '<p class="placeholder-text">上のクラスボタンを押してね！</p>';
-    area.appendChild(charArea);
-    
-    // 【修正】showVoteCharsByClass(classList[0]) を消しました。
+    area.innerHTML = `
+        <div class="vote-selector-wrapper">
+            <label for="vote-class-dropdown"><i class="fas fa-search"></i> クラスを選択：</label>
+            <select id="vote-class-dropdown" class="premium-select" onchange="showVoteCharsByClass(this.value)">
+                <option value="">-- クラスを選んでね --</option>
+                ${classList.map(c => `<option value="${c}">${c}</option>`).join('')}
+            </select>
+        </div>
+        <div id="vote-char-display" class="vote-scroll-container">
+            <p class="placeholder-text">クラスを選ぶと生徒が表示されるゾッ！</p>
+        </div>
+    `;
 }
-
 
 function showVoteCharsByClass(className) {
     const display = document.getElementById('vote-char-display');
+    if (!display || !className) return;
     display.innerHTML = '';
     const filtered = schoolData.characters.filter(c => c.class === className);
     
@@ -375,7 +440,7 @@ function showVoteCharsByClass(className) {
         const card = document.createElement('div');
         card.className = 'vote-mini-card';
         card.innerHTML = `
-            <img src="img/${c.img}" onerror="this.src='https://via.placeholder.com/70?text=bird'">
+            ${getCharImgHTML(c, 'char-circle-small')}
             <span>${c.name}</span>
             <button class="vote-btn-heart" onclick="sendVote('${c.id}', '${c.name}')">
                 <i class="fas fa-heart"></i>
@@ -384,16 +449,13 @@ function showVoteCharsByClass(className) {
         display.appendChild(card);
     });
 }
-
 async function loadRanking() {
     const rankingArea = document.getElementById('ranking-display');
     if (!rankingArea) return;
     toggleLoading('ranking-display', true);
 
     try {
-        // GAS_URLの末尾に ?type=ranking が正しくつくように
         const response = await fetch(GAS_URL + "?type=ranking");
-        if (!response.ok) throw new Error('Network response was not ok');
         const ranking = await response.json();
         
         rankingArea.innerHTML = '';
@@ -402,37 +464,51 @@ async function loadRanking() {
             return;
         }
 
-        rankingArea.innerHTML = ranking.map((r, i) => `
-            <div class="ranking-item">
-                <span class="rank-num">${i + 1}</span>
-                <span class="rank-name">${r.name}</span>
-                <span class="rank-count">${r.count} 票</span>
-            </div>
-        `).join('');
+        // 上位3名だけを特別に表示
+        rankingArea.innerHTML = ranking.map((r, i) => {
+            const char = schoolData.characters.find(c => c.name === r.name);
+            const imgPath = char ? `images/${char.img}` : 'https://via.placeholder.com/80';
+            
+            // 順位ごとのセリフ（データになければデフォルト）
+            let rankMsg = "";
+            if (i === 0) rankMsg = char?.rankQuote1 || "「1位だなんて…みんな、ありがとう！」";
+            else if (i === 1) rankMsg = char?.rankQuote2 || "「2位か、次は1位を狙うゾ！」";
+            else if (i === 2) rankMsg = char?.rankQuote3 || "「3位にランクイン！嬉しいな。」";
+
+            return `
+                <div class="ranking-item rank-${i+1}">
+                    <div class="rank-badge">${i + 1}</div>
+                    <img src="${imgPath}" class="rank-img" onerror="this.src='https://via.placeholder.com/80'">
+                    <div class="rank-info">
+                        <span class="rank-name">${r.name}</span>
+                        <span class="rank-count">${r.count} 票</span>
+                        <p class="rank-quote">${rankMsg}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
     } catch (e) {
-        console.error("ランキング取得失敗", e);
-        rankingArea.innerHTML = "<p>ランキングを取得できませんでした。GASのデプロイを確認してね！</p>";
+        rankingArea.innerHTML = "<p>ランキング取得に失敗しました</p>";
     }
 }
 
 
 // --- クラス分けラベル（H1-1, H1-2...）を自動生成 ---
 function renderClassFilters() {
-    const filterArea = document.querySelector('.filter-tabs');
+    const filterArea = document.querySelector('.filter-tabs'); // 元のタグエリア
     if (!filterArea) return;
 
-    // データにあるクラス名を重複なく取り出す
+    // タグ（ボタン）を消して、プルダウンに置き換える
     const classes = [...new Set(schoolData.characters.map(c => c.class))].sort();
     
-    filterArea.innerHTML = `<button class="filter-btn active" onclick="renderCharacters('all')">全校生徒</button>`;
-    
-    classes.forEach(className => {
-        const btn = document.createElement('button');
-        btn.className = "filter-btn";
-        btn.innerText = className;
-        btn.onclick = () => renderCharactersByClass(className);
-        filterArea.appendChild(btn);
-    });
+    filterArea.innerHTML = `
+        <div class="filter-dropdown-area">
+            <select class="premium-select" onchange="if(this.value==='all'){renderCharacters('all')}else{renderCharactersByClass(this.value)}">
+                <option value="all">全校生徒を表示</option>
+                ${classes.map(c => `<option value="${c}">${c}</option>`).join('')}
+            </select>
+        </div>
+    `;
 }
 function renderCharactersByClass(className) {
     const grid = document.getElementById('char-grid');
@@ -443,7 +519,7 @@ function renderCharactersByClass(className) {
         card.className = 'char-card';
         card.onclick = () => showProfile(c.id);
         card.innerHTML = `
-            <img src="img/${c.img}" onerror="this.src='https://via.placeholder.com/150?text=Student'">
+            <img src="images/${c.img}" onerror="this.src='https://via.placeholder.com/150?text=Student'">
             <h4>${c.name}</h4>
             <small>${c.motif}</small>
         `;
@@ -487,24 +563,17 @@ async function loadReplies() {
 function showTodayPickup() {
     const display = document.getElementById('random-char-display');
     if (!display) return;
-
-    // 今日の日付（YYYY-MM-DD）を取得
     const today = new Date();
     const dateStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
-    
-    // 日付から数字（シード値）を生成
     let seed = 0;
-    for (let i = 0; i < dateStr.length; i++) {
-        seed += dateStr.charCodeAt(i);
-    }
-
-    // シード値を使ってキャラを選択（これで1日固定になるよ）
+    for (let i = 0; i < dateStr.length; i++) seed += dateStr.charCodeAt(i);
     const index = seed % schoolData.characters.length;
     const char = schoolData.characters[index];
 
     display.innerHTML = `
         <div class="pickup-card">
-            <img src="img/${char.img}" class="pickup-img" onerror="this.src='https://via.placeholder.com/150?text=Today'">
+            <!-- images/ フォルダを参照するように修正 -->
+            <img src="images/${char.img}" class="pickup-img" onerror="this.src='https://via.placeholder.com/150?text=bird'">
             <div>
                 <h3>${char.name} <small>(${char.class})</small></h3>
                 <p>"${char.quote}"</p>
@@ -568,20 +637,11 @@ function renderCharacters(stageFilter) {
         card.className = 'char-card';
         card.onclick = () => showProfile(c.id);
         card.innerHTML = `
-            <img src="img/${c.img}" onerror="this.src='https://via.placeholder.com/150?text=Student'">
+            ${getCharImgHTML(c, 'char-circle-small')} <!-- ここで関数を使う -->
             <h4>${c.name}</h4>
             <small>${c.class} / ${c.motif}</small>
         `;
         grid.appendChild(card);
-    });
-
-    // フィルタボタンのアクティブ状態管理
-    const btns = document.querySelectorAll('.filter-btn');
-    btns.forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.innerText.includes(stageFilter) || (stageFilter === 'all' && btn.innerText.includes('全'))) {
-            btn.classList.add('active');
-        }
     });
 }
 
@@ -592,21 +652,37 @@ function showProfile(id) {
     const body = document.getElementById('modal-body');
     if (!modal || !body) return;
 
+    // 敬称の設定
+    const suffix = (c.class === "teacher") ? "先生" : "";
+    const displaySuffix = suffix ? ` (${suffix})` : "";
+
     body.innerHTML = `
-        <div class="modal-flex">
-            <div class="modal-info">
-                <h2>${c.fullName} <small>(${c.name})</small></h2>
-                <p class="tag">${c.stage} ${c.class} / ${c.gender}</p> <!-- 性別表示 -->
-                <div class="type-badge">
-                    <span>${c.mbti}</span> <span>${c.socio}</span> <span>${c.ennea}</span>
+        <div class="modal-profile-card">
+            <span class="close-btn" onclick="closeProfile()">&times;</span>
+            <div class="modal-header-bg"></div>
+            <div class="modal-main-content">
+                ${getCharImgHTML(c, 'char-circle')}
+                <h2 class="modal-full-name">${c.fullName}${displaySuffix}</h2>
+                <div class="modal-tags">
+                    <span class="m-tag">${c.stage} ${c.class}</span>
+                    <span class="m-tag">${c.gender}</span>
+                    <span class="m-tag">${c.bloodType || '?'}型</span>
                 </div>
-                <hr>
-                <p><strong>モチーフ:</strong> ${c.motif}</p>
-                <p><strong>出身:</strong> ${c.hometown}</p>
-                <p class="modal-desc">${c.description}</p>
-                <blockquote class="modal-quote">"${c.quote}"</blockquote>
+                <div class="modal-mbti-area">
+                    <span class="mbti-badge">${c.mbti}</span>
+                    <span class="ennea-badge">${c.ennea}</span>
+                </div>
+                <div class="modal-detail-list">
+                    <p><strong>モチーフ:</strong> ${c.motif}</p>
+                    <p><strong>誕生日:</strong> ${c.birthday || '不明'}</p>
+                    <p><strong>出身:</strong> ${c.hometown}</p>
+                </div>
+                <div class="modal-description-box">
+                    <p>${c.description}</p>
+                </div>
+                <blockquote class="modal-quote-box">"${c.quote}"</blockquote>
                 <button onclick="sendVote('${c.id}', '${c.name}')" class="vote-btn-big">
-                    <i class="fas fa-heart"></i> ${c.name}に投票する
+                    <i class="fas fa-heart"></i> ${c.name}を応援する
                 </button>
             </div>
         </div>
@@ -615,24 +691,268 @@ function showProfile(id) {
 }
 
 function closeProfile() {
-    const modal = document.getElementById('profile-modal');
-    if (modal) modal.style.display = "none";
+    document.getElementById('profile-modal').style.display = "none";
 }
 
 // --- GAS送信（投票） ---
 async function sendVote(charId, charName) {
-    showToast(`${charName}にエールを送信中...`);
     const char = schoolData.characters.find(c => c.id === charId);
-    const data = { type: "vote", charId: charId, charName: charName, charClass: char.class };
+    showToast(`${charName}にエールを送信中...`);
 
     try {
-        await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(data) });
-        showToast(`${charName}に投票したゾ！届いてるといいな！`);
-    } catch (e) {
-        showToast("通信エラーだゾ...");
+        await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ type: "vote", charId, charName, charClass: char.class }) });
+        
+        // 【新機能】キャラからのお礼セリフをトーストで出す
+        // quote（セリフ）の代わりに、お礼専用のデータがなければquoteを使うよ
+        const thanksMsg = char.thanks || `${charName}「投票ありがとう！嬉しいゾッ！」`;
+        showToast(thanksMsg); 
+        
+    } catch (e) { showToast("通信エラーだゾ..."); }
+}
+function showCalendar() {
+    const calArea = document.getElementById('calendar-display');
+    if (!calArea) return;
+
+    const today = new Date();
+    const todayStr = `${today.getMonth() + 1}/${today.getDate()}`;
+    
+    const birthdayPeople = schoolData.characters.filter(c => c.birthday === todayStr);
+
+    let html = `<div class="calendar-today">Today: ${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}</div>`;
+    
+    if (birthdayPeople.length > 0) {
+        html += `<div class="birthday-card-special">`;
+        birthdayPeople.forEach(c => {
+            // 先生対応の敬称
+            const suffix = (c.class === "teacher") ? "先生" : (c.gender === "女子" ? "ちゃん" : "くん");
+            html += `
+                <div class="b-day-person">
+                    ${getCharImgHTML(c, 'char-circle-small')}
+                    <div class="b-day-info">
+                        <span class="b-day-name">${c.name} ${suffix}</span>
+                        <span class="b-day-greet">Happy Birthday! 🌸</span>
+                    </div>
+                </div>`;
+        });
+        html += `</div>`;
+    } else {
+        html += `<p class="no-bday">今日誕生日の生徒はいません</p>`;
     }
+    calArea.innerHTML = html;
 }
 
+
+let pigClickCount = 0;
+function spawnGohobi() {
+    const pig = document.createElement('div');
+    pig.className = 'walking-gohobi';
+    pig.innerHTML = '🐖'; 
+    document.body.appendChild(pig);
+
+    const gohobiQuotes = [
+        "これはご褒美だゾ♡",
+        "ワシャワシャしてやるゾッ！",
+        "拙者のエキス、飲むかゾ？",
+        "ツインテール最高だゾッ！",
+        "豚骨スープが煮えたゾ〜"
+    ];
+
+    let pos = window.innerWidth; // 右端からスタート
+    const interval = setInterval(() => {
+        pos -= 2; // 左へ移動
+        pig.style.left = pos + 'px';
+        if (pos < -100) {
+            clearInterval(interval);
+            pig.remove();
+        }
+    }, 30);
+
+    pig.onclick = () => {
+        pigClickCount++;
+        const randomQuote = gohobiQuotes[Math.floor(Math.random() * gohobiQuotes.length)];
+        showToast(`ご褒美「${randomQuote} (${pigClickCount}/30) 」`);
+        if (pigClickCount === 30) {
+            triggerSoupEvent();
+            pigClickCount = 0;
+        }
+    };
+}
+
+// --- 1. いちごメロンパン争奪戦 ---
+function playMelonPanGame() {
+    const feedback = document.getElementById('game-feedback');
+    const stage = document.getElementById('melonpan-game-stage');
+    if(!stage) return;
+
+    const daiki = document.getElementById('daiki-sprite');
+    const tasuku = document.getElementById('tasuku-sprite');
+    
+    // リセット
+    daiki.className = "char-sprite left img-container circle-frame";
+    tasuku.className = "char-sprite right img-container circle-frame";
+    stage.classList.remove('horror-shake', 'horror-dark');
+    
+    const rand = Math.random();
+    setTimeout(() => {
+        if (rand > 0.7) {
+            feedback.innerHTML = "<span class='success-text'>成功！パンを死守！</span>";
+            daiki.classList.add('zoom-in');
+            showToast("だいき「……チッ、運がいいな。」");
+        } else if (rand > 0.3) {
+            feedback.innerHTML = "<span class='fail-text'>たすくに奪われた！</span>";
+            tasuku.classList.add('zoom-in');
+            showToast("たすく「ガハハ！百獣の王の獲物だ！」");
+        } else {
+            feedback.innerHTML = "<span class='horror-text'>地獄の威圧感……</span>";
+            stage.classList.add('horror-dark', 'horror-shake');
+            daiki.classList.add('zoom-in');
+            tasuku.classList.add('zoom-in');
+            showToast("だいき・たすく『……置いてけよ。』");
+        }
+    }, 100);
+}
+
+// --- 2. のりおみゲーム ---
+let currentLine = null;
+function nextNoriomiLine() {
+    const balloon = document.getElementById('noriomi-balloon');
+    const shutter = document.getElementById('shutter');
+    const lines = schoolData.games.noriomiLines;
+
+    if (!balloon || !lines) return;
+
+    currentLine = lines[Math.floor(Math.random() * lines.length)];
+    balloon.innerText = currentLine.text;
+    if (shutter) shutter.classList.remove('closed');
+}
+
+function checkNoriomi(playerChoice) {
+    if (!currentLine) return nextNoriomiLine();
+    
+    if (playerChoice === currentLine.isSocial) {
+        showToast("正解！のりおみが少しだけ心を開いた。");
+        nextNoriomiLine();
+    } else {
+        showToast("不正解！のりおみがシャッターを閉じた！");
+        document.getElementById('shutter').classList.add('closed');
+        setTimeout(nextNoriomiLine, 2000);
+    }
+}
+function startNoriomiGame() {
+    const startBtn = document.getElementById('nori-start-btn');
+    const sincerityBtn = document.getElementById('sincerity-btn');
+    const socialBtn = document.getElementById('social-btn');
+    const balloon = document.getElementById('noriomi-balloon');
+
+    if (startBtn) startBtn.style.display = 'none';
+    if (sincerityBtn) sincerityBtn.style.display = 'inline-block';
+    if (socialBtn) socialBtn.style.display = 'inline-block';
+    if (balloon) balloon.style.visibility = 'visible';
+
+    nextNoriomiLine();
+}
+let isGohobiRunning = false;
+
+function startGohobiGame() {
+    if (isGohobiRunning) return;
+    isGohobiRunning = true;
+    const container = document.getElementById('hand-container');
+    const soup = document.getElementById('soup-sea');
+    const btn = document.getElementById('gohobi-start-btn');
+    
+    btn.style.display = "none";
+    soup.classList.remove('active');
+    container.innerHTML = "";
+    
+    let score = 0;
+    const gameInterval = setInterval(() => {
+        if (!isGohobiRunning) { clearInterval(gameInterval); return; }
+
+        const hand = document.createElement('div');
+        hand.className = "falling-hand";
+        hand.innerHTML = "🖐️";
+        hand.style.left = (Math.random() * 80 + 5) + "%"; // 左右にランダム
+        hand.style.top = "-50px"; // 上からスタート
+        container.appendChild(hand);
+        
+        let topPos = -50;
+        const fall = setInterval(() => {
+            if (!isGohobiRunning) { clearInterval(fall); hand.remove(); return; }
+            topPos += 4; // 落下速度
+            hand.style.top = topPos + "px";
+
+            // 画面の下（400px付近）まで行ったら負け
+            if (topPos > 380) {
+                clearInterval(fall);
+                if (hand.parentNode) {
+                    gameOverGohobi("スルーしたな！拙者の愛からは逃げられないゾ♡");
+                    clearInterval(gameInterval);
+                }
+            }
+        }, 20);
+
+        hand.onclick = () => {
+            if (!isGohobiRunning) return;
+            hand.remove();
+            clearInterval(fall);
+            score++;
+            if (score >= 15) { // 15回回避でクリア
+                isGohobiRunning = false;
+                clearInterval(gameInterval);
+                showToast("回避成功！ご褒美くんは満足して去った。");
+                btn.style.display = "block";
+            }
+        };
+    }, 1000); // 1秒ごとに手が降ってくる
+}
+
+function gameOverGohobi(msg) {
+    isGohobiRunning = false;
+    document.getElementById('soup-sea').classList.add('active');
+    document.getElementById('gohobi-start-btn').style.display = "block";
+    showToast(msg);
+}
+function triggerSoupEvent() {
+    const overlay = document.getElementById('soup-overlay');
+    overlay.style.display = 'flex';
+    showToast("ご褒美特製・濃厚豚骨スープが溢れ出した！");
+    setTimeout(() => { overlay.style.display = 'none'; }, 5000);
+}
+function openSecret() {
+    const modal = document.getElementById('secret-modal');
+    if (modal) modal.style.display = "block";
+}
+// --- 3. 秘密のページ（7回クリック） ---
+let logoClicks = 0;
+function secretClick() {
+    logoClicks++;
+    if (logoClicks === 7) {
+        showToast("ご褒美＆えいじ「汗と脂のファンタジー、飲み干せえぇぇ！」");
+        const nav = document.querySelector('.premium-nav');
+        if (!document.getElementById('secret-link')) {
+            const a = document.createElement('a');
+            a.id = 'secret-link';
+            a.href = "javascript:void(0)"; // リンク先をJSに
+            a.className = 'nav-item';
+            a.innerHTML = '<i class="fas fa-skull-crossbones"></i> 秘密の部屋';
+            a.onclick = openSecret; // ここを修正！
+            nav.appendChild(a);
+        }
+        logoClicks = 0;
+    }
+}
+function drinkFantasy() {
+    showToast("ご褒美＆えいじ「力が……力がみなぎってくるぞおおぉぉ！」");
+    document.body.style.backgroundColor = "#fffacd"; // スープ色に染まる
+    setTimeout(() => { 
+        document.body.style.backgroundColor = "#fdfdfd";
+        closeSecret();
+    }, 3000);
+}
+
+function closeSecret() {
+    document.getElementById('secret-modal').style.display = 'none';
+}
 // --- GAS送信（お手紙） ---
 async function sendLetter() {
     const select = document.getElementById('letter-to');
@@ -712,7 +1032,6 @@ function renderGames() {
     const gameList = document.getElementById('game-list');
     if (!gameList) return;
     
-    // 外部サイトのリンク集
     const games = [
         { title: "ゆうきくんの気まぐれ猫占い", desc: "明るくノリの良いゆうきくんが未来を鑑定🔮✨", url: "https://mofu-mitsu.github.io/yuuki_fortune/", icon: "fa-cat" },
         { title: "タイピングマスター", desc: "教育実習コースでトリ’Sのキャラたちと特訓！", url: "https://mofu-mitsu.github.io/typing-Master/", icon: "fa-keyboard" },
