@@ -13,27 +13,57 @@
             <a href="chara.html" class="nav-item">生徒名簿</a>
             <a href="story.html" class="nav-item">ストーリー</a>
             <a href="world.html" class="nav-item">世界観</a>
-            <a href="games.html" class="nav-item active">コンテンツ</a>
+            <a href="games.html" class="nav-item">コンテンツ</a>
         </nav>
     </header>
 
-    <main class="container">
-        <section class="luxury-section">
-            <h2 class="gold-title"><i class="fas fa-gamepad"></i> 学園公式コンテンツ</h2>
-            <p class="u-note">とりの丘学園の生徒たちと遊べる外部ツール・ゲーム一覧です。</p>
-            <div id="game-list" class="game-grid">
-                <!-- script.jsで描画 -->
-            </div>
-        </section>
+        <main class="container">
+            <h1 class="gold-title"><i class="fas fa-vial"></i> とりの丘学園・ミニゲーム集</h1>
+            <section class="luxury-section">
+                <h2 class="gold-title"><i class="fas fa-gamepad"></i> 学園公式コンテンツ</h2>
+                <!-- このIDが大事！ -->
+                <div id="game-list" class="game-grid">
+                    <!-- ここにリンクが自動で入ります -->
+                </div>
+            </section>
+            <!-- 1. いちごメロンパン争奪戦 -->
+            <section class="luxury-section">
+                <h2 class="gold-title"><i class="fas fa-bread-slice"></i> 購買パン争奪戦</h2>
+                <div id="melonpan-game-stage" class="game-stage">
+                    <div id="game-feedback" class="game-center-msg"></div>
+                    <img src="images/melonpan.png" id="melonpan-item" class="center-item">
+                    <div id="daiki-sprite" class="char-sprite left"><img src="images/daiki.png"></div>
+                    <div id="tasuku-sprite" class="char-sprite right"><img src="images/tasuku.png"></div>
+                    <button class="game-btn premium-btn" onclick="playMelonPanGame()">パンを掴み取る！</button>
+                </div>
+            </section>
 
-        <!-- サイト限定・追加コンテンツ用（案） -->
-        <section class="luxury-section">
-            <h2 class="gold-title"><i class="fas fa-magic"></i> サイト限定：とりの丘診断</h2>
-            <div class="coming-soon">
-                <p>準備中：あなたのMBTIを入力すると、学園での「親友」や「ライバル」が判定されるツールを開発中……？</p>
-            </div>
-        </section>
-    </main>
+            <!-- 2. のりおみの社交辞令カウンター -->
+            <section class="luxury-section">
+                <h2 class="gold-title"><i class="fas fa-door-closed"></i> のりおみの社交辞令カウンター</h2>
+                <div id="noriomi-game-stage" class="game-stage">
+                    <div id="shutter" class="shutter"></div>
+                    <img src="images/noriomi.png" class="char-circle center-char">
+                    <div id="noriomi-balloon" class="speech-balloon">……。</div>
+                    <div class="game-ui">
+                        <button id="nori-start-btn" class="game-btn premium-btn" style="position: absolute; bottom: 80px;" onclick="startNoriomiGame()">開始</button>
+                        <button id="sincerity-btn" class="game-btn sincerity-btn" style="display:none" onclick="checkNoriomi(false)">本心</button>
+                        <button id="social-btn" class="game-btn social-btn" style="display:none" onclick="checkNoriomi(true)">社交辞令</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. ご褒美くんのワシャワシャ回避 -->
+            <section class="luxury-section">
+                <h2 class="gold-title"><i class="fas fa-piggy-bank"></i> ご褒美くんのワシャワシャ回避</h2>
+                <div id="gohobi-game-stage" class="game-stage">
+                    <div id="soup-sea" class="soup-sea"></div>
+                    <img src="images/gohobi.png" id="gohobi-boss" class="center-char">
+                    <div id="hand-container"></div>
+                    <button id="gohobi-start-btn" class="game-btn premium-btn" onclick="startGohobiGame()">回避訓練開始</button>
+                </div>
+            </section>
+        </main>
 
     <script src="data.js"></script>
     <script src="script.js"></script>
