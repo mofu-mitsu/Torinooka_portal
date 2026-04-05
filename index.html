@@ -17,12 +17,16 @@
                 <a href="index.html" class="nav-item">HOME</a>
                 <a href="chara.html" class="nav-item">生徒名簿</a>
                 <a href="story.html" class="nav-item">ストーリー</a> <!-- # から story.html に変更 -->
-                <a href="world.html" class="nav-item active">世界観・相関図</a>
+                <a href="world.html" class="nav-item">世界観・相関図</a>
                 <a href="#" class="nav-item">コンテンツ</a>
             </nav>
         </div>
     </header>
-
+    <div id="soup-overlay" class="soup-overlay">
+        <h1 style="color: #8b4513;">🍜 豚骨スープの海 🍜</h1>
+        <p>「拙者のエキスだゾッ♡」</p>
+        <!-- ここにスープをぶっかけられたような画像を表示 -->
+    </div>
     <!-- ... (ヘッダーなどは共通) ... -->
     <main class="container">
         <!-- 学園理念（制服と分離） -->
@@ -46,26 +50,28 @@
                 <!-- script.jsから入るよ -->
             </div>
         </section>
-        <!-- 今日のとり の下あたりに追加 -->
-        <section class="luxury-section">
-            <div class="two-column">
-                <!-- 今日のメニュー -->
-                <div class="menu-section">
-                    <h2 class="gold-title"><i class="fas fa-utensils"></i> 本日の学食・購買</h2>
-                    <div id="today-menu-display"></div>
-                </div>
-
-                <!-- 掲示板 -->
-                <div class="bulletin-section">
-                    <h2 class="gold-title"><i class="fas fa-clipboard"></i> 学園掲示板</h2>
-                    <div class="bulletin-input-area">
-                        <input type="text" id="bulletin-input" placeholder="学園生活の一言をどうぞ...">
-                        <button onclick="sendBulletin()">投稿</button>
+            <section class="luxury-section">
+                <div class="three-column">
+                    <!-- 学食 -->
+                    <div class="menu-section">
+                        <h2 class="gold-title"><i class="fas fa-utensils"></i> 本日の学食</h2>
+                        <div id="today-menu-display"></div>
                     </div>
-                    <div id="bulletin-board-display" class="bulletin-scroll"></div>
+                    <!-- 掲示板 -->
+                    <div class="bulletin-section">
+                        <h2 class="gold-title"><i class="fas fa-clipboard"></i> 掲示板</h2>
+                        <div style="text-align:center; padding:20px;">
+                            <p>生徒たちの日常をのぞいてみよう</p>
+                            <a href="bulletin.html" class="premium-btn" style="text-decoration:none; display:inline-block;">掲示板を見に行く</a>
+                        </div>
+                    </div>
+                    <!-- カレンダー -->
+                    <div class="calendar-section">
+                        <h2 class="gold-title"><i class="fas fa-calendar-alt"></i> カレンダー</h2>
+                        <div id="calendar-display"></div>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
         <!-- 人気投票セクション -->
         <section id="vote-section" class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-crown"></i> 月間人気投票</h2>
@@ -103,7 +109,20 @@
             </div>
         </div>
     </section>
-
+    <div id="secret-modal" class="modal">
+        <div class="modal-content" style="background: #ffffd0; border: 10px solid #8b4513;">
+            <span class="close-btn" onclick="closeSecret()">&times;</span>
+            <div id="secret-body" style="text-align: center;">
+                <h1 style="color: #d35400;">💪 汗と脂のファンタジー 💪</h1>
+                <p>「よく来たな。プロテインと豚骨スープ、どっちがいいゾ？」</p>
+                <div style="display: flex; justify-content: space-around; margin: 20px;">
+                    <img src="images/gohobi.png" style="width: 150px;" onerror="this.src='https://via.placeholder.com/150?text=Pig'">
+                    <img src="images/eiji.png" style="width: 150px;" onerror="this.src='https://via.placeholder.com/150?text=Eiji'">
+                </div>
+                <button onclick="drinkFantasy()" class="premium-btn" style="background: #e67e22;">秘伝のスープを飲み干す</button>
+            </div>
+        </div>
+    </div>
     </main>
 
     <script src="data.js"></script>
