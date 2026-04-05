@@ -1,76 +1,520 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>ストーリー | とりの丘学園</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="story-page">
-    <header class="mini-header">
-        <nav class="premium-nav">
-            <a href="index.html" class="nav-item">HOME</a>
-            <a href="chara.html" class="nav-item">生徒名簿</a>
-            <a href="story.html" class="nav-item active">ストーリー</a>
-        </nav>
-    </header>
+/* ==========================================
+   1. 基本変数 & デザインリセット
+   ========================================== */
+:root {
+    --gold: #d4af37;        /* 豪華な金 */
+    --navy: #1a2a6c;        /* 深い紺 */
+    --sakura: #ffecf2;      /* 桜色 */
+    --wine: #8b3a3a;        /* 落ち着いた赤 */
+    --white: #ffffff;
+    --shadow: 0 10px 30px rgba(0,0,0,0.15);
+    --transition: 0.3s ease;
+}
 
-    <main class="container">
-        <!-- 投稿ボタン -->
-        <div style="text-align: right; margin-bottom: 20px;">
-            <button onclick="toggleStoryForm()" class="premium-btn"><i class="fas fa-pen-nib"></i> ストーリーを書く</button>
-        </div>
+* { box-sizing: border-box; }
 
-        <!-- 投稿フォーム（初期は非表示） -->
-        <section id="story-form-area" class="luxury-section" style="display: none;">
-            <h2 class="gold-title">新規投稿</h2>
-            <div class="letter-form">
-                <input type="text" id="story-title" placeholder="タイトル">
-                <select id="story-stage">
-                    <option value="高等部">高等部</option>
-                    <option value="中等部">中等部</option>
-                    <option value="初等部">初等部</option>
-                    <option value="共通">共通</option>
-                </select>
-                <input type="text" id="story-chars" placeholder="登場キャラ（例：のりおみ, くう）">
-                <select id="story-tag">
-                    <option value="日常">日常</option>
-                    <option value="軽い">軽い</option>
-                    <option value="重い">重い</option>
-                    <option value="事件">事件</option>
-                    <option value="恋愛">恋愛</option>
-                </select>
-                <textarea id="story-content" placeholder="物語の内容..." style="height: 300px;"></textarea>
-                <button onclick="sendStory()" class="premium-btn">学園史に刻む（投稿）</button>
-            </div>
-        </section>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Hiragino Mincho ProN', 'Times New Roman', serif;
+    background: #fdfdfd;
+    color: #333;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
 
-        <section class="luxury-section">
-            <h2 class="gold-title"><i class="fas fa-search"></i> 物語を探す</h2>
-            <div class="story-search-grid">
-                <input type="text" id="search-text" placeholder="キーワード・キャラ名で検索" onkeyup="executeStorySearch()" class="premium-select" style="border-radius:10px">
-                
-                <select id="filter-tag" class="premium-select" onchange="executeStorySearch()">
-                    <option value="all">すべてのタグ</option>
-                </select>
+/* ==========================================
+   2. ヘッダー & ナビゲーション
+   ========================================== */
+.main-header {
+    height: 350px;
+    background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    text-align: center;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+}
 
-                <select id="filter-class" class="premium-select" onchange="executeStorySearch()">
-                    <option value="all">すべての学年/クラス</option>
-                </select>
-            </div>
-            
-            <div id="story-list" class="story-grid">
-                <!-- 物語がここに並びます -->
-            </div>
-        </section>
-            
-            <div id="story-list" class="story-grid">
-                <!-- ここに物語が並びます -->
-            </div>
-        </section>
-    </main>
+.logo-area h1 {
+    font-size: 3.5rem;
+    margin: 0;
+    letter-spacing: 0.3rem;
+    cursor: pointer;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+}
 
-    <script src="data.js"></script>
-    <script src="script.js"></script>
-</body>
-</html>
+.sub-title { font-size: 1rem; opacity: 0.9; margin-top: 5px; }
+
+.premium-nav {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-item {
+    text-decoration: none;
+    color: var(--white);
+    padding: 10px 25px;
+    border: 1px solid var(--white);
+    border-radius: 50px;
+    transition: var(--transition);
+    background: rgba(255,255,255,0.1);
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+/* アクティブ・ホバー時の色を統一 */
+.nav-item:hover, .nav-item.active {
+    background: var(--wine) !important;
+    color: white !important;
+    border-color: var(--gold) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.mini-header {
+    background: var(--sakura);
+    padding: 20px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* ==========================================
+   3. レイアウト共通 (カード & フェードイン)
+   ========================================== */
+.container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.luxury-section {
+    background: var(--white);
+    padding: 40px;
+    margin-bottom: 40px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    border-top: 6px solid var(--gold);
+    /* JSアニメーション用初期設定 */
+    opacity: 0;
+    transform: translateY(30px);
+    transition: 0.8s ease-out;
+}
+
+.luxury-section.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gold-title {
+    text-align: center;
+    color: var(--navy);
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+    font-size: 1.8rem;
+}
+
+/* ==========================================
+   4. 画像コンテナ・丸枠・Coming Soon (最強ガード)
+   ========================================== */
+/* 300x300画像がはみ出さないように overflow:hidden を徹底 */
+
+/* 各種サイズ */
+.char-circle { width: 150px; height: 150px; }
+.char-circle-small { width: 100px; height: 100px; }
+.pickup-img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--gold); object-fit: cover; }
+.rank-img { width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--gold); object-fit: cover; }
+
+.img-container {
+    width: 150px; height: 150px;
+    border-radius: 50%;
+    border: 4px solid var(--gold);
+    overflow: hidden !important;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+.char-circle-small.img-container { width: 80px; height: 80px; }
+
+.img-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Coming Soon 枠 */
+/* --- Coming Soon アイコンのデザイン修正 --- */
+.coming-soon-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e0e0e0;
+    border: 2px dashed #aaa;
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 50%;
+}
+.char-circle.coming-soon-box { width: 150px; height: 150px; }
+.char-circle-small.coming-soon-box { width: 100px; height: 100px; }
+
+/* ==========================================
+   5. ホーム機能 (掲示板・学食・カレンダー)
+   ========================================== */
+.three-column {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* 掲示板入力エリア */
+.bulletin-input-area {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    background: #f0f0f0;
+    padding: 10px;
+    border-radius: 30px;
+}
+
+.bulletin-input-area input { flex: 1; border: none; background: transparent; padding-left: 10px; outline: none; }
+.bulletin-input-area button { background: var(--navy); color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; }
+
+.bulletin-scroll {
+    max-height: 250px;
+    overflow-y: auto;
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 15px;
+}
+
+/* 学食メニュー */
+.menu-card {
+    padding: 20px;
+    border-radius: 15px;
+    border-left: 8px solid var(--navy);
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.menu-card.rare {
+    background: linear-gradient(135deg, #fff0f5, #ffe4e1);
+    border-color: #ff69b4;
+    animation: glow 1s infinite alternate;
+}
+
+@keyframes glow { from { box-shadow: 0 0 5px #ff69b4; } to { box-shadow: 0 0 20px #ff69b4; } }
+
+/* カレンダー */
+.calendar-today {
+    background: var(--sakura);
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid var(--gold);
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.calendar-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed #ddd;
+    font-size: 0.9rem;
+}
+
+.calendar-item.is-today { background: #fff0f5; color: #ff4d6d; font-weight: bold; padding: 8px 10px; border-radius: 5px; }
+
+/* ==========================================
+   6. 投票・お手紙・名簿
+   ========================================== */
+/* プルダウン装飾 */
+.premium-select {
+    width: 100%; padding: 12px 20px; border-radius: 50px;
+    border: 2px solid var(--gold); background: white;
+    font-weight: bold; color: var(--navy); outline: none;
+    appearance: none; cursor: pointer;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M6 9l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat; background-position: right 15px center; background-size: 15px;
+}
+
+/* お手紙フォーム */
+.letter-form {
+    max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px;
+}
+.letter-form textarea { height: 150px; border-radius: 15px; border: 2px solid #ddd; padding: 15px; outline: none; }
+
+.premium-btn {
+    background: var(--navy); color: white; padding: 15px; border-radius: 50px; border: none; font-weight: bold; cursor: pointer; transition: 0.3s;
+}
+.premium-btn:hover { background: var(--wine); transform: scale(1.02); }
+
+/* 投票横スクロール */
+.vote-scroll-container {
+    display: flex; gap: 20px; overflow-x: auto; padding: 25px; background: rgba(255,236,242,0.5); border-radius: 20px;
+}
+.vote-mini-card { flex: 0 0 130px; display: flex; flex-direction: column; align-items: center; }
+.vote-mini-card span { font-size: 0.85rem; font-weight: bold; white-space: nowrap; margin: 10px 0; }
+.vote-btn-heart { background: #ff4d6d; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+
+/* 名簿グリッド */
+.char-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 25px; }
+.char-card { background: white; border-radius: 20px; padding: 25px; text-align: center; border: 1px solid #eee; transition: 0.3s; cursor: pointer; }
+.char-card:hover { border-color: var(--gold); transform: translateY(-5px); box-shadow: var(--shadow); }
+
+/* ==========================================
+   7. ストーリー・コンテンツ
+   ========================================== */
+.story-card { background: white; border-left: 10px solid #ddd; padding: 25px; margin-bottom: 25px; border-radius: 0 20px 20px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+.story-tag { display: inline-block; background: #eee; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; margin-right: 10px; font-weight: bold; }
+
+.filter-tabs { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px; }
+.filter-btn { background: white; border: 2px solid var(--gold); color: var(--navy); padding: 8px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+.filter-btn.active { background: var(--gold); color: white; }
+
+/* ゲームカード (コンテンツページ) */
+.game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+.game-card { background: white; border: 2px solid #eee; border-radius: 20px; padding: 25px; display: flex; align-items: center; gap: 20px; text-decoration: none; color: inherit; transition: 0.3s; }
+.game-card:hover { border-color: var(--gold); transform: translateY(-5px); box-shadow: var(--shadow); }
+.game-icon { font-size: 2.5rem; color: var(--navy); width: 50px; text-align: center; }
+
+/* ==========================================
+   8. ミニゲーム (地獄の演出)
+   ========================================== */
+.game-stage {
+    position: relative; height: 450px; background: #eef2f3; border: 6px solid var(--navy);
+    border-radius: 25px; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+
+/* だいき・たすく (サイズ・位置修正) */
+.char-sprite {
+    position: absolute;
+    bottom: -250px; /* 初期位置を下げて隠す */
+    width: 220px;   /* たすく・だいきを大きく */
+    z-index: 60;
+    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.char-sprite.left { left: -20px; }
+.char-sprite.right { right: -20px; }
+
+/* 登場アニメーション */
+.zoom-in {
+    bottom: 20px !important;
+    transform: scale(1.3);
+}
+
+.horror-shake { animation: shake 0.15s infinite; }
+.horror-dark { background: #1a1a1a !important; }
+@keyframes shake { 0% { transform: translate(2px, 2px); } 50% { transform: translate(-2px, -2px); } 100% { transform: translate(2px, -2px); } }
+
+/* のりおみシャッター */
+.shutter { position: absolute; top: -100%; left: 0; width: 100%; height: 100%; background: #333; z-index: 100; transition: 0.6s ease-in; }
+.shutter.closed { top: 0; }
+.game-ui-nori { position: absolute; bottom: 40px; display: none; gap: 20px; z-index: 110; }
+.speech-balloon { position: absolute; top: 30px; background: white; padding: 15px 25px; border-radius: 30px; border: 4px solid var(--navy); font-weight: bold; z-index: 120; text-align: center; max-width: 80%; }
+
+/* ==========================================
+   9. その他システム (トースト・モーダル・スープ)
+   ========================================== */
+#toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10000; }
+.toast { background: rgba(26, 42, 108, 0.9); color: white; padding: 15px 30px; border-radius: 50px; margin-top: 10px; animation: fadeInUp 0.4s; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0; top: 0; 
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    overflow-y: auto; /* モーダル自体をスクロール可能に */
+    padding: 20px 0;
+}
+
+.modal-content {
+    background: transparent; /* 背景はカード側に任せる */
+    margin: 20px auto;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+}
+.close-btn { position: absolute; right: 20px; top: 15px; font-size: 2rem; cursor: pointer; }
+
+/* 秘密のスープ・ご褒美 */
+.soup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 200, 0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20000; text-align: center; }
+.walking-gohobi { position: fixed; bottom: 40px; right: -100px; font-size: 4rem; z-index: 9999; cursor: pointer; user-select: none; }
+.drink-btn { background: #e67e22; color: white; border: 4px solid #8b4513; padding: 15px 40px; font-size: 1.2rem; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 0 #5d2e0a; transition: 0.1s; }
+.drink-btn:active { transform: translateY(5px); box-shadow: none; }
+
+/* --- 人気ランキングの復活 --- */
+.ranking-item {
+    display: flex; align-items: center; gap: 15px; padding: 15px;
+    border-bottom: 1px solid #eee; background: white; border-radius: 10px; margin-bottom: 10px;
+}
+.rank-1 { border: 2px solid var(--gold); background: #fffcf0; }
+.rank-badge { background: var(--gold); color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+.rank-quote { font-style: italic; color: #8b3a3a; font-size: 0.9rem; margin-top: 5px; }
+
+/* --- 生徒名簿の応援ボタン（ハートマーク） --- */
+.cheer-btn {
+    background: #ff4d6d; color: white; border: none; padding: 8px 15px;
+    border-radius: 20px; cursor: pointer; font-size: 0.8rem; margin-top: 10px;
+    transition: 0.3s;
+}
+.cheer-btn:hover { transform: scale(1.1); background: #ff758c; }
+
+/* --- キャラ名簿のフィルタ用プルダウン（スマホ対応） --- */
+.filter-dropdown-area { margin-bottom: 30px; text-align: center; }
+/* 前に渡した .premium-select をそのまま名簿のプルダウンにも適用してね */
+
+/* --- ゲームの文字を見やすく（コントラスト強化） --- */
+.success-text { color: #2ecc71; font-size: 1.8rem; font-weight: bold; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff; }
+.fail-text { color: #e74c3c; font-size: 1.8rem; font-weight: bold; text-shadow: 2px 2px 0 #fff, -2px -2px 0 #fff; }
+.horror-text { color: #ff0000; font-size: 2rem; font-weight: bold; text-shadow: 0 0 15px #000, 2px 2px 0 #000; z-index: 200; position: relative; }
+
+/* --- 1. 人気ランキングの枠とタイトル復活 --- */
+#ranking-board {
+    border: 3px double var(--gold);
+    border-radius: 20px;
+    padding: 25px;
+    background: #fff;
+    margin-top: 30px;
+}
+#ranking-board h3 {
+    text-align: center;
+    color: var(--navy);
+    background: var(--sakura);
+    padding: 10px;
+    border-radius: 50px;
+    margin-bottom: 20px;
+}
+
+/* --- 2. プロフモーダルの豪華装飾 --- */
+.modal-profile-card {
+    background: white;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    position: relative;
+    border: 3px solid var(--gold);
+}
+.modal-header-bg {
+    height: 100px;
+    background: linear-gradient(135deg, var(--navy), #4a90e2);
+}
+.modal-main-content { padding: 0 30px 30px; margin-top: -60px; text-align: center; }
+.modal-full-name { font-size: 1.8rem; color: var(--navy); margin: 15px 0 5px; }
+.modal-tags { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+.m-tag { background: #f0f0f0; padding: 3px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: bold; }
+.modal-mbti-area { margin-bottom: 20px; }
+.mbti-badge { background: var(--gold); color: white; padding: 5px 15px; border-radius: 5px; margin: 0 5px; font-weight: bold; }
+.modal-description-box { background: #f9f9f9; padding: 15px; border-radius: 15px; text-align: left; margin: 15px 0; border-left: 5px solid var(--gold); }
+.modal-quote-box { font-style: italic; color: var(--wine); font-weight: bold; margin: 20px 0; border-top: 1px solid #eee; padding-top: 10px; }
+
+/* --- 3. のりおみゲームの選択肢を確実に表示 --- */
+.game-ui-nori {
+    display: none; /* JSでflexに切り替え */
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+    gap: 15px;
+}
+
+/* --- 4. ご褒美ゲーム：手のはみ出し防止コンテナ --- */
+#hand-container {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 150;
+    pointer-events: none; /* 下のボタンをクリックさせない、手だけクリックさせる */
+}
+.falling-hand {
+    position: absolute;
+    font-size: 4rem;
+    cursor: pointer;
+    pointer-events: auto; /* 手だけはクリック可能に */
+}
+
+.birthday-card-special {
+    background: linear-gradient(135deg, #fff0f5, #ffffff);
+    border: 2px solid var(--gold);
+    border-radius: 15px;
+    padding: 15px;
+    margin-top: 10px;
+}
+.b-day-person {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+.b-day-info { text-align: left; }
+.b-day-name { font-weight: bold; color: var(--navy); display: block; }
+.b-day-greet { font-size: 0.8rem; color: #ff4d6d; }
+
+/* --- モーダルのCloseボタン位置修正 --- */
+.close-btn {
+    position: absolute;
+    right: 20px; top: 20px;
+    font-size: 2.5rem;
+    color: white; /* ヘッダー背景の上でも見えるように */
+    cursor: pointer;
+    z-index: 1000;
+    text-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+/* --- 応援ボタンの装飾 --- */
+.vote-btn-big {
+    background: linear-gradient(135deg, #ff4d6d, #ff758c);
+    color: white;
+    border: 2px solid var(--gold);
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+    transition: 0.3s;
+    width: 100%;
+    margin-top: 20px;
+}
+.vote-btn-big:hover { transform: scale(1.05); filter: brightness(1.1); }
+
+/* --- 社交辞令カウンターのボタン装飾 --- */
+.sincerity-btn { 
+    background: #3498db !important; color: white !important; 
+    border: 2px solid white !important; box-shadow: 0 4px 0 #2980b9 !important;
+}
+.social-btn { 
+    background: #e74c3c !important; color: white !important; 
+    border: 2px solid white !important; box-shadow: 0 4px 0 #c0392b !important;
+}
+
+/* --- ストーリー検索・フィルタエリア --- */
+.story-search-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+    border: 1px solid #eee;
+}
+
+/* --- 掲示板の削除ボタン --- */
+.post-header { display: flex; justify-content: space-between; align-items: center; }
+.delete-btn {
+    background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.8rem;
+}
+.delete-btn:hover { color: #e74c3c; }
