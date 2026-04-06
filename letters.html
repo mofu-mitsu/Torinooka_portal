@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>生徒へのお手紙 | とりの丘学園</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="world-page">
+    <header class="mini-header">
+        <nav class="premium-nav">
+            <a href="index.html" class="nav-item">HOME</a>
+            <a href="chara.html" class="nav-item">生徒名簿</a>
+            <a href="life.html" class="nav-item">学校生活</a> <!-- ★追加！ -->
+            <a href="story.html" class="nav-item">ストーリー</a>
+            <a href="bulletin.html" class="nav-item">掲示板</a>
+            <a href="letters.html" class="nav-item active">お手紙</a>
+            <a href="games.html" class="nav-item">コンテンツ</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-envelope"></i> 生徒へのお手紙</h2>
+            <p style="text-align:center">応援メッセージや質問を匿名で送れるゾッ！</p>
+            <div class="letter-form">
+                <select id="letter-class-select" onchange="updateLetterCharSelect()" class="premium-select">
+                    <option value="">クラスを選択</option>
+                </select>
+                <select id="letter-to" class="premium-select">
+                    <option value="">先にクラスを選んでね</option>
+                </select>
+                <textarea id="letter-content" placeholder="メッセージをどうぞ..."></textarea>
+                <button onclick="sendLetter()" class="premium-btn">手紙を送る</button>
+            </div>
+        </section>
+
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-reply-all"></i> 学園からのお返事</h2>
+            <div id="reply-display">
+                <!-- ここにお返事が並びます -->
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

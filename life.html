@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>学校生活 | とりの丘学園</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="world-page">
+    <header class="mini-header">
+        <!-- ハンバーガーメニューボタン -->
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
+        <nav class="premium-nav" id="global-nav">
+            <a href="index.html" class="nav-item">HOME</a>
+            <a href="chara.html" class="nav-item">生徒名簿</a>
+            <a href="life.html" class="nav-item active">学校生活</a> <!-- ★追加！ -->
+            <a href="story.html" class="nav-item">ストーリー</a>
+            <a href="bulletin.html" class="nav-item">掲示板</a>
+            <a href="letters.html" class="nav-item">お手紙</a>
+            <a href="games.html" class="nav-item">コンテンツ</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <!-- 部活・委員会 -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-flag"></i> 部活動 ＆ 委員会</h2>
+            
+            <h3 style="color:var(--navy); border-bottom:2px dashed #ddd;">🏃 運動部</h3>
+            <p>球技部 / 陸上部 / 武術部 / 射撃部 / 体操部</p>
+            
+            <h3 style="color:var(--navy); border-bottom:2px dashed #ddd; margin-top:20px;">🎨 文化部</h3>
+            <p>文画部 / 音楽部 / 新聞部 / 調理部 / 化学部 / 三道部（茶・華・書道）</p>
+
+            <h3 style="color:var(--navy); border-bottom:2px dashed #ddd; margin-top:20px;">⚓ 特殊部隊</h3>
+            <p>水兵部 / 航空部</p>
+
+            <h3 style="color:var(--navy); border-bottom:2px dashed #ddd; margin-top:20px;">📋 委員会</h3>
+            <p>生徒会 / 保健委員 / 美化委員 / 図書委員 / 風紀委員</p>
+        </section>
+
+        <!-- 寮紹介 -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-building"></i> 学生寮・シェアハウス</h2>
+            <div style="display:flex; gap:20px; flex-wrap:wrap; justify-content:center;">
+                <div class="term-card" style="flex:1; min-width:250px;">
+                    <h3>とりの丘 学生寮</h3>
+                    <p>遠方から来る生徒や、様々な事情を抱える生徒が暮らす寮。個性豊かな住人たちのドタバタな日常が繰り広げられている。</p>
+                </div>
+                <div class="term-card" style="flex:1; min-width:250px;">
+                    <h3>シェアハウス（ほのか達）</h3>
+                    <p>ほのか、なぎさ、めりの3人が共同生活を送る秘密の避難所。世間にNOを突きつける彼女たちの、唯一心休まる場所。</p>
+                </div>
+                <div class="term-card" style="flex:1; min-width:250px;">
+                    <h3>シェアハウス（音楽部）</h3>
+                    <p>音楽部のメンバーたちが共同生活を送るシェアハウス。日々楽器の音色が響き渡り、セッションや作曲作業が夜遅くまで行われることも。</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
