@@ -1,3 +1,7 @@
+let currentStoryPage = 1;
+const storiesPerPage = 10;
+let filteredStories = [];
+
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxxU_LeW0UifW3kFHsSyORgSb3EI0W7zROp7sD2-8FvcEyz7m_tZoZ1DsrrEmYVACww/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -56,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // イースターエッグ
-    setInterval(spawnGohobi, 20000);
     const logo = document.querySelector('.logo-area h1');
     if(logo) logo.onclick = secretClick;
 
@@ -69,8 +72,22 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('bulletin-board-display')) {
         loadBulletin();
     }
+    if (document.getElementById('letter-class-select')) {
+        initLetterClassSelect(classList);
+        loadReplies();
+    }
+    setInterval(spawnGohobi, 15000); // これを追加！
 });
-
+let isGohobiWalking = false; // 今歩いているかどうかの判定フラグ
+function scheduleNextGohobi() {
+    // 画面が見えている時だけ出現させる（裏で大量発生させない）
+    if (!document.hidden) {
+        spawnGohobi();
+    }
+    // 45秒〜90秒のランダムな間隔で次を予約
+    const nextTime = Math.floor(Math.random() * 45000) + 45000;
+    setTimeout(scheduleNextGohobi, nextTime);
+}
 // ==========================================
 // 2. 画像 ＆ 丸枠 ＆ Coming Soon の鉄壁ガード
 // ==========================================
@@ -117,29 +134,26 @@ function showTodayMenu() {
     }
     menuArea.innerHTML = menuHTML;
 }
-// --- 学園掲示板の読み込み（GASを使用） ---
-// 掲示板ログの描画（削除要請ボタン付き）
-async function loadBulletin() {
-    const board = document.getElementById('bulletin-board-display');
-    if (!board) return;
-    try {
-        const response = await fetch(GAS_URL + "?type=bulletin");
-        const posts = await response.json();
-        board.innerHTML = posts.map(p => `
-            <div class="bulletin-post thread-style">
-                <div class="post-header">
-                    <span class="post-date">${p.date}</span>
-                    <div class="post-actions">
-                        <button class="req-btn" onclick="requestDelete('${p.date}')">削除要請</button>
-                        <button class="admin-only-btn" onclick="deletePost('${p.date}')">消去</button>
-                    </div>
-                </div>
-                <p class="post-content">${p.content}</p>
-            </div>
-        `).join('');
-    } catch (e) { console.error("ログ取得失敗"); }
-}
 
+
+
+// toggleReplies 関数を修正
+function toggleReplies(dateStr) {
+    const postId = dateStr.replace(/[:\s/]/g, '');
+    const container = document.getElementById(`replies-${postId}`);
+    const btn = document.getElementById(`btn-replies-${postId}`);
+    if (!btn || !container) return;
+
+    if (container.style.display === 'none') {
+        container.style.display = 'block';
+        btn.innerHTML = `<i class="fas fa-times"></i> スレを閉じる`;
+    } else {
+        container.style.display = 'none';
+        // ★記憶しておいた数（data-count）を読み出す！
+        const count = btn.getAttribute('data-count') || 0;
+        btn.innerHTML = `<i class="fas fa-comments"></i> スレを開く (${count})`;
+    }
+}
 // 削除要請（みつきにメールが飛ぶ）
 async function requestDelete(date) {
     showToast("管理者に削除要請を送りました...");
@@ -187,20 +201,31 @@ function executeStorySearch() {
 
 // 掲示板への書き込み
 async function sendBulletin(parentId = "") {
-    const inputId = parentId ? `reply-input-${parentId.replace(/[:\s/]/g, '')}` : 'bulletin-input';
-    const content = document.getElementById(inputId).value;
+    // 1. 返信か新規投稿かで入力元を切り替える
+    // parentIdがある場合は、プロンプトで内容を聞くか、動的に生成された入力欄から取る
+    let content;
+    if (parentId) {
+        content = prompt("返信内容を入力してください：");
+        if (!content) return; // キャンセル時は何もしない
+    } else {
+        const inputEl = document.getElementById('bulletin-input');
+        if (!inputEl) return;
+        content = inputEl.value;
+    }
+
     if (!content) return;
 
-    showToast("学園の壁に刻んでいます...");
+    showToast("掲示板に刻んでいます...");
     try {
         await fetch(GAS_URL, { 
             method: "POST", 
             mode: "no-cors", 
             body: JSON.stringify({ type: "bulletin", content: content, parentId: parentId }) 
         });
-        showToast("投稿成功！");
-        location.reload(); 
-    } catch (e) { showToast("通信エラーだゾ..."); }
+        showToast("投稿成功だゾッ！");
+        if (!parentId) document.getElementById('bulletin-input').value = "";
+        loadBulletin(); // 再読み込み
+    } catch (e) { showToast("失敗したゾ..."); }
 }
 
 async function deletePost(dateStr) {
@@ -214,6 +239,25 @@ async function deletePost(dateStr) {
         location.reload();
     } catch (e) { showToast("失敗だゾ..."); }
 }
+async function requestDelete(date, content) {
+    if(!confirm("この投稿の削除要請を管理者に送りますか？")) return;
+    
+    showToast("要請を送信中...");
+    try {
+        await fetch(GAS_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ 
+                type: "delete_request", 
+                date: date, 
+                content: content // ここで内容をしっかり渡すゾッ
+            }) 
+        });
+        showToast("管理者に通知したゾッ！");
+    } catch (e) { showToast("送信失敗だゾ..."); }
+}
+
+
 function renderRelations() {
     const container = document.getElementById('relation-visual');
     if (!container) return;
@@ -291,20 +335,17 @@ async function loadStories() {
     const list = document.getElementById('story-list');
     if (!list) return;
 
-    list.innerHTML = `
-        <div class="loading-spinner-wrap" style="text-align:center; padding:50px;">
-            <div class="loading-spinner"></div>
-            <p style="color:var(--gold); font-weight:bold; margin-top:10px;">学園の記録を読み込み中...</p>
-        </div>`;
+    list.innerHTML = `<div class="loading-area"><div class="loading-spinner"></div><p>記録を読み込み中...</p></div>`;
 
     try {
         const response = await fetch(GAS_URL + "?type=stories");
         allStories = await response.json();
-        
-        renderStoryFilters(); // ★タグプルダウンを自動生成
-        renderStoryCards(allStories);
+        filteredStories = allStories; // 初期状態は全件
+        renderStoryFilters(); // フィルタ作成
+        renderStoryCards(allStories); // 描画！
     } catch (e) {
-        list.innerHTML = "<p>読み込みに失敗したゾッ。GASのURLを確認してね。</p>";
+        console.error("Story load error:", e);
+        list.innerHTML = "<p>物語の読み込みに失敗したゾッ。</p>";
     }
 }
 
@@ -333,22 +374,30 @@ function renderStoryCards(stories) {
     const list = document.getElementById('story-list');
     if (!list) return;
     list.innerHTML = '';
+    
+    filteredStories = stories;
+    const start = (currentStoryPage - 1) * storiesPerPage;
+    const pagedStories = filteredStories.slice(start, start + storiesPerPage);
 
-    stories.forEach(s => {
-        const charNames = s.chars.split(/[、,]/).map(name => name.trim());
+    if (pagedStories.length === 0) {
+        list.innerHTML = "<p>該当する物語はまだないゾッ。</p>";
+        return;
+    }
+
+    pagedStories.forEach(s => {
+        // キャラアイコンの生成
+        const charNames = s.chars ? s.chars.split(/[、,]/).map(name => name.trim()) : [];
         const iconsHTML = charNames.map(name => {
             const charObj = schoolData.characters.find(c => c.name === name);
             let imgFile = charObj ? charObj.img : "";
-            // ストーリー投稿時に「イラスト版」が選ばれていたら
-            if (charObj && charObj.imgIllust && s.useIllust === true) {
-                imgFile = charObj.imgIllust;
-            }
+            // イラストフラグがある場合
+            if (charObj && charObj.imgIllust && s.useIllust === "true") imgFile = charObj.imgIllust;
             return getCharImgHTML({ ...charObj, img: imgFile }, 'char-circle-mini');
         }).join('');
 
         const card = document.createElement('div');
         card.className = `story-card tag-${s.tag}`;
-        const preview = s.content.replace(/\n/g, ' ').substring(0, 50);
+        const preview = s.content ? s.content.replace(/\n/g, ' ').substring(0, 50) : "";
 
         card.innerHTML = `
             <div class="story-header">
@@ -362,12 +411,42 @@ function renderStoryCards(stories) {
         `;
         list.appendChild(card);
     });
+    renderStoryPagination();
+}
+function toggleReplies(postId) {
+    const container = document.getElementById(`replies-${postId.replace(/[:\s/]/g, '')}`);
+    const btn = document.getElementById(`btn-replies-${postId.replace(/[:\s/]/g, '')}`);
+    if (container.style.display === 'none' || container.style.display === '') {
+        container.style.display = 'block';
+        btn.innerText = '返信を閉じる';
+    } else {
+        container.style.display = 'none';
+        btn.innerText = btn.dataset.originalText;
+    }
 }
 
 function formatText(text) {
     return text.replace(/\n/g, '<br>');
 }
+function renderStoryPagination() {
+    const list = document.getElementById('story-list');
+    const totalPages = Math.ceil(filteredStories.length / storiesPerPage);
+    if (totalPages <= 1) return;
 
+    const nav = document.createElement('div');
+    nav.className = 'pagination-area';
+    nav.innerHTML = `
+        <button onclick="changeStoryPage(-1)" ${currentStoryPage === 1 ? 'disabled' : ''} class="filter-btn">前へ</button>
+        <span>${currentStoryPage} / ${totalPages}</span>
+        <button onclick="changeStoryPage(1)" ${currentStoryPage === totalPages ? 'disabled' : ''} class="filter-btn">次へ</button>
+    `;
+    list.appendChild(nav);
+}
+function changeStoryPage(offset) {
+    currentStoryPage += offset;
+    renderStoryCards(filteredStories);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 // --- ストーリー詳細表示（エラー対策版） ---
 function openFullStory(dateStr) {
     const s = allStories.find(story => String(story.date) === String(dateStr));
@@ -376,16 +455,25 @@ function openFullStory(dateStr) {
     const modal = document.getElementById('profile-modal');
     const body = document.getElementById('modal-body');
 
+    // 登場キャラのアイコンを生成
+    const charNames = s.chars.split(/[、,]/).map(name => name.trim());
+    const iconsHTML = charNames.map(name => {
+        const charObj = schoolData.characters.find(c => c.name === name);
+        return getCharImgHTML(charObj, 'char-circle-mini');
+    }).join('');
+
     body.innerHTML = `
-        <div class="story-full-view">
-            <h2 class="story-modal-title">${s.title}</h2>
-            <div class="story-modal-meta">
+        <div class="story-full-view" style="text-align:left">
+            <span class="close-btn" onclick="closeProfile()">&times;</span>
+            <div class="story-modal-header">
                 <span class="m-tag">${s.tag}</span> <span class="m-tag">${s.stage}</span>
             </div>
-            <p class="story-modal-chars">【出演】 ${s.chars}</p>
+            <h2 class="story-modal-title" style="text-align:center">${s.title}</h2>
+            <div class="story-char-icons-wrap" style="justify-content:center">${iconsHTML}</div>
+            <p style="text-align:center; font-size:0.9rem; color:#666;">出演：${s.chars}</p>
             <hr>
-            <div class="story-modal-content" style="white-space: pre-wrap; text-align:left;">${s.content}</div>
-            <p class="story-modal-date">${s.date} 記録</p>
+            <div class="story-modal-content">${s.content}</div>
+            <p class="story-modal-date" style="text-align:right">${s.date} 記録</p>
         </div>
     `;
     modal.style.display = "block";
@@ -534,19 +622,11 @@ async function loadRanking() {
         }).join('');
     } catch (e) { console.error("ランキング取得失敗"); }
 }
-function searchCharacters() {
-    const query = document.getElementById('char-search-input').value.toLowerCase();
+function renderCharacterCards(characters) {
     const grid = document.getElementById('char-grid');
     if (!grid) return;
     grid.innerHTML = '';
-
-    const filtered = schoolData.characters.filter(c => 
-        c.name.toLowerCase().includes(query) || 
-        c.fullName.toLowerCase().includes(query) ||
-        c.class.toLowerCase().includes(query)
-    );
-
-    filtered.forEach(c => {
+    characters.forEach(c => {
         const card = document.createElement('div');
         card.className = 'char-card';
         card.onclick = () => showProfile(c.id);
@@ -558,33 +638,63 @@ function searchCharacters() {
         grid.appendChild(card);
     });
 }
+
+// loadBulletin の中身をこれに差し替えて！
 async function loadBulletin(page = 1) {
     const board = document.getElementById('bulletin-board-display');
     if (!board) return;
     try {
         const response = await fetch(`${GAS_URL}?type=bulletin&page=${page}`);
         const data = await response.json();
-        const posts = data.posts;
+        const allPosts = data.posts;
         
-        if (!posts || posts.length === 0) {
-            board.innerHTML = "<p style='text-align:center;'>まだ書き込みはありません。</p>";
+        board.innerHTML = '';
+        if (!allPosts || allPosts.length === 0) {
+            board.innerHTML = "<p style='text-align:center'>まだ書き込みはないゾッ。</p>";
             return;
         }
 
-        board.innerHTML = posts.map(p => `
-            <div class="bulletin-post thread-style" style="white-space: pre-wrap;">
-                <div class="post-header">
-                    <span class="post-date">${p.date}</span>
-                    <button class="req-btn" onclick="requestDelete('${p.date}', '${p.content}')">削除要請</button>
-                </div>
-                <p class="post-content">${p.content}</p>
-            </div>
-        `).join('');
+        // 1. 親投稿（parentIdがない、または空文字のもの）を抽出
+        const mainPosts = allPosts.filter(p => !p.parentId || p.parentId === "");
+        // 2. 返信（parentIdに親の日付が入っているもの）を抽出
+        const replies = allPosts.filter(p => p.parentId && p.parentId !== "");
+
+        board.innerHTML = mainPosts.map(p => {
+            const threadReplies = replies.filter(r => r.parentId === p.date);
+            const replyCount = threadReplies.length;
+            const postId = p.date.replace(/[:\s/]/g, '');
+
+            return `
+                <div class="bulletin-post thread-style">
+                    <div class="post-header">
+                        <span class="post-date">${p.date}</span>
+                        <div class="post-actions">
+                            <button class="req-btn" onclick="sendBulletin('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
+                            <!-- ★ここで data-count を使って数を記憶させるゾ！ -->
+                            <button id="btn-replies-${postId}" class="req-btn" data-count="${replyCount}" onclick="toggleReplies('${p.date}')">
+                                <i class="fas fa-comments"></i> スレを開く (${replyCount})
+                            </button>
+                            <button class="req-btn delete-req" onclick="requestDelete('${p.date}', '${p.content}')">削除要請</button>
+                        </div>
+                    </div>
+                    <p class="post-content" style="white-space: pre-wrap;">${p.content}</p>
+                    
+                    <div id="replies-${postId}" class="replies-container" style="display:none;">
+                        ${threadReplies.length > 0 ? threadReplies.map(r => `
+                            <div class="reply-item">
+                                <small>${r.date}</small>
+                                <p style="white-space: pre-wrap;">${r.content}</p>
+                            </div>
+                        `).join('') : '<p style="font-size:0.8rem; color:#888;">まだ返信はないゾッ。</p>'}
+                    </div>
+                </div>`;
+        }).join('');
     } catch (e) { 
-        console.error("掲示板読み込み失敗", e);
-        board.innerHTML = "<p>データの取得に失敗しました。GASのデプロイを確認してね！</p>";
+        console.error("掲示板エラー", e); 
+        board.innerHTML = "<p>掲示板の読み込みに失敗しました。</p>";
     }
 }
+
 // --- クラス分けラベル（H1-1, H1-2...）を自動生成 ---
 function renderClassFilters() {
     const filterArea = document.querySelector('.filter-tabs'); // 元のタグエリア
@@ -656,19 +766,17 @@ function showTodayPickup() {
     const display = document.getElementById('random-char-display');
     if (!display) return;
     const today = new Date();
-    const dateStr = today.getFullYear() + "-" + (today.getMonth() + 1) + "-" + today.getDate();
-    let seed = 0;
-    for (let i = 0; i < dateStr.length; i++) seed += dateStr.charCodeAt(i);
+    const seed = today.getFullYear() + today.getMonth() + today.getDate();
     const index = seed % schoolData.characters.length;
     const char = schoolData.characters[index];
 
     display.innerHTML = `
-        <div class="pickup-card">
-            <!-- images/ フォルダを参照するように修正 -->
-            <img src="images/${char.img}" class="pickup-img" onerror="this.src='https://via.placeholder.com/150?text=bird'">
+        <div class="pickup-card" style="display:flex; align-items:center; gap:20px; padding:20px;">
+            ${getCharImgHTML(char, 'pickup-img')} <!-- 共通関数を使うように修正 -->
             <div>
-                <h3>${char.name} <small>(${char.class})</small></h3>
-                <p>"${char.quote}"</p>
+                <h3 style="margin:0">${char.name} <small>(${char.class})</small></h3>
+                <p style="font-style:italic; margin:10px 0">"${char.quote}"</p>
+                <button class="cheer-btn" onclick="sendVote('${char.id}', '${char.name}')"><i class="fas fa-heart"></i> 応援する</button>
             </div>
         </div>
     `;
@@ -836,12 +944,17 @@ function showCalendar() {
 
 let pigClickCount = 0;
 function spawnGohobi() {
+    // 別のタブを見ている時や、すでに歩いている時は出さない！
+    if (document.hidden || isGohobiWalking) return; 
+    
+    isGohobiWalking = true;
+    
     const pig = document.createElement('div');
     pig.className = 'walking-gohobi';
     pig.innerHTML = '🐖'; 
     document.body.appendChild(pig);
 
-    const gohobiQuotes = [
+    const gohobiQuotes =[
         "これはご褒美だゾ♡",
         "ワシャワシャしてやるゾッ！",
         "拙者のエキス、飲むかゾ？",
@@ -849,13 +962,14 @@ function spawnGohobi() {
         "豚骨スープが煮えたゾ〜"
     ];
 
-    let pos = window.innerWidth; // 右端からスタート
+    let pos = window.innerWidth;
     const interval = setInterval(() => {
-        pos -= 2; // 左へ移動
+        pos -= 2; 
         pig.style.left = pos + 'px';
         if (pos < -100) {
             clearInterval(interval);
             pig.remove();
+            isGohobiWalking = false; // 画面外に出たらフラグをリセット！
         }
     }, 30);
 
@@ -866,6 +980,9 @@ function spawnGohobi() {
         if (pigClickCount === 30) {
             triggerSoupEvent();
             pigClickCount = 0;
+            clearInterval(interval);
+            pig.remove();
+            isGohobiWalking = false;
         }
     };
 }
@@ -1119,7 +1236,21 @@ function filterTerms() {
         card.style.display = title.includes(query) ? 'block' : 'none';
     });
 }
+function searchCharacters() {
+    const input = document.getElementById('char-search-input');
+    if (!input) return;
+    const query = input.value.toLowerCase();
+    const grid = document.getElementById('char-grid');
+    if (!grid) return;
 
+    const filtered = schoolData.characters.filter(c => 
+        c.name.toLowerCase().includes(query) || 
+        c.fullName.toLowerCase().includes(query) ||
+        c.class.toLowerCase().includes(query)
+    );
+
+    renderCharacterCards(filtered); // 検索結果を描画
+}
 function renderGames() {
     const gameList = document.getElementById('game-list');
     if (!gameList) return;
@@ -1130,6 +1261,7 @@ function renderGames() {
         { title: "とりの丘トリ’S大富豪", desc: "可愛いキャラたちとトランプの大富豪対決！", url: "https://daifugo-mofu.vercel.app", icon: "fa-crown" },
         { title: "みりんてゃソリティア", desc: "みりんてゃとトランプ勝負！クリアできるかな？", icon: "fa-layer-group", url: "https://mirintea-solitaire.vercel.app" },
         { title: "とりの丘トリ’S人狼", desc: "AIキャラたちと本気の心理戦！推理を楽しもう。", icon: "fa-wolf-pack-battalion", url: "https://mofu-mitsu.github.io/Torinooka-Werewolf/" },
+        { title: "先駆シェフの献立メーカー", desc: "今日の夕飯が決まらない？シェフが勝手に献立を決めてくれるよ！", url: "https://mofu-mitsu.github.io/kondate-maker/", icon: "fa-utensils" }, // ← 追加！
         { title: "もふみつ工房 BOOTH", desc: "ノベルゲームや各種グッズをチェック！", icon: "fa-shopping-bag", url: "https://torisproject.booth.pm" }
     ];
 
@@ -1143,4 +1275,11 @@ function renderGames() {
             <i class="fas fa-external-link-alt ext-icon"></i>
         </a>
     `).join('');
+}
+// --- ハンバーガーメニューの開閉 ---
+function toggleMenu() {
+    const nav = document.getElementById('global-nav');
+    if (nav) {
+        nav.classList.toggle('open');
+    }
 }
