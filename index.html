@@ -2,24 +2,49 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>とりの丘学園 | 総合ポータル</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- スマホ対応必須！ -->
+    <title>とりの丘学園 | 300人以上のキャラが登場する一次創作・学園ストーリー＆キャラ図鑑</title>
+    <link rel="icon" href="images/logo.png" type="image/png">
+    
+    <!-- ▼ここからSEO・OGP対策▼ -->
+    <meta name="description" content="300人以上の個性豊かなキャラクターが登場する一次創作「とりの丘学園」の公式ポータルサイト。キャラクター名鑑、ショートストーリー、MBTI性格分類、学園設定、ミニゲームなど豊富なコンテンツを掲載。">
+    <meta name="keywords" content="とりの丘学園, 一次創作, キャラクター, MBTI, 小説, ゲーム">
+    
+    <!-- OGP (SNSシェア時のカード表示) -->
+    <meta property="og:site_name" content="とりの丘学園 総合ポータル">
+    <meta property="og:title" content="とりの丘学園 | 総合ポータル">
+    <meta property="og:description" content="300人以上の個性豊かなキャラクターたちが織りなす一次創作「とりの丘学園」公式ポータル。">
+    <meta property="og:url" content="https://mofu-mitsu.github.io/Torinooka_portal/">
+    <meta property="og:image" content="https://mofu-mitsu.github.io/Torinooka_portal/images/ogp.png">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitterカード -->
+    <meta name="twitter:card" content="summary_large_image">
+    <!-- ▲ここまで▲ -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="home-page">
+    <div class="home-intro-overlay">
+        <img src="images/logo.png" class="intro-logo" alt="とりの丘学園">
+    </div>
     <header class="main-header">
-        <div class="header-overlay">
-            <div class="logo-area">
-                <h1><i class="fas fa-feather-alt"></i> とりの丘学園</h1>
-                <p class="sub-title">Torinooka Academy Portal</p>
-            </div>
-            <nav class="premium-nav">
-                <a href="index.html" class="nav-item">HOME</a>
-                <a href="chara.html" class="nav-item">生徒名簿</a>
-                <a href="story.html" class="nav-item">ストーリー</a> <!-- # から story.html に変更 -->
-                <a href="#" class="nav-item">コンテンツ</a>
-            </nav>
+        <div class="logo-area">
+            <!-- ロゴ画像に差し替え ＆ イースターエッグの onclick -->
+            <img src="images/logo.png" alt="とりの丘学園" onclick="secretClick()">
+            <p class="sub-title">Torinooka Academy Portal</p>
         </div>
+        <nav class="premium-nav">
+            <a href="index.html" class="nav-item active">HOME</a>
+            <a href="chara.html" class="nav-item">生徒名簿</a>
+            <a href="life.html" class="nav-item">学校生活</a> <!-- ★追加！ -->
+            <a href="story.html" class="nav-item">ストーリー</a>
+            <a href="bulletin.html" class="nav-item">掲示板</a>
+            <a href="letters.html" class="nav-item">お手紙</a>
+            <a href="games.html" class="nav-item">コンテンツ</a>
+        </nav>
     </header>
     <div id="soup-overlay" class="soup-overlay">
         <h1 style="color: #8b4513;">🍜 豚骨スープの海 🍜</h1>
@@ -85,29 +110,7 @@
                 <!-- GASから読み込まれます -->
             </div>
         </div>
-    <section id="letter-section" class="luxury-section">
-        <h2 class="gold-title"><i class="fas fa-envelope-open-text"></i> 生徒へのお手紙</h2>
-        
-        <!-- お手紙フォーム -->
-        <div class="letter-form">
-            <select id="letter-class-select" onchange="updateLetterCharSelect()">
-                <option value="">クラスを選択</option>
-            </select>
-            <select id="letter-to">
-                <option value="">先にクラスを選んでね</option>
-            </select>
-            <textarea id="letter-content" placeholder="メッセージをどうぞ..."></textarea>
-            <button onclick="sendLetter()" class="premium-btn">手紙を送る</button>
-        </div>
 
-        <!-- お返事掲示板 -->
-        <div id="reply-board">
-            <h3 class="gold-title" style="margin-top: 40px;"><i class="fas fa-comment-dots"></i> 学園からの返信</h3>
-            <div id="reply-display" class="reply-container">
-                <!-- ここにお返事が出ます -->
-            </div>
-        </div>
-    </section>
     <div id="secret-modal" class="modal">
         <div class="modal-content" style="background: #ffffd0; border: 10px solid #8b4513;">
             <span class="close-btn" onclick="closeSecret()">&times;</span>
@@ -123,7 +126,20 @@
         </div>
     </div>
     </main>
-
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-links">
+                <!-- Google AdSenseには「プライバシーポリシー」と「お問い合わせ」が絶対必要！ -->
+                <a href="policy.html">プライバシーポリシー</a>
+                <a href="terms.html">利用規約</a>
+                <a href="mailto:momoka.mimika1122@gmail.com">お問い合わせ</a>
+            </div>
+            <a href="https://mofu-mitsu.github.io/" class="back-to-kobo-btn">
+                <i class="fas fa-home"></i> もふみつ工房へ戻る
+            </a>
+            <p class="copyright">&copy; 2026 もふみつ工房 / とりの丘学園 All Rights Reserved.</p>
+        </div>
+    </footer>
     <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
