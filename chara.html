@@ -10,29 +10,31 @@
     <header class="mini-header">
         <nav class="premium-nav">
             <a href="index.html" class="nav-item">HOME</a>
-            <a href="chara.html" class="nav-item">生徒名簿</a>
+            <a href="chara.html" class="nav-item active">生徒名簿</a>
+            <a href="life.html" class="nav-item">学校生活</a> <!-- ★追加！ -->
             <a href="story.html" class="nav-item">ストーリー</a>
-            <a href="world.html" class="nav-item">世界観</a>
+            <a href="bulletin.html" class="nav-item">掲示板</a>
+            <a href="letters.html" class="nav-item">お手紙</a>
             <a href="games.html" class="nav-item">コンテンツ</a>
         </nav>
     </header>
 
     <main class="container">
-        <section class="luxury-section">
-            <h2 class="gold-title"><i class="fas fa-address-book"></i> 生徒名簿</h2>
-                    <!-- JSでここに自動追加されるか、手動でクラス名を入れてね -->
-                </select>
-            </div>
-            <div class="filter-tabs">
-                <button class="filter-btn active" onclick="filterChars('all')">全校生徒</button>
-                <button class="filter-btn" onclick="filterChars('高等部')">高等部</button>
-                <button class="filter-btn" onclick="filterChars('中等部')">中等部</button>
-                <button class="filter-btn" onclick="filterChars('初等部')">初等部</button>
-            </div>
-            <div id="char-grid" class="char-grid">
-                <!-- ここにキャラが表示されるよ！ -->
-            </div>
-        </section>
+    <section class="luxury-section">
+        <h2 class="gold-title"><i class="fas fa-users"></i> 生徒を探す</h2>
+        <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" id="char-search-input" onkeyup="searchCharacters()" placeholder="名前・フルネーム・クラスで検索..." class="search-input">
+        </div>
+        <!-- プルダウンは既存のものを維持 -->
+        <div class="filter-dropdown-area">
+            <select id="char-class-filter" class="premium-select" onchange="renderCharactersByClass(this.value)">
+                <option value="all">全校生徒を表示</option>
+            </select>
+        </div>
+        
+        <div id="char-grid" class="char-grid"></div>
+    </section>
     </main>
 
     <!-- プロフモーダル -->
