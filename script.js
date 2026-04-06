@@ -1,4 +1,4 @@
-const GAS_URL = "https://script.google.com/macros/s/AKfycbwbAFy6stfjJfkcTAMmPKsjauTq09z92YpBkKuEsz0jKuZsiOSTw_Gea5giYQDxmKsh-g/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxxU_LeW0UifW3kFHsSyORgSb3EI0W7zROp7sD2-8FvcEyz7m_tZoZ1DsrrEmYVACww/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
@@ -65,6 +65,10 @@ document.addEventListener('DOMContentLoaded', () => {
     sections.forEach((sec, index) => {
         setTimeout(() => sec.classList.add('show'), index * 150);
     });
+    // ★掲示板ページ、またはHOMEにいるなら、即座にログを読み込む！
+    if (document.getElementById('bulletin-board-display')) {
+        loadBulletin();
+    }
 });
 
 // ==========================================
@@ -114,34 +118,36 @@ function showTodayMenu() {
     menuArea.innerHTML = menuHTML;
 }
 // --- 学園掲示板の読み込み（GASを使用） ---
+// 掲示板ログの描画（削除要請ボタン付き）
 async function loadBulletin() {
     const board = document.getElementById('bulletin-board-display');
     if (!board) return;
-    toggleLoading('bulletin-board-display', true);
-
     try {
         const response = await fetch(GAS_URL + "?type=bulletin");
         const posts = await response.json();
-        
-        board.innerHTML = '';
-        if (!posts || posts.length === 0) {
-            board.innerHTML = "<p>まだ書き込みはありません。</p>";
-            return;
-        }
-
-        // loadBulletin内のmap処理の一部
         board.innerHTML = posts.map(p => `
-            <div class="bulletin-post">
+            <div class="bulletin-post thread-style">
                 <div class="post-header">
-                    <span class="post-date">${new Date(p.date).toLocaleString()}</span>
-                    <button class="delete-btn" onclick="deletePost('${p.date}')"><i class="fas fa-trash-alt"></i> 削除</button>
+                    <span class="post-date">${p.date}</span>
+                    <div class="post-actions">
+                        <button class="req-btn" onclick="requestDelete('${p.date}')">削除要請</button>
+                        <button class="admin-only-btn" onclick="deletePost('${p.date}')">消去</button>
+                    </div>
                 </div>
                 <p class="post-content">${p.content}</p>
             </div>
         `).join('');
-    } catch (e) {
-        board.innerHTML = "<p>掲示板の読み込みに失敗しました。</p>";
-    }
+    } catch (e) { console.error("ログ取得失敗"); }
+}
+
+// 削除要請（みつきにメールが飛ぶ）
+async function requestDelete(date) {
+    showToast("管理者に削除要請を送りました...");
+    await fetch(GAS_URL, { 
+        method: "POST", 
+        mode: "no-cors", 
+        body: JSON.stringify({ type: "delete_request", date: date }) 
+    });
 }
 // ストーリー用フィルター初期化
 function renderStoryFilters() {
@@ -149,16 +155,17 @@ function renderStoryFilters() {
     const classSelect = document.getElementById('filter-class');
     if (!tagSelect || !classSelect) return;
 
-    // タグを動的に取得してプルダウンへ（みつきが自由に設定したタグを拾う）
+    // スプレッドシートにあるタグを全部拾って、重複を消す
     const tags = [...new Set(allStories.map(s => s.tag))].filter(t => t);
     tagSelect.innerHTML = '<option value="all">すべてのタグ</option>' + 
                           tags.map(t => `<option value="${t}">${t}</option>`).join('');
 
     // クラス一覧も取得
-    const classes = [...new Set(schoolData.characters.map(c => c.class))].sort();
+    const classes = [...new Set(allStories.map(s => s.stage))].filter(c => c);
     classSelect.innerHTML = '<option value="all">すべてのクラス</option>' + 
                             classes.map(c => `<option value="${c}">${c}</option>`).join('');
 }
+
 
 // 高度な検索実行
 function executeStorySearch() {
@@ -167,30 +174,33 @@ function executeStorySearch() {
     const classQuery = document.getElementById('filter-class').value;
 
     const filtered = allStories.filter(s => {
-        const matchText = s.title.toLowerCase().includes(textQuery) || s.chars.toLowerCase().includes(textQuery);
+        const matchText = s.title.toLowerCase().includes(textQuery) || 
+                         s.chars.toLowerCase().includes(textQuery) ||
+                         s.content.toLowerCase().includes(textQuery);
         const matchTag = (tagQuery === 'all' || s.tag === tagQuery);
-        const matchClass = (classQuery === 'all' || s.stage === classQuery); // stageをクラス/学年として判定
+        const matchClass = (classQuery === 'all' || s.stage === classQuery);
         return matchText && matchTag && matchClass;
     });
 
     renderStoryCards(filtered);
 }
+
 // 掲示板への書き込み
-async function sendBulletin() {
-    const content = document.getElementById('bulletin-input').value;
+async function sendBulletin(parentId = "") {
+    const inputId = parentId ? `reply-input-${parentId.replace(/[:\s/]/g, '')}` : 'bulletin-input';
+    const content = document.getElementById(inputId).value;
     if (!content) return;
 
-    showToast("掲示板に貼り付けています...");
+    showToast("学園の壁に刻んでいます...");
     try {
         await fetch(GAS_URL, { 
             method: "POST", 
             mode: "no-cors", 
-            body: JSON.stringify({ type: "bulletin", content: content }) 
+            body: JSON.stringify({ type: "bulletin", content: content, parentId: parentId }) 
         });
-        showToast("書き込み完了！");
-        document.getElementById('bulletin-input').value = "";
-        loadBulletin();
-    } catch (e) { showToast("失敗しちゃった..."); }
+        showToast("投稿成功！");
+        location.reload(); 
+    } catch (e) { showToast("通信エラーだゾ..."); }
 }
 
 async function deletePost(dateStr) {
@@ -248,17 +258,17 @@ async function sendStory() {
     const chars = document.getElementById('story-chars').value;
     const tag = document.getElementById('story-tag').value;
     const content = document.getElementById('story-content').value;
+    // チェックボックスから取得（HTMLに id="story-use-illust" を追加してね）
+    const useIllust = document.getElementById('story-use-illust') ? document.getElementById('story-use-illust').checked : false;
 
     if (!title || !content) return alert("タイトルと内容は必須だゾ！");
 
-    // ★投稿前に合言葉を聞く！
     const adminKey = prompt("学園史を刻むための『合言葉』を入力してね：");
     if (!adminKey) return;
 
     showToast("物語を紡いでいます...");
     
-    // adminKeyをデータに含めて送る
-    const data = { type: "story", title, stage, chars, tag, content, adminKey };
+    const data = { type: "story", title, stage, chars, tag, content, adminKey, useIllust: useIllust };
 
     try {
         const response = await fetch(GAS_URL, { method: "POST", mode: "cors", body: JSON.stringify(data) });
@@ -280,20 +290,21 @@ async function sendStory() {
 async function loadStories() {
     const list = document.getElementById('story-list');
     if (!list) return;
-    toggleLoading('story-list', true);
+
+    list.innerHTML = `
+        <div class="loading-spinner-wrap" style="text-align:center; padding:50px;">
+            <div class="loading-spinner"></div>
+            <p style="color:var(--gold); font-weight:bold; margin-top:10px;">学園の記録を読み込み中...</p>
+        </div>`;
 
     try {
         const response = await fetch(GAS_URL + "?type=stories");
         allStories = await response.json();
         
-        // --- タグボタンを動的に生成する ---
-        renderDynamicTagFilters(allStories);
-        
-        // カードを表示
+        renderStoryFilters(); // ★タグプルダウンを自動生成
         renderStoryCards(allStories);
     } catch (e) {
-        console.error("ストーリー読み込み失敗", e);
-        list.innerHTML = "<p>物語の読み込みに失敗しました。</p>";
+        list.innerHTML = "<p>読み込みに失敗したゾッ。GASのURLを確認してね。</p>";
     }
 }
 
@@ -317,29 +328,68 @@ function renderDynamicTagFilters(stories) {
     });
 }
 
+// --- ストーリーカードの描画（アイコン表示版） ---
 function renderStoryCards(stories) {
     const list = document.getElementById('story-list');
+    if (!list) return;
     list.innerHTML = '';
-    if (stories.length === 0) {
-        list.innerHTML = "<p>該当する物語はありません。</p>";
-        return;
-    }
+
     stories.forEach(s => {
+        const charNames = s.chars.split(/[、,]/).map(name => name.trim());
+        const iconsHTML = charNames.map(name => {
+            const charObj = schoolData.characters.find(c => c.name === name);
+            let imgFile = charObj ? charObj.img : "";
+            // ストーリー投稿時に「イラスト版」が選ばれていたら
+            if (charObj && charObj.imgIllust && s.useIllust === true) {
+                imgFile = charObj.imgIllust;
+            }
+            return getCharImgHTML({ ...charObj, img: imgFile }, 'char-circle-mini');
+        }).join('');
+
         const card = document.createElement('div');
         card.className = `story-card tag-${s.tag}`;
+        const preview = s.content.replace(/\n/g, ' ').substring(0, 50);
+
         card.innerHTML = `
             <div class="story-header">
-                <span class="story-tag">${s.tag}</span>
+                <span class="story-tag">#${s.tag}</span>
                 <span class="story-stage">${s.stage}</span>
             </div>
             <h3>${s.title}</h3>
-            <p class="story-chars"><i class="fas fa-users"></i> ${s.chars}</p>
-            <div class="story-preview">${s.content.replace(/\n/g, '<br>').substring(0, 100)}...</div>
+            <div class="story-char-icons-wrap">${iconsHTML}</div>
+            <div class="story-preview">${preview}...</div>
+            <button onclick="openFullStory('${s.date}')" class="read-more-btn">物語を読む</button>
         `;
         list.appendChild(card);
     });
 }
 
+function formatText(text) {
+    return text.replace(/\n/g, '<br>');
+}
+
+// --- ストーリー詳細表示（エラー対策版） ---
+function openFullStory(dateStr) {
+    const s = allStories.find(story => String(story.date) === String(dateStr));
+    if (!s) return;
+
+    const modal = document.getElementById('profile-modal');
+    const body = document.getElementById('modal-body');
+
+    body.innerHTML = `
+        <div class="story-full-view">
+            <h2 class="story-modal-title">${s.title}</h2>
+            <div class="story-modal-meta">
+                <span class="m-tag">${s.tag}</span> <span class="m-tag">${s.stage}</span>
+            </div>
+            <p class="story-modal-chars">【出演】 ${s.chars}</p>
+            <hr>
+            <div class="story-modal-content" style="white-space: pre-wrap; text-align:left;">${s.content}</div>
+            <p class="story-modal-date">${s.date} 記録</p>
+        </div>
+    `;
+    modal.style.display = "block";
+}
 function filterStories(tagName) {
     // ボタンの見た目切り替え
     document.querySelectorAll('#story-filters .filter-btn').forEach(btn => {
@@ -452,47 +502,89 @@ function showVoteCharsByClass(className) {
 async function loadRanking() {
     const rankingArea = document.getElementById('ranking-display');
     if (!rankingArea) return;
-    toggleLoading('ranking-display', true);
-
     try {
         const response = await fetch(GAS_URL + "?type=ranking");
         const ranking = await response.json();
-        
         rankingArea.innerHTML = '';
-        if (!ranking || ranking.length === 0) {
-            rankingArea.innerHTML = "<p>今月の集計はまだありません。</p>";
-            return;
-        }
 
-        // 上位3名だけを特別に表示
         rankingArea.innerHTML = ranking.map((r, i) => {
             const char = schoolData.characters.find(c => c.name === r.name);
-            const imgPath = char ? `images/${char.img}` : 'https://via.placeholder.com/80';
+            let imgFile = char ? char.img : "";
             
-            // 順位ごとのセリフ（データになければデフォルト）
+            // ★ imgIllustを持っている子は、ランキングでは常にイラストを表示する
+            if (char && char.imgIllust) {
+                imgFile = char.imgIllust;
+            }
+
+            const imgHTML = getCharImgHTML({ ...char, img: imgFile }, 'rank-img');
             let rankMsg = "";
-            if (i === 0) rankMsg = char?.rankQuote1 || "「1位だなんて…みんな、ありがとう！」";
-            else if (i === 1) rankMsg = char?.rankQuote2 || "「2位か、次は1位を狙うゾ！」";
-            else if (i === 2) rankMsg = char?.rankQuote3 || "「3位にランクイン！嬉しいな。」";
+            if (i === 0) rankMsg = char?.rankQuote1 || "応援ありがとうございます！";
+            else if (i === 1) rankMsg = char?.rankQuote2 || "2位、嬉しいです！";
+            else if (i === 2) rankMsg = char?.rankQuote3 || "3位、感謝です！";
 
             return `
                 <div class="ranking-item rank-${i+1}">
                     <div class="rank-badge">${i + 1}</div>
-                    <img src="${imgPath}" class="rank-img" onerror="this.src='https://via.placeholder.com/80'">
-                    <div class="rank-info">
-                        <span class="rank-name">${r.name}</span>
-                        <span class="rank-count">${r.count} 票</span>
+                    <div class="rank-img-wrap">${imgHTML}</div>
+                    <div class="rank-content">
+                        <span class="rank-name-text">${r.name} ${r.count} 票</span>
                         <p class="rank-quote">${rankMsg}</p>
                     </div>
-                </div>
-            `;
+                </div>`;
         }).join('');
-    } catch (e) {
-        rankingArea.innerHTML = "<p>ランキング取得に失敗しました</p>";
+    } catch (e) { console.error("ランキング取得失敗"); }
+}
+function searchCharacters() {
+    const query = document.getElementById('char-search-input').value.toLowerCase();
+    const grid = document.getElementById('char-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const filtered = schoolData.characters.filter(c => 
+        c.name.toLowerCase().includes(query) || 
+        c.fullName.toLowerCase().includes(query) ||
+        c.class.toLowerCase().includes(query)
+    );
+
+    filtered.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'char-card';
+        card.onclick = () => showProfile(c.id);
+        card.innerHTML = `
+            ${getCharImgHTML(c, 'char-circle-small')}
+            <h4>${c.name}</h4>
+            <small>${c.class} / ${c.motif}</small>
+        `;
+        grid.appendChild(card);
+    });
+}
+async function loadBulletin(page = 1) {
+    const board = document.getElementById('bulletin-board-display');
+    if (!board) return;
+    try {
+        const response = await fetch(`${GAS_URL}?type=bulletin&page=${page}`);
+        const data = await response.json();
+        const posts = data.posts;
+        
+        if (!posts || posts.length === 0) {
+            board.innerHTML = "<p style='text-align:center;'>まだ書き込みはありません。</p>";
+            return;
+        }
+
+        board.innerHTML = posts.map(p => `
+            <div class="bulletin-post thread-style" style="white-space: pre-wrap;">
+                <div class="post-header">
+                    <span class="post-date">${p.date}</span>
+                    <button class="req-btn" onclick="requestDelete('${p.date}', '${p.content}')">削除要請</button>
+                </div>
+                <p class="post-content">${p.content}</p>
+            </div>
+        `).join('');
+    } catch (e) { 
+        console.error("掲示板読み込み失敗", e);
+        board.innerHTML = "<p>データの取得に失敗しました。GASのデプロイを確認してね！</p>";
     }
 }
-
-
 // --- クラス分けラベル（H1-1, H1-2...）を自動生成 ---
 function renderClassFilters() {
     const filterArea = document.querySelector('.filter-tabs'); // 元のタグエリア
@@ -1035,8 +1127,8 @@ function renderGames() {
     const games = [
         { title: "ゆうきくんの気まぐれ猫占い", desc: "明るくノリの良いゆうきくんが未来を鑑定🔮✨", url: "https://mofu-mitsu.github.io/yuuki_fortune/", icon: "fa-cat" },
         { title: "タイピングマスター", desc: "教育実習コースでトリ’Sのキャラたちと特訓！", url: "https://mofu-mitsu.github.io/typing-Master/", icon: "fa-keyboard" },
-        { title: "とりの丘トリ’S大富豪", desc: "可愛いキャラたちとトランプの大富豪対決！", url: "https://daifugo-mofu.vercel.app", icon: "fa-suit-spade" },
-        { title: "みりんてゃソリティア", desc: "みりんてゃとトランプ勝負！クリアできるかな？", icon: "fa-cards", url: "https://mirintea-solitaire.vercel.app" },
+        { title: "とりの丘トリ’S大富豪", desc: "可愛いキャラたちとトランプの大富豪対決！", url: "https://daifugo-mofu.vercel.app", icon: "fa-crown" },
+        { title: "みりんてゃソリティア", desc: "みりんてゃとトランプ勝負！クリアできるかな？", icon: "fa-layer-group", url: "https://mirintea-solitaire.vercel.app" },
         { title: "とりの丘トリ’S人狼", desc: "AIキャラたちと本気の心理戦！推理を楽しもう。", icon: "fa-wolf-pack-battalion", url: "https://mofu-mitsu.github.io/Torinooka-Werewolf/" },
         { title: "もふみつ工房 BOOTH", desc: "ノベルゲームや各種グッズをチェック！", icon: "fa-shopping-bag", url: "https://torisproject.booth.pm" }
     ];
