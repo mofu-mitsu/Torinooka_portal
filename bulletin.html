@@ -3,29 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <title>学園掲示板 | とりの丘学園</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="world-page">
+
+    <!-- ヘッダーエリア -->
     <header class="mini-header">
         <nav class="premium-nav">
             <a href="index.html" class="nav-item">HOME</a>
+            <a href="chara.html" class="nav-item">生徒名簿</a>
+            <a href="story.html" class="nav-item">ストーリー</a>
             <a href="bulletin.html" class="nav-item active">掲示板</a>
+            <a href="games.html" class="nav-item">コンテンツ</a>
         </nav>
     </header>
+
     <main class="container">
+        <!-- 案内 ＆ ルール -->
         <section class="luxury-section">
-            <h2 class="gold-title"><i class="fas fa-clipboard"></i> 学園自由掲示板</h2>
-            <div class="bulletin-input-area large">
-                <textarea id="bulletin-input" placeholder="学園生活の一言をどうぞ...（管理者は削除可能）"></textarea>
-                <button onclick="sendBulletin()" class="premium-btn">投稿する</button>
+            <h2 class="gold-title"><i class="fas fa-bullhorn"></i> 掲示板のご案内</h2>
+            <div class="rules-box" style="background:#fffaf0; padding:20px; border-radius:15px; border:1px solid #ffe4b5; margin-bottom:20px;">
+                <p><strong>【学園掲示板ルール】</strong></p>
+                <ul style="font-size:0.9rem; color:#5d4037; line-height: 1.8;">
+                    <li>誰でも自由に投稿できますが、他者が不快になる言葉は控えましょう。</li>
+                    <li>ストーリーの感想や、キャラへの愛を叫ぶのも大歓迎だゾッ！</li>
+                    <li>間違えて投稿した、または不適切な投稿を見つけた場合は、<strong>「削除要請」</strong>ボタンを押してください。管理者に通知が届きます。</li>
+                    <li>改行もしっかり反映されるゾッ！</li>
+                </ul>
             </div>
-            <div id="bulletin-board-display" class="bulletin-full-list">
-                <!-- ここに全書き込みが表示される -->
+        </section>
+
+        <!-- 新規投稿エリア -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-pen-fancy"></i> 今、何してる？</h2>
+            <div class="letter-form">
+                <textarea id="bulletin-input" placeholder="学園生活の一言をどうぞ..." style="height: 120px;"></textarea>
+                <button onclick="sendBulletin()" class="premium-btn">
+                    <i class="fas fa-paper-plane"></i> 掲示板に刻む（投稿）
+                </button>
+            </div>
+        </section>
+
+        <!-- 掲示板表示エリア -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-clipboard-list"></i> ログ一覧</h2>
+            
+            <!-- ローディング表示（JSで制御） -->
+            <div id="bulletin-board-display">
+                <div style="text-align:center; padding:40px;">
+                    <div class="loading-spinner"></div>
+                    <p>ログを読み込み中...</p>
+                </div>
+            </div>
+
+            <!-- ページネーション（10件ごと） -->
+            <div class="pagination-area" style="display: flex; justify-content: center; align-items: center; gap: 20px; margin-top: 30px;">
+                <button onclick="changeBulletinPage(-1)" id="prev-btn" class="filter-btn" style="padding: 8px 20px;">
+                    <i class="fas fa-chevron-left"></i> 前へ
+                </button>
+                <span id="current-page-num" style="font-weight: bold; color: var(--navy);">PAGE 1</span>
+                <button onclick="changeBulletinPage(1)" id="next-btn" class="filter-btn" style="padding: 8px 20px;">
+                    次へ <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
         </section>
     </main>
+
+    <!-- 全ページ共通モーダル（削除要請などの詳細用） -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeProfile()">&times;</span>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- トースト通知コンテナ -->
+    <div id="toast-container"></div>
+
     <script src="data.js"></script>
     <script src="script.js"></script>
+
+    <script>
+        // 掲示板ページ専用のページ管理
+        let currentBulletinPage = 1;
+
+        async function changeBulletinPage(offset) {
+            const newPage = currentBulletinPage + offset;
+            if (newPage < 1) return;
+            currentBulletinPage = newPage;
+            document.getElementById('current-page-num').innerText = `PAGE ${currentBulletinPage}`;
+            await loadBulletin(currentBulletinPage);
+            // ページトップへ戻す
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html>
