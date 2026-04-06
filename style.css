@@ -2,12 +2,12 @@
    1. 基本変数 & デザインリセット
    ========================================== */
 :root {
-    --gold: #d4af37;        /* 豪華な金 */
-    --navy: #1a2a6c;        /* 深い紺 */
-    --sakura: #ffecf2;      /* 桜色 */
-    --wine: #8b3a3a;        /* 落ち着いた赤 */
+    --gold: #d4a373;        /* ロゴに合わせた落ち着いた茶色寄りの金 */
+    --navy: #5d4037;        /* ロゴの文字色に近いダークブラウン */
+    --sakura: #faedcd;      /* ロゴ背景に合うクリーム色 */
+    --wine: #bc6c25;        /* 温かいオレンジ系 */
     --white: #ffffff;
-    --shadow: 0 10px 30px rgba(0,0,0,0.15);
+    --shadow: 0 10px 30px rgba(0,0,0,0.1);
     --transition: 0.3s ease;
 }
 
@@ -17,7 +17,7 @@ body {
     margin: 0;
     padding: 0;
     font-family: 'Hiragino Mincho ProN', 'Times New Roman', serif;
-    background: #fdfdfd;
+    background: #fefae0;
     color: #333;
     line-height: 1.6;
     overflow-x: hidden;
@@ -27,15 +27,22 @@ body {
    2. ヘッダー & ナビゲーション
    ========================================== */
 .main-header {
-    height: 350px;
-    background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+    height: 400px;
+    /* ロゴの色合いに合わせたグラデーションを少し多めに設定 */
+    background: linear-gradient(135deg, #faedcd, #fefae0, #f8ad9d, #faedcd);
+    background-size: 300% 300%;
+    animation: gradientFlow 15s ease infinite; /* 15秒かけてゆっくり動く */
+    border-bottom: 5px solid var(--gold);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--white);
-    text-align: center;
-    box-shadow: inset 0 0 100px rgba(0,0,0,0.5);
+}
+
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 .logo-area h1 {
@@ -45,8 +52,21 @@ body {
     cursor: pointer;
     text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
 }
-
-.sub-title { font-size: 1rem; opacity: 0.9; margin-top: 5px; }
+.logo-area img {
+    max-width: 300px; /* ロゴを適切なサイズに */
+    height: auto;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.logo-area img:hover { transform: scale(1.1); }
+.sub-title { 
+    font-size: 1.1rem; 
+    opacity: 1; /* 透明度をなくす */
+    color: #8b5e3c; /* 濃いめのブラウン */
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.8); /* 白い影をつけて浮かせる */
+    margin-top: 5px;
+}
 
 .premium-nav {
     margin-top: 20px;
@@ -58,9 +78,9 @@ body {
 
 .nav-item {
     text-decoration: none;
-    color: var(--white);
+    color: var(--navy);
     padding: 10px 25px;
-    border: 1px solid var(--white);
+    border: 2px solid var(--navy);
     border-radius: 50px;
     transition: var(--transition);
     background: rgba(255,255,255,0.1);
@@ -248,8 +268,21 @@ body {
 }
 
 /* お手紙フォーム */
+/* お手紙ポスト風デザイン */
 .letter-form {
-    max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 15px;
+    background: #fffafa;
+    border: 10px solid #e74c3c; /* 赤いポスト風 */
+    border-radius: 20px;
+    padding: 30px;
+    position: relative;
+}
+.letter-form::before {
+    content: 'POST';
+    position: absolute;
+    top: -20px; left: 50%;
+    transform: translateX(-50%);
+    background: #e74c3c; color: white;
+    padding: 5px 20px; font-weight: bold; border-radius: 10px;
 }
 .letter-form textarea { height: 150px; border-radius: 15px; border: 2px solid #ddd; padding: 15px; outline: none; }
 
@@ -336,23 +369,37 @@ body {
     z-index: 10000;
     left: 0; top: 0; 
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85);
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(5px);
     overflow-y: auto; /* モーダル自体をスクロール可能に */
     padding: 20px 0;
 }
 
 .modal-content {
-    background: transparent; /* 背景はカード側に任せる */
-    margin: 20px auto;
-    width: 90%;
-    max-width: 600px;
-    position: relative;
+    background: white !important; /* 絶対に白にする */
+    color: #333 !important;
+    border: 3px solid var(--gold);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    max-height: 90vh; /* 画面の90%までに制限 */
+    overflow-y: auto; /* ★ここ！中身が長ければスクロールさせる */
+    padding: 30px;
+    border-radius: 20px;
 }
 .close-btn { position: absolute; right: 20px; top: 15px; font-size: 2rem; cursor: pointer; }
 
 /* 秘密のスープ・ご褒美 */
 .soup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 200, 0.9); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 20000; text-align: center; }
-.walking-gohobi { position: fixed; bottom: 40px; right: -100px; font-size: 4rem; z-index: 9999; cursor: pointer; user-select: none; }
+.walking-gohobi {
+    position: fixed;
+    bottom: 40px;
+    right: -100px;
+    font-size: 4rem;
+    line-height: 1; /* ★これ！高さを文字サイズにピッタリ合わせる */
+    width: 1em;     /* ★幅もピッタリに！ */
+    z-index: 9999;
+    cursor: pointer;
+    user-select: none;
+}
 .drink-btn { background: #e67e22; color: white; border: 4px solid #8b4513; padding: 15px 40px; font-size: 1.2rem; border-radius: 50px; cursor: pointer; box-shadow: 0 5px 0 #5d2e0a; transition: 0.1s; }
 .drink-btn:active { transform: translateY(5px); box-shadow: none; }
 
@@ -533,17 +580,39 @@ body {
     border-radius: 10px; padding: 15px; margin-bottom: 10px;
 }
 .post-actions { display: flex; gap: 10px; }
-.req-btn { background: #eee; border: none; font-size: 0.7rem; cursor: pointer; border-radius: 5px; }
-.req-btn:hover { background: #ffdada; color: #e74c3c; }
+.req-btn {
+    background: var(--sakura);
+    border: 1px solid var(--gold);
+    color: var(--navy);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+.req-btn:hover {
+    background: var(--gold);
+    color: white;
+}
+/* 削除要請ボタン（赤みを追加） */
+.req-btn.delete-req {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+.req-btn.delete-req:hover {
+    background: #e74c3c;
+    color: white;
+}
 
 /* 管理者ボタンは普段隠しておく（みつきがコンソールから消す時用など） */
 .admin-only-btn { opacity: 0.2; font-size: 0.6rem; border: none; background: none; }
 
-/* キャラアイコンを重ねる（離れすぎを防止） */
+/* ストーリーアイコンの密着（再修正） */
 .story-char-icons-wrap {
     display: flex;
-    margin: 15px 0;
+    justify-content: flex-start; /* 左寄せ */
     padding-left: 10px;
+    margin: 15px 0;
 }
 .char-circle-mini.img-container {
     width: 45px; height: 45px;
@@ -555,13 +624,13 @@ body {
 /* ストーリー全文表示の装飾 */
 .story-modal-title { color: var(--navy); font-size: 2rem; margin: 10px 0; }
 .story-modal-content {
-    text-align: left;
+    max-height: 60vh; /* 文章エリアの高さを制限 */
+    overflow-y: auto; /* 長ければスクロール */
+    padding-right: 10px;
+    margin: 20px 0;
     line-height: 1.8;
-    font-size: 1.1rem;
-    padding: 20px;
-    background: #fdfdfd;
-    border-radius: 10px;
-    white-space: pre-wrap; /* 改行をそのまま反映 */
+    white-space: pre-wrap; /* 改行を反映 */
+    text-align: left;
 }
 .read-more-btn {
     background: var(--gold);
@@ -573,7 +642,25 @@ body {
     font-weight: bold;
     margin-top: 10px;
 }
-
+.search-container {
+    margin-bottom: 20px;
+    position: relative;
+}
+.search-container i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gold);
+}
+.search-input {
+    width: 100%;
+    padding: 12px 15px 12px 45px;
+    border: 2px solid var(--gold);
+    border-radius: 50px;
+    font-size: 1rem;
+    outline: none;
+}
 /* --- ローディングスピナーのデザイン --- */
 .loading-spinner {
     width: 50px;
@@ -600,21 +687,12 @@ body {
     margin-top: 5px;
 }
 
-/* キャラアイコンを重ねる演出 */
-.story-char-icons-wrap {
-    display: flex;
-    margin: 10px 0;
-    padding-left: 10px;
-}
-
 .char-circle-mini {
     width: 45px; height: 45px;
-    margin-left: -15px; /* ここで重なりを作る */
-    border: 2px solid white;
-    border-radius: 50%;
-    overflow: hidden;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
-    background: white;
+    margin-right: 20px; /* ここをマイナスにして重ねる！ */
+    border: 3px solid white;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+    z-index: 1;
 }
 
 .char-circle-mini:first-child { margin-left: 0; }
@@ -662,3 +740,236 @@ body {
     white-space: pre-wrap; /* これで「テスト[改行]テスト」が反映される！ */
     word-wrap: break-word;
 }
+
+.bulletin-post.is-reply {
+    margin-left: 40px;
+    border-left: 4px solid var(--gold);
+    background: #fff;
+    transform: scale(0.95);
+}
+
+/* --- ストーリー投稿フォームの入力欄を豪華に --- */
+.letter-form input[type="text"] {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: 2px solid var(--gold);
+    background: white;
+    font-size: 1rem;
+    color: var(--navy);
+    outline: none;
+    margin-bottom: 5px;
+}
+.letter-form input[type="text"]:focus {
+    border-color: var(--wine);
+    box-shadow: 0 0 10px rgba(188, 108, 37, 0.2);
+}
+.replies-container {
+    margin-top: 15px;
+    padding-left: 20px;
+    border-left: 3px solid var(--sakura);
+}
+.reply-item {
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+.reply-item small { color: #999; }
+
+/* --- ホーム画面のオープニング演出 --- */
+.home-intro-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: #fefae0; /* ロゴに合わせた背景色 */
+    z-index: 30000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeOutIntro 2s forwards 1.5s; /* 1.5秒待ってから消える */
+    pointer-events: none; /* これがないと下のボタンが押せなくなるゾ！ */
+}
+
+.intro-logo {
+    width: 250px;
+    animation: zoomPulse 1.5s ease-in-out;
+}
+@keyframes fadeOutIntro {
+    from { opacity: 1; visibility: visible; }
+    to { opacity: 0; visibility: hidden; }
+}
+@keyframes zoomPulse {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+/* ページを開いた時のふわっとした表示 */
+body.home-page {
+    animation: bodyFadeIn 1s ease-out;
+}
+@keyframes bodyFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOutIntro {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+@keyframes zoomPulse {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+/* ページ全体のフェードイン */
+body {
+    animation: bodyFadeIn 1s ease-out;
+}
+@keyframes bodyFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* --- 掲示板スレッドの初期非表示 --- */
+.replies-container {
+    display: none; /* 初期は隠す */
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(255, 236, 242, 0.3);
+    border-radius: 15px;
+    border-left: 5px solid var(--gold);
+}
+
+/* ==========================================
+   スマホ対応（レスポンシブ）
+   ========================================== */
+@media screen and (max-width: 768px) {
+    /* ヘッダーの高さを縮小 */
+    .main-header { height: 250px; }
+    .logo-area img { max-width: 200px; }
+    
+    /* ナビを縦並びに近くする、またはスクロール可能に */
+    .premium-nav {
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding: 10px;
+        white-space: nowrap;
+    }
+    .nav-item { padding: 8px 15px; font-size: 0.8rem; }
+
+    /* 3カラムを1カラムに変更（重要！） */
+    .three-column {
+        grid-template-columns: 1fr;
+    }
+
+    /* モーダルを画面いっぱいに */
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 20px;
+    }
+
+    /* ストーリー検索グリッドを縦並びに */
+    .story-search-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .char-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
+    }
+    
+    .char-card { padding: 10px; }
+    .char-circle-small { width: 80px; height: 80px; }
+}
+
+/* --- ハンバーガーメニュー用 --- */
+.menu-toggle {
+    display: none; /* PCでは隠す */
+    font-size: 2rem;
+    color: var(--navy);
+    cursor: pointer;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+}
+
+/* スマホ用レスポンシブ */
+@media screen and (max-width: 768px) {
+    .menu-toggle { display: block; } /* スマホでハンバーガーを表示 */
+    
+    .premium-nav {
+        display: none; /* 初期状態は隠す */
+        flex-direction: column;
+        background: rgba(250, 237, 205, 0.95);
+        backdrop-filter: blur(10px);
+        position: absolute;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        padding: 20px 0;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        z-index: 9999;
+    }
+    
+    /* トグルで表示された時 */
+    .premium-nav.open { display: flex; }
+    
+    .nav-item {
+        text-align: center;
+        margin: 5px 20px;
+        border-color: var(--navy);
+    }
+}
+/* ==========================================
+   フッター (AdSense対策・ナビゲーション)
+   ========================================== */
+.site-footer {
+    background: var(--navy);
+    color: white;
+    padding: 30px 20px;
+    margin-top: 50px;
+    text-align: center;
+}
+
+.footer-container {
+    max-width: 800px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.footer-links {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.footer-links a {
+    color: var(--sakura);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+.footer-links a:hover { color: var(--gold); text-decoration: underline; }
+
+.back-to-kobo-btn {
+    background: var(--wine);
+    color: white;
+    padding: 12px 30px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    border: 2px solid var(--gold);
+    transition: 0.3s;
+}
+.back-to-kobo-btn:hover { background: var(--gold); color: var(--navy); transform: scale(1.05); }
+
+.copyright { font-size: 0.8rem; color: #ccc; margin: 0; }
