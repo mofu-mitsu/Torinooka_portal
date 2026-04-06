@@ -518,3 +518,147 @@ body {
     background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.8rem;
 }
 .delete-btn:hover { color: #e74c3c; }
+
+/* ストーリー内のミニキャラ枠 */
+.story-char-icons { display: flex; gap: -10px; margin: 10px 0; }
+.char-circle-mini.img-container {
+    width: 40px; height: 40px; border-width: 2px;
+    margin-left: -10px; /* 重なり演出 */
+}
+.char-circle-mini.img-container:first-child { margin-left: 0; }
+
+/* 掲示板スレ風デザイン */
+.thread-style {
+    background: #fff; border: 1px solid #ddd;
+    border-radius: 10px; padding: 15px; margin-bottom: 10px;
+}
+.post-actions { display: flex; gap: 10px; }
+.req-btn { background: #eee; border: none; font-size: 0.7rem; cursor: pointer; border-radius: 5px; }
+.req-btn:hover { background: #ffdada; color: #e74c3c; }
+
+/* 管理者ボタンは普段隠しておく（みつきがコンソールから消す時用など） */
+.admin-only-btn { opacity: 0.2; font-size: 0.6rem; border: none; background: none; }
+
+/* キャラアイコンを重ねる（離れすぎを防止） */
+.story-char-icons-wrap {
+    display: flex;
+    margin: 15px 0;
+    padding-left: 10px;
+}
+.char-circle-mini.img-container {
+    width: 45px; height: 45px;
+    margin-left: -15px; /* 重なり */
+    border: 2px solid white;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+/* ストーリー全文表示の装飾 */
+.story-modal-title { color: var(--navy); font-size: 2rem; margin: 10px 0; }
+.story-modal-content {
+    text-align: left;
+    line-height: 1.8;
+    font-size: 1.1rem;
+    padding: 20px;
+    background: #fdfdfd;
+    border-radius: 10px;
+    white-space: pre-wrap; /* 改行をそのまま反映 */
+}
+.read-more-btn {
+    background: var(--gold);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+/* --- ローディングスピナーのデザイン --- */
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--gold);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* --- コンテンツアイコンの修正（FontAwesome 6 対応） --- */
+.fa-crown, .fa-layer-group, .fa-cat, .fa-keyboard, .fa-wolf-pack-battalion {
+    display: inline-block !important;
+}
+
+/* --- 掲示板：スレッド（返信）のデザイン --- */
+.reply-post {
+    margin-left: 30px;
+    border-left: 3px solid var(--sakura);
+    padding-left: 15px;
+    background: #fdfdfd;
+    margin-top: 5px;
+}
+
+/* キャラアイコンを重ねる演出 */
+.story-char-icons-wrap {
+    display: flex;
+    margin: 10px 0;
+    padding-left: 10px;
+}
+
+.char-circle-mini {
+    width: 45px; height: 45px;
+    margin-left: -15px; /* ここで重なりを作る */
+    border: 2px solid white;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+    background: white;
+}
+
+.char-circle-mini:first-child { margin-left: 0; }
+
+.char-circle-mini img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 検索グリッド */
+.story-search-grid {
+    background: #fdfdfd;
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+/* ランキングアイテムの構造修正（2位のズレ防止） */
+.ranking-item {
+    display: flex;
+    align-items: center; /* 縦方向を中央揃え */
+    gap: 20px;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 15px;
+}
+
+.rank-img-wrap {
+    flex-shrink: 0; /* 画像が縮まないように */
+}
+
+.rank-content {
+    flex-grow: 1; /* テキストエリアを広げる */
+    text-align: left;
+}
+
+.rank-name-text {
+    font-weight: bold;
+    color: var(--navy);
+    display: block;
+}
+
+/* 掲示板の改行をそのまま表示 */
+.bulletin-post {
+    white-space: pre-wrap; /* これで「テスト[改行]テスト」が反映される！ */
+    word-wrap: break-word;
+}
