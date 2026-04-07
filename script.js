@@ -550,12 +550,15 @@ function updateLetterCharSelect() {
     });
 }
 
+// --- クラス分けプルダウン（生徒名簿用）を生成 ---
 function renderClassFilters(classList) {
-    // HTMLにあるセレクトボックスを「ID」で直接狙い撃ち！
     const select = document.getElementById('char-class-filter'); 
-    if (!select) return; // なければ何もしない
+    if (!select) {
+        console.error("プルダウンのIDが見つからないゾッ！");
+        return; 
+    }
     
-    // 中身を全校＋クラス一覧で上書き
+    // クラス一覧を option タグにして追加
     select.innerHTML = '<option value="all">全校生徒を表示</option>' + 
                        classList.map(className => `<option value="${className}">${className}</option>`).join('');
 }
