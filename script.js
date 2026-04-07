@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadRanking();
         showTodayMenu();
         loadBulletin();
+        renderNews();
     }
 
     // --- 生徒名簿 (chara.html) ---
@@ -46,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 共通パーツ (全ページ共通) ---
     // カレンダー表示
     showCalendar();
-
+    renderUniforms();
     // リンクの自動修正
     document.querySelectorAll('.nav-item').forEach(item => {
         if (item.innerText.includes("コンテンツ")) item.href = "games.html";
@@ -144,15 +145,45 @@ function toggleReplies(dateStr) {
     const btn = document.getElementById(`btn-replies-${postId}`);
     if (!btn || !container) return;
 
-    if (container.style.display === 'none') {
+    if (container.style.display === 'none' || container.style.display === '') {
         container.style.display = 'block';
         btn.innerHTML = `<i class="fas fa-times"></i> スレを閉じる`;
     } else {
         container.style.display = 'none';
-        // ★記憶しておいた数（data-count）を読み出す！
-        const count = btn.getAttribute('data-count') || 0;
-        btn.innerHTML = `<i class="fas fa-comments"></i> スレを開く (${count})`;
+        // ★裏側に保存しておいたHTMLをそのまま戻す！
+        btn.innerHTML = btn.getAttribute('data-original');
     }
+}
+function openImageModal(imgSrc) {
+    const modal = document.getElementById('profile-modal');
+    const body = document.getElementById('modal-body');
+    if (!modal || !body) return;
+
+    body.innerHTML = `
+        <div style="text-align: center; position: relative;">
+            <img src="${imgSrc}" style="max-width: 100%; height: auto; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        </div>
+    `;
+    modal.style.display = "block";
+}
+
+
+function renderUniforms() {
+    const display = document.getElementById('uniform-display');
+    if (!display) return;
+    const uniforms = schoolData.info.uniforms;
+    if (!uniforms) return;
+
+    display.innerHTML = uniforms.map(u => `
+        <div class="uniform-card">
+            <!-- クリックで画像を拡大表示！ -->
+            <div class="uniform-img-container" style="cursor: pointer;" onclick="openImageModal('images/${u.img}')">
+                <img src="images/${u.img}" onerror="this.src='images/coming_soon.png'">
+            </div>
+            <h3 style="color:var(--navy); margin-top:15px;">${u.stage}</h3>
+            <p style="font-size:0.9rem;">${u.style}</p>
+        </div>
+    `).join('');
 }
 // 削除要請（みつきにメールが飛ぶ）
 async function requestDelete(date) {
@@ -413,15 +444,19 @@ function renderStoryCards(stories) {
     });
     renderStoryPagination();
 }
-function toggleReplies(postId) {
-    const container = document.getElementById(`replies-${postId.replace(/[:\s/]/g, '')}`);
-    const btn = document.getElementById(`btn-replies-${postId.replace(/[:\s/]/g, '')}`);
+function toggleReplies(dateStr, count) {
+    const postId = dateStr.replace(/[:\s/]/g, '');
+    const container = document.getElementById(`replies-${postId}`);
+    const btn = document.getElementById(`btn-replies-${postId}`);
+    if (!btn || !container) return;
+
     if (container.style.display === 'none' || container.style.display === '') {
         container.style.display = 'block';
-        btn.innerText = '返信を閉じる';
+        btn.innerHTML = `<i class="fas fa-times"></i> スレを閉じる`;
     } else {
         container.style.display = 'none';
-        btn.innerText = btn.dataset.originalText;
+        // ★ 受け取った数字をそのまま使うから、絶対に undefined にならない！
+        btn.innerHTML = `<i class="fas fa-comments"></i> スレを開く (${count})`;
     }
 }
 
@@ -516,16 +551,13 @@ function updateLetterCharSelect() {
 }
 
 function renderClassFilters(classList) {
-    const filterArea = document.querySelector('.filter-tabs');
-    if (!filterArea) return;
-    filterArea.innerHTML = `<button class="filter-btn active" onclick="renderCharacters('all')">全校生徒</button>`;
-    classList.forEach(className => {
-        const btn = document.createElement('button');
-        btn.className = "filter-btn";
-        btn.innerText = className;
-        btn.onclick = () => renderCharactersByClass(className);
-        filterArea.appendChild(btn);
-    });
+    // HTMLにあるセレクトボックスを「ID」で直接狙い撃ち！
+    const select = document.getElementById('char-class-filter'); 
+    if (!select) return; // なければ何もしない
+    
+    // 中身を全校＋クラス一覧で上書き
+    select.innerHTML = '<option value="all">全校生徒を表示</option>' + 
+                       classList.map(className => `<option value="${className}">${className}</option>`).join('');
 }
 
 // --- トースト通知機能 ---
@@ -654,10 +686,8 @@ async function loadBulletin(page = 1) {
             return;
         }
 
-        // 1. 親投稿（parentIdがない、または空文字のもの）を抽出
-        const mainPosts = allPosts.filter(p => !p.parentId || p.parentId === "");
-        // 2. 返信（parentIdに親の日付が入っているもの）を抽出
-        const replies = allPosts.filter(p => p.parentId && p.parentId !== "");
+        const mainPosts = allPosts.filter(p => !p.parentId);
+        const replies = allPosts.filter(p => p.parentId);
 
         board.innerHTML = mainPosts.map(p => {
             const threadReplies = replies.filter(r => r.parentId === p.date);
@@ -670,8 +700,8 @@ async function loadBulletin(page = 1) {
                         <span class="post-date">${p.date}</span>
                         <div class="post-actions">
                             <button class="req-btn" onclick="sendBulletin('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
-                            <!-- ★ここで data-count を使って数を記憶させるゾ！ -->
-                            <button id="btn-replies-${postId}" class="req-btn" data-count="${replyCount}" onclick="toggleReplies('${p.date}')">
+                            <!-- ★ここに data-count をしっかり埋め込む！ -->
+                            <button id="btn-replies-${postId}" class="req-btn" onclick="toggleReplies('${p.date}', ${replyCount})">
                                 <i class="fas fa-comments"></i> スレを開く (${replyCount})
                             </button>
                             <button class="req-btn delete-req" onclick="requestDelete('${p.date}', '${p.content}')">削除要請</button>
@@ -689,10 +719,7 @@ async function loadBulletin(page = 1) {
                     </div>
                 </div>`;
         }).join('');
-    } catch (e) { 
-        console.error("掲示板エラー", e); 
-        board.innerHTML = "<p>掲示板の読み込みに失敗しました。</p>";
-    }
+    } catch (e) { console.error("掲示板エラー", e); }
 }
 
 // --- クラス分けラベル（H1-1, H1-2...）を自動生成 ---
@@ -1258,6 +1285,7 @@ function renderGames() {
     const games = [
         { title: "ゆうきくんの気まぐれ猫占い", desc: "明るくノリの良いゆうきくんが未来を鑑定🔮✨", url: "https://mofu-mitsu.github.io/yuuki_fortune/", icon: "fa-cat" },
         { title: "タイピングマスター", desc: "教育実習コースでトリ’Sのキャラたちと特訓！", url: "https://mofu-mitsu.github.io/typing-Master/", icon: "fa-keyboard" },
+        { title: "闇観測実験アーカイブ", desc: "入力速度や迷いまで観測……。あなたの心の「闇」を暴き出す本格実験ツール。", url: "https://mofu-mitsu.github.io/yami_kansoku_archive/", icon: "fa-eye" },
         { title: "とりの丘トリ’S大富豪", desc: "可愛いキャラたちとトランプの大富豪対決！", url: "https://daifugo-mofu.vercel.app", icon: "fa-crown" },
         { title: "みりんてゃソリティア", desc: "みりんてゃとトランプ勝負！クリアできるかな？", icon: "fa-layer-group", url: "https://mirintea-solitaire.vercel.app" },
         { title: "とりの丘トリ’S人狼", desc: "AIキャラたちと本気の心理戦！推理を楽しもう。", icon: "fa-wolf-pack-battalion", url: "https://mofu-mitsu.github.io/Torinooka-Werewolf/" },
@@ -1282,4 +1310,38 @@ function toggleMenu() {
     if (nav) {
         nav.classList.toggle('open');
     }
+}
+function renderNews() {
+    const display = document.getElementById('news-display');
+    if (!display) return;
+    
+    // data.jsに news が設定されているかチェック
+    const newsList = schoolData.info.news;
+    if (!newsList || newsList.length === 0) {
+        display.innerHTML = "<p>まだ新しいニュースはないゾッ。</p>";
+        return;
+    }
+
+    display.innerHTML = newsList.map(n => `
+        <div class="news-item">
+            <div class="news-date">${n.date}</div>
+            <div class="news-content-area">
+                <h3 class="news-title">${n.title}</h3>
+                <p class="news-text">${n.content}</p>
+            </div>
+        </div>
+    `).join('');
+}
+
+function openImageModal(imgSrc) {
+    const modal = document.getElementById('profile-modal');
+    const body = document.getElementById('modal-body');
+    if (!modal || !body) return;
+
+    body.innerHTML = `
+        <div style="text-align: center; position: relative;">
+            <img src="${imgSrc}" style="max-width: 100%; height: auto; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+        </div>
+    `;
+    modal.style.display = "block";
 }
