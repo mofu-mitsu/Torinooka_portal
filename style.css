@@ -973,3 +973,144 @@ body {
 .back-to-kobo-btn:hover { background: var(--gold); color: var(--navy); transform: scale(1.05); }
 
 .copyright { font-size: 0.8rem; color: #ccc; margin: 0; }
+
+/* ==========================================
+   LINEスタンプの画像付きカード
+   ========================================== */
+.line-sticker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.sticker-card {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 2px solid #00B900;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--navy);
+    transition: 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 185, 0, 0.1);
+}
+
+.sticker-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 185, 0, 0.2);
+}
+
+.sticker-img {
+    width: 100%;
+    height: auto;
+    background: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.sticker-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.sticker-info h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.sticker-info p {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+.sticker-btn {
+    background: #00B900;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 50px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    display: inline-block;
+}
+
+/* 制服コレクションのグリッド */
+.uniform-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+    text-align: center;
+}
+.uniform-card {
+    background: #fdfdfd;
+    padding: 20px;
+    border-radius: 20px;
+    border: 1px solid #eee;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    transition: 0.3s;
+}
+.uniform-card:hover { transform: translateY(-5px); border-color: var(--navy); }
+
+.news-container {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+.news-item {
+    display: flex;
+    gap: 20px;
+    padding: 15px 0;
+    border-bottom: 1px dashed #ddd;
+    align-items: flex-start;
+}
+@media screen and (max-width: 600px) {
+    .news-item { flex-direction: column; gap: 5px; }
+}
+.news-date {
+    background: var(--gold);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+.news-title { margin: 0 0 5px 0; font-size: 1.1rem; color: var(--navy); }
+.news-text { margin: 0; font-size: 0.9rem; color: #555; }
+
+/* --- 制服専用の画像コンテナ（横長・見切れ防止版） --- */
+.uniform-img-container {
+    width: 100%;
+    /* 高さを固定せず、横幅に合わせて自然な比率にする */
+    height: auto; 
+    border-radius: 15px; 
+    border: 4px solid var(--navy); 
+    overflow: hidden;
+    background: #f9f9f9;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    /* 画像を真ん中に配置 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.uniform-img-container img {
+    width: 100%;
+    height: auto; /* 縦横比を崩さない */
+    object-fit: contain; /* ★ cover ではなく contain にして、絶対に全体を映す！ */
+    transition: transform 0.4s ease; 
+}
+
+/* マウスを乗せたら画像が少し拡大する演出 */
+.uniform-card:hover .uniform-img-container img {
+    transform: scale(1.05); 
+}
