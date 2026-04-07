@@ -66,41 +66,57 @@
                 </div>
             </section>
         <!-- ミニゲームセクションの下に追加 -->
+        <!-- 公式Bot ＆ SNS セクション -->
         <section class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-robot"></i> 公式Bot ＆ SNS</h2>
             
-            <div class="game-card" style="border-color: #3498db;">
-                <i class="fas fa-cat game-icon" style="color: #3498db;"></i>
-                <div class="game-info">
-                    <h3 style="color: #3498db;">みりんてゃ @mirinchuuu (Bluesky)</h3>
-                    <p>地雷系あざと女子 承認欲求つよめ 黒猫モチーフ🐾<br>
-                    「みんなの推し活や創作を応援するbotだよっ♡」<br>
-                    もふみつ工房のツール紹介やリプにお返事してるよ！</p>
-                    <div style="margin-top: 10px;">
-                        <a href="https://bsky.app/profile/mirinchuuu.bsky.social" target="_blank" class="req-btn" style="background:#3498db; color:white; text-decoration:none;"><i class="fab fa-bluesky"></i> Blueskyをフォロー</a>
-                        <a href="https://note.com/sorake/n/n28c7cc8e3b07" target="_blank" class="req-btn" style="text-decoration:none;">詳しい説明はこちら</a>
+            <div class="game-card" style="border-color: #3498db; flex-direction: column; text-align: center;">
+                <!-- ★ char-circle-small から char-circle にして大きくしたよ！ -->
+                <div class="img-container char-circle" style="margin-bottom: 15px;">
+                    <img src="images/mirin.png" onerror="this.src='images/coming_soon.png'">
+                </div>
+                
+                <div class="game-info" style="width: 100%;">
+                    <h3 style="color: #3498db; margin-bottom: 10px;">みりんてゃ @mirinchuuu (Bluesky)</h3>
+                    <p style="font-size: 0.95rem; line-height: 1.8;">
+                        地雷系あざと女子 承認欲求つよめ 黒猫モチーフ🐾<br>
+                        「みんなの推し活や創作を応援するbotだよっ♡」<br>
+                        もふみつ工房のツール紹介やリプにお返事してるよ！
+                    </p>
+                    <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                        <a href="https://bsky.app/profile/mirinchuuu.bsky.social" target="_blank" class="req-btn" style="background:#3498db; color:white; text-decoration:none; padding: 10px 20px; font-size: 1rem;"><i class="fab fa-bluesky"></i> Blueskyをフォロー</a>
+                        <a href="https://note.com/sorake/n/n28c7cc8e3b07" target="_blank" class="req-btn" style="text-decoration:none; padding: 10px 20px; font-size: 1rem;">詳しい説明はこちら</a>
                     </div>
                 </div>
             </div>
         </section>
 
+        <!-- LINEスタンプセクション（画像付きリンクカード！） -->
         <section class="luxury-section">
-            <h2 class="gold-title"><i class="fab fa-line"></i> LINEスタンプ大好評発売中！</h2>
-            <div class="game-grid">
-                <a href="https://line.me/S/sticker/33291694/?lang=ja&utm_source=gnsh_stickerDetail" target="_blank" class="game-card" style="border-color: #00B900;">
-                    <i class="fab fa-line game-icon" style="color: #00B900;"></i>
-                    <div class="game-info">
+            <h2 class="gold-title"><i class="fab fa-line" style="color:#00B900;"></i> LINEスタンプ大好評発売中！</h2>
+            <div class="line-sticker-grid">
+                
+                <!-- みりんてゃスタンプ -->
+                <a href="https://line.me/S/sticker/33291694/?lang=ja&utm_source=gnsh_stickerDetail" target="_blank" class="sticker-card">
+                    <!-- LINEストアからメイン画像を直接引っ張ってくる裏技！ -->
+                    <img src="https://stickershop.line-scdn.net/stickershop/v1/product/33291694/LINEStorePC/main.png" alt="みりんてゃスタンプ" class="sticker-img">
+                    <div class="sticker-info">
                         <h3>地雷系黒猫みりんてゃ</h3>
                         <p>あざと可愛いみりんてゃのスタンプでトークを盛り上げよう！</p>
+                        <span class="sticker-btn">LINE STOREで見る</span>
                     </div>
                 </a>
-                <a href="https://line.me/S/sticker/33207828/?lang=ja&utm_source=gnsh_stickerDetail" target="_blank" class="game-card" style="border-color: #00B900;">
-                    <i class="fab fa-line game-icon" style="color: #00B900;"></i>
-                    <div class="game-info">
+
+                <!-- ご褒美とえいじスタンプ -->
+                <a href="https://line.me/S/sticker/33207828/?lang=ja&utm_source=gnsh_stickerDetail" target="_blank" class="sticker-card">
+                    <img src="https://stickershop.line-scdn.net/stickershop/v1/product/33207828/LINEStorePC/main.png" alt="ご褒美とえいじスタンプ" class="sticker-img">
+                    <div class="sticker-info">
                         <h3>ご褒美とえいじ<br>〜汗と油のファンタジー〜</h3>
                         <p>圧倒的暑苦しさ！ワシャワシャしたい時に使える（？）スタンプ。</p>
+                        <span class="sticker-btn">LINE STOREで見る</span>
                     </div>
                 </a>
+
             </div>
         </section>
         </main>
