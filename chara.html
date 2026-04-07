@@ -20,19 +20,24 @@
     </header>
 
     <main class="container">
+    <!-- 生徒を探すセクションの中身 -->
     <section class="luxury-section">
         <h2 class="gold-title"><i class="fas fa-users"></i> 生徒を探す</h2>
+        
+        <!-- 名前検索 -->
         <div class="search-container">
             <i class="fas fa-search"></i>
             <input type="text" id="char-search-input" onkeyup="searchCharacters()" placeholder="名前・フルネーム・クラスで検索..." class="search-input">
         </div>
-        <!-- プルダウンは既存のものを維持 -->
-        <div class="filter-dropdown-area">
-            <select id="char-class-filter" class="premium-select" onchange="renderCharactersByClass(this.value)">
+        
+        <!-- ★ここがプルダウンの受け皿！ id="char-class-filter" が超重要！ -->
+        <div class="filter-dropdown-area" style="margin-bottom: 30px; text-align: center;">
+            <select id="char-class-filter" class="premium-select" onchange="if(this.value==='all'){renderCharacters('all')}else{renderCharactersByClass(this.value)}">
                 <option value="all">全校生徒を表示</option>
             </select>
         </div>
         
+        <!-- ここに生徒が並ぶ -->
         <div id="char-grid" class="char-grid"></div>
     </section>
     </main>
