@@ -6,7 +6,21 @@ const GAS_URL = "https://script.google.com/macros/s/AKfycbxxU_LeW0UifW3kFHsSyORg
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
-    const classList = [...new Set(schoolData.characters.map(c => c.class))].sort();
+    console.log("【デバッグ報告】ページを読み込んだゾッ！");
+
+    // 全キャラのデータから、クラス名だけを重複なしで抜き出す
+    const classList =[...new Set(schoolData.characters.map(c => c.class))].filter(Boolean).sort();
+    console.log("【デバッグ報告】抽出したクラスリスト（これがないとヤバい）:", classList);
+
+    // --- 生徒名簿 (chara.html) の初期化 ---
+    const charGrid = document.getElementById('char-grid');
+    if (charGrid) {
+        console.log("【デバッグ報告】生徒名簿ページを開いていると判定したゾ！");
+        renderClassFilters(classList);          // プルダウンの選択肢を作る！
+        renderCharactersByClass('all');         // 最初は「全校生徒」を表示する！
+    } else {
+        console.log("【デバッグ報告】ここは生徒名簿ページじゃないみたい。");
+    }
 
     // --- HOME (index.html) ---
     if (document.getElementById('school-philosophy')) {
@@ -23,9 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 生徒名簿 (chara.html) ---
+    // ★ここをスッキリ1つにまとめたよ！
     if (document.getElementById('char-grid')) {
-        renderClassFilters(classList); 
-        renderCharacters('all');
+        renderClassFilters(classList);          // プルダウンの選択肢を作る！
+        renderCharactersByClass('all');         // 最初は「全校生徒」を表示！
     }
 
     // --- ストーリー (story.html) ---
@@ -550,17 +565,27 @@ function updateLetterCharSelect() {
     });
 }
 
-// --- クラス分けプルダウン（生徒名簿用）を生成 ---
 function renderClassFilters(classList) {
+    console.log("【デバッグ報告】renderClassFilters が呼ばれたゾッ！");
+    console.log("【デバッグ報告】受け取ったクラス一覧:", classList);
+    
     const select = document.getElementById('char-class-filter'); 
+    console.log("【デバッグ報告】プルダウンのHTML要素:", select);
+    
     if (!select) {
-        console.error("プルダウンのIDが見つからないゾッ！");
+        console.error("【重大エラー】id='char-class-filter' のプルダウンがHTMLに見つからないゾ！HTMLのスペルを確認して！");
         return; 
     }
     
-    // クラス一覧を option タグにして追加
-    select.innerHTML = '<option value="all">全校生徒を表示</option>' + 
-                       classList.map(className => `<option value="${className}">${className}</option>`).join('');
+    let optionsHTML = '<option value="all">全校生徒を表示</option>';
+    
+    classList.forEach(className => {
+        if (!className) return; 
+        optionsHTML += `<option value="${className}">${className}</option>`;
+    });
+    
+    select.innerHTML = optionsHTML;
+    console.log("【デバッグ報告】プルダウンに選択肢をセット完了だゾッ！");
 }
 
 // --- トースト通知機能 ---
@@ -661,14 +686,15 @@ function renderCharacterCards(characters) {
     const grid = document.getElementById('char-grid');
     if (!grid) return;
     grid.innerHTML = '';
+    
     characters.forEach(c => {
         const card = document.createElement('div');
         card.className = 'char-card';
-        card.onclick = () => showProfile(c.id);
+        card.onclick = () => showProfile(c.id); 
         card.innerHTML = `
             ${getCharImgHTML(c, 'char-circle-small')}
             <h4>${c.name}</h4>
-            <small>${c.class} / ${c.motif}</small>
+            <small>${c.class || 'クラス不明'} / ${c.motif}</small>
         `;
         grid.appendChild(card);
     });
@@ -727,33 +753,40 @@ async function loadBulletin(page = 1) {
 
 // --- クラス分けラベル（H1-1, H1-2...）を自動生成 ---
 function renderClassFilters() {
-    const filterArea = document.querySelector('.filter-tabs'); // 元のタグエリア
-    if (!filterArea) return;
-
-    // タグ（ボタン）を消して、プルダウンに置き換える
-    const classes = [...new Set(schoolData.characters.map(c => c.class))].sort();
+    // chara.html にある select タグを直接探す！
+    const select = document.getElementById('char-class-filter'); 
+    if (!select) return; // なければ何もしない
     
-    filterArea.innerHTML = `
-        <div class="filter-dropdown-area">
-            <select class="premium-select" onchange="if(this.value==='all'){renderCharacters('all')}else{renderCharactersByClass(this.value)}">
-                <option value="all">全校生徒を表示</option>
-                ${classes.map(c => `<option value="${c}">${c}</option>`).join('')}
-            </select>
-        </div>
-    `;
+    // schoolData からクラス名のリストを自動生成する
+    const classes =[...new Set(schoolData.characters.map(c => c.class))].filter(Boolean).sort();
+    
+    // 中身を「全校生徒」＋「各クラス」で作る
+    let html = '<option value="all">全校生徒を表示</option>';
+    classes.forEach(className => {
+        html += `<option value="${className}">${className}</option>`;
+    });
+    
+    select.innerHTML = html;
 }
 function renderCharactersByClass(className) {
     const grid = document.getElementById('char-grid');
+    if (!grid) return;
     grid.innerHTML = '';
-    const filtered = schoolData.characters.filter(c => c.class === className);
+    
+    // 'all' なら全員、それ以外ならそのクラスの生徒だけを抽出！
+    const filtered = (className === 'all') 
+        ? schoolData.characters 
+        : schoolData.characters.filter(c => c.class === className);
+        
+    // カードを生成して並べる
     filtered.forEach(c => {
         const card = document.createElement('div');
         card.className = 'char-card';
         card.onclick = () => showProfile(c.id);
         card.innerHTML = `
-            <img src="images/${c.img}" onerror="this.src='https://via.placeholder.com/150?text=Student'">
+            ${getCharImgHTML(c, 'char-circle-small')}
             <h4>${c.name}</h4>
-            <small>${c.motif}</small>
+            <small>${c.class || 'クラス不明'} / ${c.motif}</small>
         `;
         grid.appendChild(card);
     });
@@ -1270,16 +1303,14 @@ function searchCharacters() {
     const input = document.getElementById('char-search-input');
     if (!input) return;
     const query = input.value.toLowerCase();
-    const grid = document.getElementById('char-grid');
-    if (!grid) return;
-
+    
     const filtered = schoolData.characters.filter(c => 
-        c.name.toLowerCase().includes(query) || 
-        c.fullName.toLowerCase().includes(query) ||
-        c.class.toLowerCase().includes(query)
+        (c.name && c.name.toLowerCase().includes(query)) || 
+        (c.fullName && c.fullName.toLowerCase().includes(query)) ||
+        (c.class && c.class.toLowerCase().includes(query))
     );
-
-    renderCharacterCards(filtered); // 検索結果を描画
+    
+    renderCharacterCards(filtered); 
 }
 function renderGames() {
     const gameList = document.getElementById('game-list');
