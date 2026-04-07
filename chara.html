@@ -32,7 +32,8 @@
         
         <!-- ★ここがプルダウンの受け皿！ id="char-class-filter" が超重要！ -->
         <div class="filter-dropdown-area" style="margin-bottom: 30px; text-align: center;">
-            <select id="char-class-filter" class="premium-select" onchange="if(this.value==='all'){renderCharacters('all')}else{renderCharactersByClass(this.value)}">
+            <!-- ★ onchange の中身をシンプルに！ -->
+            <select id="char-class-filter" class="premium-select" onchange="renderCharactersByClass(this.value)">
                 <option value="all">全校生徒を表示</option>
             </select>
         </div>
