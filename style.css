@@ -1060,11 +1060,21 @@ body {
 }
 .uniform-card:hover { transform: translateY(-5px); border-color: var(--navy); }
 
+/* --- 学園ニュースの枠をスクロール可能に --- */
 .news-container {
-    max-height: 300px;
-    overflow-y: auto;
-    padding-right: 10px;
+    max-height: 250px; /* ここで高さを制限！ */
+    overflow-y: auto;  /* はみ出たらスクロール */
+    padding-right: 15px; /* スクロールバー用の余白 */
+    background: #fdfdfd;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    padding: 15px;
 }
+
+/* スクロールバーのお洒落な装飾（ニュース用） */
+.news-container::-webkit-scrollbar { width: 6px; }
+.news-container::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
 .news-item {
     display: flex;
     gap: 20px;
@@ -1072,11 +1082,10 @@ body {
     border-bottom: 1px dashed #ddd;
     align-items: flex-start;
 }
-@media screen and (max-width: 600px) {
-    .news-item { flex-direction: column; gap: 5px; }
-}
+.news-item:last-child { border-bottom: none; } /* 最後の下線を消す */
+
 .news-date {
-    background: var(--gold);
+    background: var(--navy);
     color: white;
     padding: 5px 15px;
     border-radius: 5px;
@@ -1084,8 +1093,8 @@ body {
     font-size: 0.9rem;
     flex-shrink: 0;
 }
-.news-title { margin: 0 0 5px 0; font-size: 1.1rem; color: var(--navy); }
-.news-text { margin: 0; font-size: 0.9rem; color: #555; }
+.news-title { margin: 0 0 5px 0; font-size: 1.1rem; color: var(--wine); font-weight: bold; }
+.news-text { margin: 0; font-size: 0.9rem; color: #555; line-height: 1.5; }
 
 /* --- 制服専用の画像コンテナ（横長・見切れ防止版） --- */
 .uniform-img-container {
