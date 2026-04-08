@@ -3407,7 +3407,7 @@ const schoolData = {
         {
             "id": "mihi",
             "fullName": "杠葉 実陽（ゆずりは みひ）",
-            "name": "みhi",
+            "name": "みひ",
             "gender": "女子",
             "stage": "中等部",
             "class": "M1-1",
