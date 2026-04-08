@@ -2,20 +2,31 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学園コンテンツ | とりの丘学園</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="world-page">
-    <header class="main-header"> <!-- mini-header のページも同じようにしてね -->
-        <!-- ハンバーガーのアイコンを必ず入れる！ -->
-        <div class="menu-toggle" onclick="toggleMenu()" style="position: absolute; top: 20px; right: 20px; font-size: 2rem; color: var(--navy); cursor: pointer; z-index: 10000;">
+    
+    <!-- 1. ヘッダー -->
+    <header class="main-header">
+        <div class="menu-toggle" onclick="toggleMenu()">
             <i class="fas fa-bars"></i>
         </div>
-        <nav class="premium-nav">
+        
+        <div class="logo-area" style="text-align: center;">
+            <a href="index.html">
+                <img src="images/logo.png?v=1" alt="とりの丘学園" style="max-width: 250px; cursor: pointer;">
+            </a>
+            <p class="sub-title">Torinooka Academy Portal</p>
+        </div>
+        
+        <nav class="premium-nav" id="global-nav">
             <a href="index.html" class="nav-item">HOME</a>
             <a href="chara.html" class="nav-item">生徒名簿</a>
-            <a href="life.html" class="nav-item">学校生活</a> <!-- ★追加！ -->
+            <a href="life.html" class="nav-item">学校生活</a>
             <a href="story.html" class="nav-item">ストーリー</a>
             <a href="bulletin.html" class="nav-item">掲示板</a>
             <a href="letters.html" class="nav-item">お手紙</a>
@@ -23,26 +34,29 @@
         </nav>
     </header>
 
-        <main class="container">
-            <h1 class="gold-title"><i class="fas fa-vial"></i> とりの丘学園・ミニゲーム集</h1>
-            <section class="luxury-section">
-                <h2 class="gold-title"><i class="fas fa-gamepad"></i> 学園公式コンテンツ</h2>
-                <!-- このIDが大事！ -->
-                <div id="game-list" class="game-grid">
-                    <!-- ここにリンクが自動で入ります -->
-                </div>
-            </section>
-            <!-- 1. いちごメロンパン争奪戦 -->
-            <section class="luxury-section">
-                <h2 class="gold-title"><i class="fas fa-bread-slice"></i> 購買パン争奪戦</h2>
-                <div id="melonpan-game-stage" class="game-stage">
-                    <div id="game-feedback" class="game-center-msg"></div>
-                    <img src="images/melonpan.png" id="melonpan-item" class="center-item">
-                    <div id="daiki-sprite" class="char-sprite left"><img src="images/daiki.png"></div>
-                    <div id="tasuku-sprite" class="char-sprite right"><img src="images/tasuku.png"></div>
-                    <button class="game-btn premium-btn" onclick="playMelonPanGame()">パンを掴み取る！</button>
-                </div>
-            </section>
+    <!-- 2. メインコンテンツ -->
+    <main class="container">
+        <h1 class="gold-title"><i class="fas fa-vial"></i> とりの丘学園・ミニゲーム集</h1>
+        
+        <!-- 学園公式コンテンツ（ゲームリンク集） -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-gamepad"></i> 学園公式コンテンツ</h2>
+            <div id="game-list" class="game-grid">
+                <!-- JSでリンクが自動挿入されます -->
+            </div>
+        </section>
+
+        <!-- いちごメロンパン争奪戦 -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-bread-slice"></i> 購買パン争奪戦</h2>
+            <div id="melonpan-game-stage" class="game-stage">
+                <div id="game-feedback" class="game-center-msg"></div>
+                <img src="images/melonpan.png" id="melonpan-item" class="center-item">
+                <div id="daiki-sprite" class="char-sprite left"><img src="images/daiki.png"></div>
+                <div id="tasuku-sprite" class="char-sprite right"><img src="images/tasuku.png"></div>
+                <button class="game-btn premium-btn" style="position: absolute; bottom: 30px;" onclick="playMelonPanGame()">パンを掴み取る！</button>
+            </div>
+        </section>
 
             <!-- 2. のりおみの社交辞令カウンター -->
             <section class="luxury-section">
