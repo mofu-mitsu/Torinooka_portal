@@ -899,54 +899,55 @@ body {
 }
 
 /* スマホ用レスポンシブ */
+/* ==========================================
+   スマホ対応（レスポンシブ）絶対修正版
+   ========================================== */
 @media screen and (max-width: 768px) {
-    .menu-toggle { display: block; } /* スマホでハンバーガーを表示 */
-    
-    .premium-nav {
-        display: none; /* 初期状態は隠す */
-        flex-direction: column;
-        background: rgba(250, 237, 205, 0.95);
-        backdrop-filter: blur(10px);
-        position: absolute;
-        top: 70px;
-        left: 0;
-        width: 100%;
-        padding: 20px 0;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        z-index: 9999;
+    .main-header { height: 250px; position: relative; /* ★超重要！これがないとボタンが飛んでいく */ }
+    .logo-area img { max-width: 200px; }
+    .three-column { grid-template-columns: 1fr; }
+    .modal-content { width: 95%; margin: 10% auto; padding: 20px; }
+    .story-search-grid { grid-template-columns: 1fr; }
+    .char-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+    .char-card { padding: 10px; }
+    .char-circle-small.img-container { width: 80px; height: 80px; }
+
+    /* --- ハンバーガーメニューの表示 --- */
+    .menu-toggle { 
+        display: block !important; 
+        position: absolute; 
+        top: 20px; 
+        right: 20px; 
+        font-size: 2.2rem; 
+        color: var(--navy); 
+        cursor: pointer; 
+        z-index: 99999; /* ★絶対に一番手前！ */
     }
-    
-    /* トグルで表示された時 */
-    .premium-nav.open { display: flex; }
-    
-    .nav-item {
-        text-align: center;
-        margin: 5px 20px;
-        border-color: var(--navy);
-    }
-    .menu-toggle { display: block; }
     
     .premium-nav {
         display: none; /* 初期は隠す */
         flex-direction: column;
-        background: rgba(250, 237, 205, 0.95);
+        background: rgba(250, 237, 205, 0.98);
         position: absolute;
-        top: 60px; /* 位置を調整 */
+        top: 60px; 
         left: 0;
         width: 100%;
         padding: 20px 0;
-        z-index: 9999;
+        z-index: 99990; /* メニューも手前に */
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
-    .premium-nav.open { display: flex; }
+    
+    /* JSで .open が付いたら強制表示（!importantの暴力！） */
+    .premium-nav.open { display: flex !important; }
 
-    /* --- 今日のとりの細長バグを直す！ --- */
+    /* --- 今日のとりの細長バグ修正 --- */
     .pickup-card {
-        flex-direction: column !important; /* スマホでは縦並びに！ */
-        text-align: center; /* 文字を真ん中に */
-        gap: 10px !important;
+        flex-direction: column !important;
+        text-align: center;
+        gap: 15px !important;
     }
     .pickup-card .img-container {
-        flex-shrink: 0; /* ★これが細長くなるのを防ぐ最強の盾！ */
+        flex-shrink: 0; /* ★これが細長くなるのを防ぐ！ */
         margin: 0 auto;
     }
 
