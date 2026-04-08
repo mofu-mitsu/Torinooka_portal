@@ -924,6 +924,35 @@ body {
         margin: 5px 20px;
         border-color: var(--navy);
     }
+    .menu-toggle { display: block; }
+    
+    .premium-nav {
+        display: none; /* 初期は隠す */
+        flex-direction: column;
+        background: rgba(250, 237, 205, 0.95);
+        position: absolute;
+        top: 60px; /* 位置を調整 */
+        left: 0;
+        width: 100%;
+        padding: 20px 0;
+        z-index: 9999;
+    }
+    .premium-nav.open { display: flex; }
+
+    /* --- 今日のとりの細長バグを直す！ --- */
+    .pickup-card {
+        flex-direction: column !important; /* スマホでは縦並びに！ */
+        text-align: center; /* 文字を真ん中に */
+        gap: 10px !important;
+    }
+    .pickup-card .img-container {
+        flex-shrink: 0; /* ★これが細長くなるのを防ぐ最強の盾！ */
+        margin: 0 auto;
+    }
+
+    /* --- お手紙・掲示板のスマホ調整 --- */
+    .post-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .post-actions { flex-wrap: wrap; }
 }
 /* ==========================================
    フッター (AdSense対策・ナビゲーション)
