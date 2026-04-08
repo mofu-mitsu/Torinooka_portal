@@ -232,8 +232,9 @@ function executeStorySearch() {
     const textQuery = document.getElementById('search-text').value.toLowerCase();
     const tagQuery = document.getElementById('filter-tag').value;
     const classQuery = document.getElementById('filter-class').value;
+    const sortOrder = document.getElementById('sort-order') ? document.getElementById('sort-order').value : 'new'; // 並び順取得
 
-    const filtered = allStories.filter(s => {
+    filteredStories = allStories.filter(s => {
         const matchText = s.title.toLowerCase().includes(textQuery) || 
                          s.chars.toLowerCase().includes(textQuery) ||
                          s.content.toLowerCase().includes(textQuery);
@@ -242,7 +243,15 @@ function executeStorySearch() {
         return matchText && matchTag && matchClass;
     });
 
-    renderStoryCards(filtered);
+    // ★ 日付で並び替え！
+    filteredStories.sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return sortOrder === 'new' ? dateB - dateA : dateA - dateB;
+    });
+
+    currentStoryPage = 1; // 検索したら1ページ目に戻す
+    renderStoryCards(filteredStories);
 }
 
 // 掲示板への書き込み
@@ -979,15 +988,29 @@ function showCalendar() {
     const today = new Date();
     const todayStr = `${today.getMonth() + 1}/${today.getDate()}`;
     
+    // ★みつきファミリーの特別枠！
+    const specialBirthdays =[
+        { date: "1/17", name: "開発者・神", type: "creator" },
+        { date: "12/11", name: "ももかママ", type: "family" },
+        { date: "2/19", name: "ももかパパ", type: "family" }
+    ];
+
+    const todaySpecials = specialBirthdays.filter(s => s.date === todayStr);
     const birthdayPeople = schoolData.characters.filter(c => c.birthday === todayStr);
 
     let html = `<div class="calendar-today">Today: ${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}</div>`;
     
-    if (birthdayPeople.length > 0) {
+    if (birthdayPeople.length > 0 || todaySpecials.length > 0) {
         html += `<div class="birthday-card-special">`;
+        
+        // 生徒の誕生日
         birthdayPeople.forEach(c => {
-            // 先生対応の敬称
-            const suffix = (c.class === "teacher") ? "先生" : (c.gender === "女子" ? "ちゃん" : "くん");
+            // ★敬称の判定ロジック！
+            let suffix = "くん";
+            if (c.class === "teacher") suffix = "先生";
+            else if (c.gender === "女子" || c.gender === "女") suffix = "ちゃん";
+            else if (c.gender === "雌雄同体") suffix = "さん"; // ほなみ対応！
+
             html += `
                 <div class="b-day-person">
                     ${getCharImgHTML(c, 'char-circle-small')}
@@ -997,9 +1020,22 @@ function showCalendar() {
                     </div>
                 </div>`;
         });
+
+        // 開発者・ファミリーの特別表示（画像なし、王冠つき）
+        todaySpecials.forEach(s => {
+            const icon = s.type === "creator" ? "👑" : "🎉";
+            html += `
+                <div class="b-day-person" style="justify-content: center; background: linear-gradient(135deg, #fff, #ffe4e1); padding: 10px; border-radius: 10px; border: 2px dashed #ff4d6d;">
+                    <div class="b-day-info" style="text-align: center;">
+                        <span class="b-day-name" style="color: #e74c3c; font-size: 1.2rem;">${icon} ${s.name} ${icon}</span>
+                        <span class="b-day-greet">特別なお誕生日おめでとうございます！✨</span>
+                    </div>
+                </div>`;
+        });
+
         html += `</div>`;
     } else {
-        html += `<p class="no-bday">今日誕生日の生徒はいません</p>`;
+        html += `<p class="no-bday" style="text-align:center; color:#999;">今日誕生日のトリはいません</p>`;
     }
     calArea.innerHTML = html;
 }
