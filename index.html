@@ -27,20 +27,19 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="home-page">
-    <div class="home-intro-overlay">
-        <img src="images/logo.png" class="intro-logo" alt="とりの丘学園">
+<header class="main-header"> <!-- mini-headerのページも同じ！ -->
+    <!-- ★ ハンバーガーボタン -->
+    <div class="menu-toggle" onclick="toggleMenu()">
+        <i class="fas fa-bars"></i>
     </div>
-    <header class="main-header"> <!-- mini-header のページも同じようにしてね -->
-        <!-- ハンバーガーのアイコンを必ず入れる！ -->
-        <div class="menu-toggle" onclick="toggleMenu()" style="position: absolute; top: 20px; right: 20px; font-size: 2rem; color: var(--navy); cursor: pointer; z-index: 10000;">
-            <i class="fas fa-bars"></i>
-        </div>
-        <div class="logo-area">
-            <!-- ロゴ画像に差し替え ＆ イースターエッグの onclick -->
-            <img src="images/logo.png" alt="とりの丘学園" onclick="secretClick()">
-            <p class="sub-title">Torinooka Academy Portal</p>
-        </div>
-        <nav class="premium-nav">
+    
+    <div class="logo-area">
+        <a href="index.html"><img src="images/logo.png?v=1" alt="とりの丘学園" onclick="secretClick()"></a>
+        <p class="sub-title">Torinooka Academy Portal</p>
+    </div>
+    
+    <!-- ★ id="global-nav" が必須！ -->
+    <nav class="premium-nav" id="global-nav">
             <a href="index.html" class="nav-item active">HOME</a>
             <a href="chara.html" class="nav-item">生徒名簿</a>
             <a href="life.html" class="nav-item">学校生活</a> <!-- ★追加！ -->
