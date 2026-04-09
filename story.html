@@ -12,7 +12,13 @@
         <div class="menu-toggle" onclick="toggleMenu()" style="position: absolute; top: 20px; right: 20px; font-size: 2rem; color: var(--navy); cursor: pointer; z-index: 10000;">
             <i class="fas fa-bars"></i>
         </div>
-        <nav class="premium-nav">
+        <div class="logo-area" style="text-align: center;">
+            <a href="index.html">
+                <img src="images/logo.png?v=1" alt="とりの丘学園" style="max-width: 250px; cursor: pointer;" onclick="secretClick()">
+            </a>
+            <p class="sub-title">Torinooka Academy Portal</p>
+        </div>
+        <nav class="premium-nav" id="global-nav">
             <a href="index.html" class="nav-item">HOME</a>
             <a href="chara.html" class="nav-item">生徒名簿</a>
             <a href="life.html" class="nav-item">学校生活</a> <!-- ★追加！ -->
@@ -42,6 +48,12 @@
                     <option value="H3-1">H3-1</option><option value="H3-2">H3-2</option>
                 </select>
                 <input type="text" id="story-chars" placeholder="登場キャラ（例：のりおみ、くう）※「、」で区切る">
+                <div style="margin: 10px 0; font-size: 0.95rem; color: var(--navy); font-weight: bold; background: #fffafa; padding: 10px; border-radius: 10px; border: 1px solid var(--gold);">
+                    <label style="cursor: pointer;">
+                        <input type="checkbox" id="story-use-illust" style="transform: scale(1.2); margin-right: 10px;"> 
+                        特定キャラ（ももか等）をイラスト版アイコンで表示する
+                    </label>
+                </div>
                 <input type="text" id="story-tag" placeholder="タグ（例：日常、過去、事件）">
                 <textarea id="story-content" placeholder="物語の内容..."></textarea>
                 <button onclick="sendStory()" class="premium-btn">投稿する</button>
