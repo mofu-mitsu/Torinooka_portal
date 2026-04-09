@@ -1206,4 +1206,36 @@ body {
         padding: 15px;
     }
     .game-icon { margin-bottom: 10px; }
+/* ==========================================
+       スマホ対応（追加分）
+       ========================================== */
+
+    /* --- ランキングを縦並びにして綺麗に収める --- */
+    .ranking-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+    .rank-img-wrap {
+        margin: 0 auto;
+    }
+    .rank-content {
+        text-align: center;
+    }
+
+    /* --- パン争奪戦のボタン隠れ防止 --- */
+    .game-stage {
+        height: auto;
+        min-height: 400px;
+        padding-bottom: 70px; /* ボタン用の余白を確保 */
+    }
+    .char-sprite {
+        width: 140px; /* スマホでは威圧感キャラを少し小さく */
+    }
+    /* ボタンを「絶対」に最前面へ！ */
+    #melonpan-game-stage .game-btn,
+    .premium-btn {
+        z-index: 9999 !important; 
+    }
 }
+
