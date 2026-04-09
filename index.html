@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- スマホ対応必須！ -->
     <title>とりの丘学園 | 300人以上のキャラが登場する一次創作・学園ストーリー＆キャラ図鑑</title>
-    <link rel="icon" href="images/logo.png" type="image/png">
     
     <!-- ▼ここからSEO・OGP対策▼ -->
     <meta name="description" content="300人以上の個性豊かなキャラクターが登場する一次創作「とりの丘学園」の公式ポータルサイト。キャラクター名鑑、ショートストーリー、MBTI性格分類、学園設定、ミニゲームなど豊富なコンテンツを掲載。">
@@ -17,46 +16,53 @@
     <meta property="og:url" content="https://mofu-mitsu.github.io/Torinooka_portal/">
     <meta property="og:image" content="https://mofu-mitsu.github.io/Torinooka_portal/images/ogp.png">
     <meta property="og:type" content="website">
-    
-    <!-- Twitterカード -->
     <meta name="twitter:card" content="summary_large_image">
     <!-- ▲ここまで▲ -->
-    <link rel="icon" href="./favicon.ico?v=2" type="image/x-icon">
-    <link rel="shortcut icon" href="./favicon.ico?v=2">
+    
+    <link rel="icon" href="favicon.ico?v=2" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico?v=2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="home-page">
-<header class="main-header"> <!-- mini-headerのページも同じ！ -->
-    <!-- ★ ハンバーガーボタン -->
-    <div class="menu-toggle" onclick="toggleMenu()">
-        <i class="fas fa-bars"></i>
+
+    <!-- ★ オープニングアニメーション -->
+    <div class="home-intro-overlay">
+        <img src="images/logo.png?v=1" class="intro-logo" alt="とりの丘学園">
     </div>
-    
-    <div class="logo-area">
-        <a href="index.html"><img src="images/logo.png?v=1" alt="とりの丘学園" onclick="secretClick()"></a>
-        <p class="sub-title">Torinooka Academy Portal</p>
-    </div>
-    
-    <!-- ★ id="global-nav" が必須！ -->
-    <nav class="premium-nav" id="global-nav">
+
+    <!-- ヘッダー -->
+    <header class="main-header"> 
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
+        
+        <div class="logo-area" style="text-align: center;">
+            <a href="index.html">
+                <img src="images/logo.png?v=1" alt="とりの丘学園" style="max-width: 250px; cursor: pointer;" onclick="secretClick()">
+            </a>
+            <p class="sub-title">Torinooka Academy Portal</p>
+        </div>
+        
+        <nav class="premium-nav" id="global-nav">
             <a href="index.html" class="nav-item active">HOME</a>
             <a href="chara.html" class="nav-item">生徒名簿</a>
-            <a href="life.html" class="nav-item">学校生活</a> <!-- ★追加！ -->
+            <a href="life.html" class="nav-item">学校生活</a>
             <a href="story.html" class="nav-item">ストーリー</a>
             <a href="bulletin.html" class="nav-item">掲示板</a>
             <a href="letters.html" class="nav-item">お手紙</a>
             <a href="games.html" class="nav-item">コンテンツ</a>
         </nav>
     </header>
+
+    <!-- 豚骨スープの海 -->
     <div id="soup-overlay" class="soup-overlay">
         <h1 style="color: #8b4513;">🍜 豚骨スープの海 🍜</h1>
         <p>「拙者のエキスだゾッ♡」</p>
-        <!-- ここにスープをぶっかけられたような画像を表示 -->
     </div>
-    <!-- ... (ヘッダーなどは共通) ... -->
+
     <main class="container">
-        <!-- 学園理念（制服と分離） -->
+        <!-- 学園理念 -->
         <section class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-university"></i> 学園理念</h2>
             <div class="philosophy-box">
@@ -64,10 +70,11 @@
                 <p class="concept-text" id="school-concept"></p>
             </div>
         </section>
-        <!-- とりの丘学園とは？（制作秘話） -->
+
+        <!-- 制作秘話 -->
         <section class="luxury-section" id="about-torinooka">
             <h2 class="gold-title"><i class="fas fa-book-reader"></i> とりの丘学園とは？</h2>
-            <div style="line-height: 1.8; color: #5d4037; padding: 10px 20px; background: #fffcf0; border-radius: 15px; border: 1px solid #f8e1b4;">
+            <div style="line-height: 1.8; color: #5d4037; padding: 20px; background: #fffcf0; border-radius: 15px; border: 1px solid #f8e1b4;">
                 <p><strong>300人以上のキャラクターたちが織りなす、一次創作の世界へようこそ！</strong></p>
                 <p>この学園の起源は、私がまだ子供だった頃にさかのぼります。<br>
                 愛犬の「桃花（ももか）」や、白猫のぬいぐるみ「みみか」たちを集めて、学校ごっこをして遊んでいたのがすべての始まりでした。</p>
@@ -78,18 +85,22 @@
                 とりの丘学園で生きる彼らの日常を、どうぞゆっくりと覗いていってください。</p>
             </div>
         </section>
+
+        <!-- 学園ニュース -->
         <section class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-newspaper"></i> 学園ニュース</h2>
             <div id="news-display" class="news-container">
                 <!-- JSで描画 -->
             </div>
         </section>
-        <!-- 制服紹介（専用の説明文を追加） -->
+
+        <!-- 制服紹介 -->
         <section class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-tshirt"></i> 制服コレクション</h2>
             <p id="uniform-policy" class="policy-text"></p>
             <div class="uniform-grid" id="uniform-display"></div>
         </section>
+
         <!-- 今日のとり -->
         <section id="today-pickup" class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-star"></i> 今日のとり</h2>
@@ -97,62 +108,70 @@
                 <!-- script.jsから入るよ -->
             </div>
         </section>
-            <section class="luxury-section">
-                <div class="three-column">
-                    <!-- 学食 -->
-                    <div class="menu-section">
-                        <h2 class="gold-title"><i class="fas fa-utensils"></i> 本日の学食</h2>
-                        <div id="today-menu-display"></div>
-                    </div>
-                    <!-- 掲示板 -->
-                    <div class="bulletin-section">
-                        <h2 class="gold-title"><i class="fas fa-clipboard"></i> 掲示板</h2>
-                        <div style="text-align:center; padding:20px;">
-                            <p>生徒たちの日常をのぞいてみよう</p>
-                            <a href="bulletin.html" class="premium-btn" style="text-decoration:none; display:inline-block;">掲示板を見に行く</a>
-                        </div>
-                    </div>
-                    <!-- カレンダー -->
-                    <div class="calendar-section">
-                        <h2 class="gold-title"><i class="fas fa-calendar-alt"></i> カレンダー</h2>
-                        <div id="calendar-display"></div>
+
+        <!-- 学食・掲示板・カレンダー -->
+        <section class="luxury-section">
+            <div class="three-column">
+                <div class="menu-section">
+                    <h2 class="gold-title"><i class="fas fa-utensils"></i> 本日の学食</h2>
+                    <div id="today-menu-display"></div>
+                </div>
+                <div class="bulletin-section">
+                    <h2 class="gold-title"><i class="fas fa-clipboard"></i> 掲示板</h2>
+                    <div style="text-align:center; padding:20px;">
+                        <p>生徒たちの日常をのぞいてみよう</p>
+                        <a href="bulletin.html" class="premium-btn" style="text-decoration:none; display:inline-block;">掲示板を見に行く</a>
                     </div>
                 </div>
-            </section>
+                <div class="calendar-section">
+                    <h2 class="gold-title"><i class="fas fa-calendar-alt"></i> カレンダー</h2>
+                    <div id="calendar-display"></div>
+                </div>
+            </div>
+        </section>
+
         <!-- 人気投票セクション -->
         <section id="vote-section" class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-crown"></i> 月間人気投票</h2>
             <p style="text-align:center;">お気に入りの生徒にエールを送りましょう！</p>
-            <div id="quick-vote-area" class="vote-grid">
-                <!-- JSで上位キャラを表示 -->
+            <div id="quick-vote-area" class="vote-grid"></div>
+            
+            <div id="ranking-board" style="margin-top: 30px;">
+                <h3><i class="fas fa-trophy"></i> 今月の人気ランキング</h3>
+                <div id="ranking-display" class="ranking-container">
+                    <!-- GASから読み込まれます -->
+                </div>
             </div>
         </section>
-        <div id="ranking-board" style="margin-top: 30px;">
-            <h3><i class="fas fa-trophy"></i> 今月の人気ランキング</h3>
-            <div id="ranking-display" class="ranking-container">
-                <!-- GASから読み込まれます -->
-            </div>
-        </div>
 
-    <div id="secret-modal" class="modal">
-        <div class="modal-content" style="background: #ffffd0; border: 10px solid #8b4513;">
-            <span class="close-btn" onclick="closeSecret()">&times;</span>
-            <div id="secret-body" style="text-align: center;">
-                <h1 style="color: #d35400;">💪 汗と脂のファンタジー 💪</h1>
-                <p>「よく来たな。プロテインと豚骨スープ、どっちがいいゾ？」</p>
-                <div style="display: flex; justify-content: space-around; margin: 20px;">
-                    <img src="images/gohobi.png" style="width: 150px;" onerror="this.src='https://via.placeholder.com/150?text=Pig'">
-                    <img src="images/eiji.png" style="width: 150px;" onerror="this.src='https://via.placeholder.com/150?text=Eiji'">
+        <!-- 秘密の部屋（イースターエッグ） -->
+        <div id="secret-modal" class="modal">
+            <div class="modal-content" style="background: #ffffd0; border: 10px solid #8b4513;">
+                <span class="close-btn" onclick="closeSecret()" style="color: #333;">&times;</span>
+                <div id="secret-body" style="text-align: center;">
+                    <h1 style="color: #d35400;">💪 汗と脂のファンタジー 💪</h1>
+                    <p>「よく来たな。プロテインと豚骨スープ、どっちがいいゾ？」</p>
+                    <div style="display: flex; justify-content: space-around; margin: 20px;">
+                        <div class="img-container char-circle-small"><img src="images/gohobi.png" onerror="this.src='images/coming_soon.png'"></div>
+                        <div class="img-container char-circle-small"><img src="images/eiji.png" onerror="this.src='images/coming_soon.png'"></div>
+                    </div>
+                    <button onclick="drinkFantasy()" class="drink-btn">秘伝のスープを飲み干す</button>
                 </div>
-                <button onclick="drinkFantasy()" class="premium-btn" style="background: #e67e22;">秘伝のスープを飲み干す</button>
             </div>
         </div>
-    </div>
+        
+        <!-- プロフィール等汎用モーダル -->
+        <div id="profile-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeProfile()">&times;</span>
+                <div id="modal-body"></div>
+            </div>
+        </div>
     </main>
+
     <footer class="site-footer">
         <div class="footer-container">
             <div class="footer-links">
-                <!-- Google AdSenseには「プライバシーポリシー」と「お問い合わせ」が絶対必要！ -->
                 <a href="policy.html">プライバシーポリシー</a>
                 <a href="terms.html">利用規約</a>
                 <a href="mailto:momoka.mimika1122@gmail.com">お問い合わせ</a>
@@ -163,6 +182,10 @@
             <p class="copyright">&copy; 2026 もふみつ工房 / とりの丘学園 All Rights Reserved.</p>
         </div>
     </footer>
+
+    <!-- トースト通知 -->
+    <div id="toast-container"></div>
+
     <script src="data.js"></script>
     <script src="script.js"></script>
 </body>
