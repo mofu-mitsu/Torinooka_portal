@@ -4,7 +4,7 @@ const schoolData = {
         concept: "とりの丘学園は、初等部から大学部まで一貫した教育を行う、自然豊かな丘の上に立つ学園です。生徒一人一人が持つ固有の『翼（個性）』を尊重し、それを美しく広げられる環境を提供します。",
         uniformPolicy: "当校は『自己表現の自由』を重んじているため、制服の着用は義務ではありません。標準制服は用意されていますが、アレンジや私服登校も認められています。",
         uniforms: [
-            { stage: "初等部", style: "紺色のセーラー服", img: "uniform_e.png" },
+            { stage: "初等部", style: "サスペンダー/深緑色のセーラー服", img: "uniform_e.png" },
             { stage: "中等部", style: "学ラン / 黒セーラー服", img: "uniform_m.png" },
             { stage: "高等部", style: "ブレザー / 赤チェック / クリームセーター", img: "uniform_h.png" }
         ],
