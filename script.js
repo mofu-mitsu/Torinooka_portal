@@ -918,22 +918,43 @@ function renderCharacters(stageFilter) {
 }
 
 // --- プロフィール詳細表示（フルネーム対応） ---
+// --- プロフィール表示（画像切り替えボタン追加版） ---
 function showProfile(id) {
     const c = schoolData.characters.find(char => char.id === id);
     const modal = document.getElementById('profile-modal');
     const body = document.getElementById('modal-body');
     if (!modal || !body) return;
 
-    // 敬称の設定
     const suffix = (c.class === "teacher") ? "先生" : "";
     const displaySuffix = suffix ? ` (${suffix})` : "";
+
+    // ★イラスト切り替えボタンの生成
+    let toggleBtnHTML = "";
+    if (c.imgIllust) {
+        toggleBtnHTML = `
+            <div style="margin-top: 10px;">
+                <button class="req-btn" onclick="toggleProfileImage('${c.img}', '${c.imgIllust}')">
+                    <i class="fas fa-sync-alt"></i> 画像を切り替える
+                </button>
+            </div>
+        `;
+    }
+
+    // 画像コンテナにIDを振って、JSで操作できるようにする
+    const imgHTML = `
+        <div class="img-container char-circle">
+            <img id="profile-main-img" src="images/${c.img}" onerror="this.parentElement.innerHTML='<div class=\\'coming-soon-box char-circle\\'>Coming<br>Soon</div>'">
+        </div>
+    `;
 
     body.innerHTML = `
         <div class="modal-profile-card">
             <span class="close-btn" onclick="closeProfile()">&times;</span>
             <div class="modal-header-bg"></div>
             <div class="modal-main-content">
-                ${getCharImgHTML(c, 'char-circle')}
+                ${imgHTML}
+                ${toggleBtnHTML} <!-- 切り替えボタン表示 -->
+                
                 <h2 class="modal-full-name">${c.fullName}${displaySuffix}</h2>
                 <div class="modal-tags">
                     <span class="m-tag">${c.stage} ${c.class}</span>
@@ -942,6 +963,7 @@ function showProfile(id) {
                 </div>
                 <div class="modal-mbti-area">
                     <span class="mbti-badge">${c.mbti}</span>
+                    <span class="socio-badge">${c.socio}</span>
                     <span class="ennea-badge">${c.ennea}</span>
                 </div>
                 <div class="modal-detail-list">
@@ -960,6 +982,19 @@ function showProfile(id) {
         </div>
     `;
     modal.style.display = "block";
+}
+
+// --- 画像切り替え関数 ---
+function toggleProfileImage(imgReal, imgIllust) {
+    const imgEl = document.getElementById('profile-main-img');
+    if (!imgEl) return;
+    
+    // 現在の画像のURLを見て、実写ならイラストへ、イラストなら実写へ切り替える
+    if (imgEl.src.includes(imgReal)) {
+        imgEl.src = `images/${imgIllust}`;
+    } else {
+        imgEl.src = `images/${imgReal}`;
+    }
 }
 
 function closeProfile() {
