@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学校生活 | とりの丘学園</title>
     <link rel="icon" href="images/logo.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -13,13 +14,18 @@
         <div class="menu-toggle" onclick="toggleMenu()">
             <i class="fas fa-bars"></i>
         </div>
+        <div class="logo-area" style="text-align: center;">
+            <a href="index.html">
+                <img src="images/logo.png?v=1" alt="とりの丘学園" style="max-width: 250px; cursor: pointer;" onclick="secretClick()">
+            </a>
+            <p class="sub-title">Torinooka Academy Portal</p>
+        </div>
         <nav class="premium-nav" id="global-nav">
             <a href="index.html" class="nav-item">HOME</a>
             <a href="chara.html" class="nav-item">生徒名簿</a>
             <a href="life.html" class="nav-item active">学校生活</a> <!-- ★追加！ -->
             <a href="story.html" class="nav-item">ストーリー</a>
             <a href="bulletin.html" class="nav-item">掲示板</a>
-            <a href="world.html" class="nav-item">世界観</a>
             <a href="games.html" class="nav-item">コンテンツ</a>
         </nav>
     </header>
