@@ -1153,3 +1153,57 @@ body {
 .uniform-card:hover .uniform-img-container img {
     transform: scale(1.05); 
 }
+
+/* ==========================================
+   スマホ対応（レスポンシブ）の追加・上書き部分
+   ========================================== */
+@media screen and (max-width: 768px) {
+    /* 画面の左右の余白を少し詰める */
+    .container { padding: 0 10px; }
+
+    /* --- ハンバーガーメニューの確実な配置 --- */
+    .menu-toggle { 
+        display: block !important; 
+        position: absolute; 
+        top: 20px; 
+        right: 20px; 
+        font-size: 2.2rem; 
+        color: var(--navy); 
+        cursor: pointer; 
+        z-index: 99999; 
+    }
+    .premium-nav {
+        display: none; 
+        flex-direction: column;
+        background: rgba(250, 237, 205, 0.98);
+        position: absolute;
+        top: 70px; 
+        left: 0;
+        width: 100%;
+        padding: 20px 0;
+        z-index: 99990; 
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    .premium-nav.open { display: flex !important; }
+    .nav-item { margin: 5px 20px; text-align: center; }
+
+    /* --- はみ出し防止！カード類をスマホの幅に合わせる --- */
+    .game-grid, .term-grid, .line-sticker-grid {
+        grid-template-columns: 1fr !important; /* スマホでは絶対に1列！ */
+        gap: 15px;
+    }
+
+    .game-card, .term-card, .sticker-card {
+        min-width: auto !important; /* PC用の固定幅を解除！ */
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* ゲームのリンクカードを縦並びに変えてスッキリさせる */
+    .game-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+    .game-icon { margin-bottom: 10px; }
+}
