@@ -70,7 +70,49 @@
                 <p class="concept-text" id="school-concept"></p>
             </div>
         </section>
+        <!-- はじめての方へ（Welcomeガイド・開閉式） -->
+        <section class="luxury-section" id="welcome-guide">
+            <!-- ここをクリックで開閉！ -->
+            <div class="welcome-header" onclick="toggleWelcome()" style="cursor: pointer; text-align: center;">
+                <h2 class="gold-title" style="margin-bottom: 0; border-bottom: none; display: inline-block;">
+                    <i class="fas fa-map-signs"></i> はじめての方へ（楽しみ方ガイド） 
+                    <i class="fas fa-chevron-down" id="welcome-arrow" style="transition: 0.3s; color: var(--gold); margin-left: 10px;"></i>
+                </h2>
+            </div>
 
+            <!-- 最初は display: none; で隠しておく -->
+            <div id="welcome-content" style="display: none; padding-top: 20px; border-top: 2px solid var(--gold); margin-top: 15px;">
+                <p style="text-align: center; margin-bottom: 30px; font-weight: bold; color: var(--navy);">
+                    とりの丘学園へようこそ！まずはこの3つのステップで学園を楽しんでみてね。
+                </p>
+                <div class="step-grid">
+                    <!-- Step 1 -->
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <div class="step-icon"><i class="fas fa-id-badge"></i></div>
+                        <h3>生徒と出会う</h3>
+                        <p>300人以上の個性豊かな生徒から「推し」を見つけよう！プロフを見て、<strong>応援投票</strong>や匿名のお手紙を送ってみてね。</p>
+                        <a href="chara.html" class="step-btn">生徒名簿を見る</a>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <div class="step-icon"><i class="fas fa-comments"></i></div>
+                        <h3>日常を楽しむ</h3>
+                        <p>学園の「今」を体験！<strong>掲示板</strong>で推しへの愛を語り合ったり、日替わりの学食を覗いたり、ミニゲームで遊んでみよう。</p>
+                        <a href="bulletin.html" class="step-btn">掲示板へ行く</a>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <div class="step-icon"><i class="fas fa-book-open"></i></div>
+                        <h3>物語を辿る</h3>
+                        <p>学園で起きた事件や、生徒たちの過去・日常の記録。タグやクラスで検索して、彼らの深い関係性や秘密を知ろう。</p>
+                        <a href="story.html" class="step-btn">ストーリーを読む</a>
+                    </div>
+                </div>
+            </div>
+        </section>
         <!-- 制作秘話 -->
         <section class="luxury-section" id="about-torinooka">
             <h2 class="gold-title"><i class="fas fa-book-reader"></i> とりの丘学園とは？</h2>
