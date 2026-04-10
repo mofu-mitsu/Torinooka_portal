@@ -1450,3 +1450,21 @@ function openImageModal(imgSrc) {
     `;
     modal.style.display = "block";
 }
+
+// ==========================================
+// 11. はじめての方へ（Welcomeガイド）の開閉
+// ==========================================
+function toggleWelcome() {
+    const content = document.getElementById('welcome-content');
+    const arrow = document.getElementById('welcome-arrow');
+    
+    if (content.style.display === 'none') {
+        content.style.display = 'block';
+        // 矢印を上に向けるアニメーション
+        arrow.style.transform = 'rotate(180deg)';
+    } else {
+        content.style.display = 'none';
+        // 矢印を下に戻す
+        arrow.style.transform = 'rotate(0deg)';
+    }
+}
