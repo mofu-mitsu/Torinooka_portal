@@ -968,7 +968,6 @@ function showProfile(id) {
                 </div>
                 <div class="modal-mbti-area">
                     <span class="mbti-badge">${c.mbti}</span>
-                    <span class="socio-badge">${c.socio}</span>
                     <span class="ennea-badge">${c.ennea}</span>
                 </div>
                 <div class="modal-detail-list">
@@ -1272,31 +1271,44 @@ function openSecret() {
 }
 // --- 3. 秘密のページ（7回クリック）修正版 ---
 let logoClicks = 0;
+// --- 秘密のページ（7回クリック）強制記憶版 ---
 function secretClick(e) {
-    // もしホーム画面（home-page）なら、リンク移動を無効化する！
-    if (document.body.classList.contains('home-page')) {
-        if (e) e.preventDefault(); 
+    // もしリンクのクリック動作を止められるなら止める（念のため）
+    if (e) e.preventDefault();
+
+    // ブラウザの記憶から今のカウントを取り出す（なければ0）
+    let currentClicks = parseInt(localStorage.getItem('logoClicks') || '0');
+    currentClicks++;
+
+    if (currentClicks >= 7) {
+        // 7回に達したら発動！
+        showToast("ご褒美＆えいじ「汗と脂のファンタジー、飲み干せえぇぇ！」");
         
-        logoClicks++;
-        if (logoClicks === 7) {
-            showToast("ご褒美＆えいじ「汗と脂のファンタジー、飲み干せえぇぇ！」");
-            const modal = document.getElementById('secret-modal');
-            if (modal) modal.style.display = "block";
-            logoClicks = 0;
-        }
+        // 秘密のモーダルを表示
+        const modal = document.getElementById('secret-modal');
+        if (modal) modal.style.display = "block";
+        
+        // カウントをリセット
+        localStorage.setItem('logoClicks', '0');
+    } else {
+        // 7回未満ならカウントを保存して、本来のリンク先（HOME）へ飛ばす
+        localStorage.setItem('logoClicks', currentClicks);
+        window.location.href = "index.html"; 
     }
 }
+
 function drinkFantasy() {
     showToast("ご褒美＆えいじ「力が……力がみなぎってくるぞおおぉぉ！」");
     document.body.style.backgroundColor = "#fffacd"; // スープ色に染まる
     setTimeout(() => { 
-        document.body.style.backgroundColor = "#fdfdfd";
+        document.body.style.backgroundColor = ""; // 元に戻す
         closeSecret();
     }, 3000);
 }
 
 function closeSecret() {
-    document.getElementById('secret-modal').style.display = 'none';
+    const modal = document.getElementById('secret-modal');
+    if (modal) modal.style.display = 'none';
 }
 // --- GAS送信（お手紙） ---
 async function sendLetter() {
