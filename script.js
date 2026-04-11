@@ -2,7 +2,7 @@ let currentStoryPage = 1;
 const storiesPerPage = 10;
 let filteredStories = [];
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycby8yLL_i8e-aEHefNpyL3zI-T9mUBcSpkL71vOc566J0jPYxTslxaTgSBbLHR2ngYGM/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxigr4izcWO4yY1yIH-Cb3E_DL08MuUfSTrX1mWzM3ygJ9JVc25ZBhto_9x_1KAQ_dDGw/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
@@ -441,12 +441,17 @@ function renderStoryCards(stories) {
 
     pagedStories.forEach(s => {
         // キャラアイコンの生成
-        const charNames = s.chars ? s.chars.split(/[、,]/).map(name => name.trim()) : [];
+        const charNames = s.chars ? s.chars.split(/[、,]/).map(name => name.trim()) :[];
         const iconsHTML = charNames.map(name => {
             const charObj = schoolData.characters.find(c => c.name === name);
             let imgFile = charObj ? charObj.img : "";
-            // イラストフラグがある場合
-            if (charObj && charObj.imgIllust && s.useIllust === "true") imgFile = charObj.imgIllust;
+            
+            // ★ 文字列でもブール値でも、とにかく「trueっぽい」ならイラスト化！
+            const useIllustFlag = (s.useIllust === true || s.useIllust === "true" || s.useIllust === "TRUE");
+            if (charObj && charObj.imgIllust && useIllustFlag) {
+                imgFile = charObj.imgIllust;
+            }
+            
             return getCharImgHTML({ ...charObj, img: imgFile }, 'char-circle-mini');
         }).join('');
 
@@ -466,7 +471,7 @@ function renderStoryCards(stories) {
         `;
         list.appendChild(card);
     });
-    renderStoryPagination();
+    renderStoryPagination(filteredStories.length);
 }
 function toggleReplies(dateStr, count) {
     const postId = dateStr.replace(/[:\s/]/g, '');
@@ -1265,23 +1270,20 @@ function openSecret() {
     const modal = document.getElementById('secret-modal');
     if (modal) modal.style.display = "block";
 }
-// --- 3. 秘密のページ（7回クリック） ---
+// --- 3. 秘密のページ（7回クリック）修正版 ---
 let logoClicks = 0;
-function secretClick() {
-    logoClicks++;
-    if (logoClicks === 7) {
-        showToast("ご褒美＆えいじ「汗と脂のファンタジー、飲み干せえぇぇ！」");
-        const nav = document.querySelector('.premium-nav');
-        if (!document.getElementById('secret-link')) {
-            const a = document.createElement('a');
-            a.id = 'secret-link';
-            a.href = "javascript:void(0)"; // リンク先をJSに
-            a.className = 'nav-item';
-            a.innerHTML = '<i class="fas fa-skull-crossbones"></i> 秘密の部屋';
-            a.onclick = openSecret; // ここを修正！
-            nav.appendChild(a);
+function secretClick(e) {
+    // もしホーム画面（home-page）なら、リンク移動を無効化する！
+    if (document.body.classList.contains('home-page')) {
+        if (e) e.preventDefault(); 
+        
+        logoClicks++;
+        if (logoClicks === 7) {
+            showToast("ご褒美＆えいじ「汗と脂のファンタジー、飲み干せえぇぇ！」");
+            const modal = document.getElementById('secret-modal');
+            if (modal) modal.style.display = "block";
+            logoClicks = 0;
         }
-        logoClicks = 0;
     }
 }
 function drinkFantasy() {
