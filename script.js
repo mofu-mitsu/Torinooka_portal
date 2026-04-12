@@ -519,11 +519,19 @@ function openFullStory(dateStr) {
     const modal = document.getElementById('profile-modal');
     const body = document.getElementById('modal-body');
 
-    // 登場キャラのアイコンを生成
-    const charNames = s.chars.split(/[、,]/).map(name => name.trim());
+    // 登場キャラのアイコンを生成（★イラスト切り替え判定を追加！）
+    const charNames = s.chars ? s.chars.split(/[、,]/).map(name => name.trim()) :[];
     const iconsHTML = charNames.map(name => {
         const charObj = schoolData.characters.find(c => c.name === name);
-        return getCharImgHTML(charObj, 'char-circle-mini');
+        let imgFile = charObj ? charObj.img : "";
+        
+        // ★ 文字列でもブール値でも、とにかく「trueっぽい」ならイラスト化！
+        const useIllustFlag = (s.useIllust === true || s.useIllust === "true" || s.useIllust === "TRUE");
+        if (charObj && charObj.imgIllust && useIllustFlag) {
+            imgFile = charObj.imgIllust;
+        }
+        
+        return getCharImgHTML({ ...charObj, img: imgFile }, 'char-circle-mini');
     }).join('');
 
     body.innerHTML = `
@@ -536,7 +544,7 @@ function openFullStory(dateStr) {
             <div class="story-char-icons-wrap" style="justify-content:center">${iconsHTML}</div>
             <p style="text-align:center; font-size:0.9rem; color:#666;">出演：${s.chars}</p>
             <hr>
-            <div class="story-modal-content">${s.content}</div>
+            <div class="story-modal-content" style="white-space: pre-wrap;">${s.content}</div>
             <p class="story-modal-date" style="text-align:right">${s.date} 記録</p>
         </div>
     `;
@@ -842,14 +850,30 @@ async function loadReplies() {
 function showTodayPickup() {
     const display = document.getElementById('random-char-display');
     if (!display) return;
+
+    // ★ 1. 画像が設定されているキャラ（Coming Soonじゃないキャラ）だけを抽出！
+    const availableChars = schoolData.characters.filter(c => c.img && c.img.trim() !== "");
+    if (availableChars.length === 0) return; // 全員画像なしの場合は何もしない
+
+    // 2. 今日の日付から「シード（種）」となる文字列を作成
     const today = new Date();
-    const seed = today.getFullYear() + today.getMonth() + today.getDate();
-    const index = seed % schoolData.characters.length;
-    const char = schoolData.characters[index];
+    const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    
+    // 3. 日付文字列から複雑な数字（ハッシュ値）を生成して順番をバラバラにする魔法！
+    let seed = 0;
+    for (let i = 0; i < dateStr.length; i++) {
+        seed = (seed << 5) - seed + dateStr.charCodeAt(i);
+        seed |= 0; // 32bit整数に変換
+    }
+    seed = Math.abs(seed); // 絶対値（プラスの数）にする
+
+    // 4. バラバラになったシード値を使って、画像ありキャラの中から1人を選ぶ
+    const index = seed % availableChars.length;
+    const char = availableChars[index];
 
     display.innerHTML = `
         <div class="pickup-card" style="display:flex; align-items:center; gap:20px; padding:20px;">
-            ${getCharImgHTML(char, 'pickup-img')} <!-- 共通関数を使うように修正 -->
+            ${getCharImgHTML(char, 'pickup-img')}
             <div>
                 <h3 style="margin:0">${char.name} <small>(${char.class})</small></h3>
                 <p style="font-style:italic; margin:10px 0">"${char.quote}"</p>
@@ -858,7 +882,6 @@ function showTodayPickup() {
         </div>
     `;
 }
-
 // --- クイック投票ボタン生成 ---
 function renderQuickVote() {
     const area = document.getElementById('quick-vote-area');
