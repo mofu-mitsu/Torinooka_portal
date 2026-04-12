@@ -1052,7 +1052,7 @@ function showCalendar() {
     
     // ★みつきファミリーの特別枠！
     const specialBirthdays =[
-        { date: "1/17", name: "開発者・神", type: "creator" },
+        { date: "1/17", name: "みつき（開発者・神）", type: "creator" },
         { date: "12/11", name: "ももかママ", type: "family" },
         { date: "2/19", name: "ももかパパ", type: "family" }
     ];
@@ -1060,30 +1060,37 @@ function showCalendar() {
     const todaySpecials = specialBirthdays.filter(s => s.date === todayStr);
     const birthdayPeople = schoolData.characters.filter(c => c.birthday === todayStr);
 
-    let html = `<div class="calendar-today">Today: ${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}</div>`;
+    let html = `<div class="calendar-today"><i class="fas fa-clock"></i> Today: ${today.getFullYear()}/${today.getMonth()+1}/${today.getDate()}</div>`;
     
     if (birthdayPeople.length > 0 || todaySpecials.length > 0) {
         html += `<div class="birthday-card-special">`;
         
-        // 生徒の誕生日
+        // 生徒・先生の誕生日
         birthdayPeople.forEach(c => {
-            // ★敬称の判定ロジック！
+            // ★敬称の判定ロジック！先生の時は何もつけない（空文字）にするゾッ！
             let suffix = "くん";
-            if (c.class === "teacher") suffix = "先生";
-            else if (c.gender === "女子" || c.gender === "女") suffix = "ちゃん";
-            else if (c.gender === "雌雄同体") suffix = "さん"; // ほなみ対応！
+            if (c.class === "teacher" || c.class === "teacher") {
+                suffix = ""; // すでに名前に先生が入っているので付けない
+            } else if (c.gender === "女子" || c.gender === "女") {
+                suffix = "ちゃん";
+            } else if (c.gender === "雌雄同体") {
+                suffix = "さん"; // ほなみ対応！
+            }
+
+            // suffixが空文字の場合はスペースが余らないように調整
+            const displayName = suffix ? `${c.name} ${suffix}` : c.name;
 
             html += `
                 <div class="b-day-person">
                     ${getCharImgHTML(c, 'char-circle-small')}
                     <div class="b-day-info">
-                        <span class="b-day-name">${c.name} ${suffix}</span>
+                        <span class="b-day-name">${displayName}</span>
                         <span class="b-day-greet">Happy Birthday! 🌸</span>
                     </div>
                 </div>`;
         });
 
-        // 開発者・ファミリーの特別表示（画像なし、王冠つき）
+        // 開発者・ファミリーの特別表示
         todaySpecials.forEach(s => {
             const icon = s.type === "creator" ? "👑" : "🎉";
             html += `
@@ -1097,7 +1104,7 @@ function showCalendar() {
 
         html += `</div>`;
     } else {
-        html += `<p class="no-bday" style="text-align:center; color:#999;">今日誕生日のトリはいません</p>`;
+        html += `<p class="no-bday" style="text-align:center; color:#999; margin-top: 10px;">今日誕生日のキャラクターはいません</p>`;
     }
     calArea.innerHTML = html;
 }
