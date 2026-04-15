@@ -846,31 +846,28 @@ async function loadReplies() {
         replyArea.innerHTML = "<p>返信の取得に失敗しました。</p>";
     }
 }
-// --- 今日のとり表示 ---
+// --- 今日のとり表示（真・ランダム ＆ 画像ありキャラ限定版） ---
 function showTodayPickup() {
     const display = document.getElementById('random-char-display');
     if (!display) return;
 
-    // ★ 1. 画像が設定されているキャラ（Coming Soonじゃないキャラ）だけを抽出！
+    // 1. 画像が設定されているキャラ（Coming Soonじゃないキャラ）だけを抽出！
     const availableChars = schoolData.characters.filter(c => c.img && c.img.trim() !== "");
     if (availableChars.length === 0) return; // 全員画像なしの場合は何もしない
 
-    // 2. 今日の日付から「シード（種）」となる文字列を作成
+    // 2. 今日の日付から「シード値（純粋な数字）」を作成 (例: 20260415)
     const today = new Date();
-    const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+    const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
     
-    // 3. 日付文字列から複雑な数字（ハッシュ値）を生成して順番をバラバラにする魔法！
-    let seed = 0;
-    for (let i = 0; i < dateStr.length; i++) {
-        seed = (seed << 5) - seed + dateStr.charCodeAt(i);
-        seed |= 0; // 32bit整数に変換
-    }
-    seed = Math.abs(seed); // 絶対値（プラスの数）にする
+    // 3. 【新機能】サイン(sin)関数を使った強力なランダム計算！
+    // 日付が1変わるだけで結果が劇的に飛ぶから、絶対に順番にはならないゾッ！
+    const randomFraction = Math.abs(Math.sin(seed) * 10000) % 1;
 
-    // 4. バラバラになったシード値を使って、画像ありキャラの中から1人を選ぶ
-    const index = seed % availableChars.length;
+    // 4. キャラクター数で掛けて、今日選ばれる1人を決定！
+    const index = Math.floor(randomFraction * availableChars.length);
     const char = availableChars[index];
 
+    // 5. 画面に表示
     display.innerHTML = `
         <div class="pickup-card" style="display:flex; align-items:center; gap:20px; padding:20px;">
             ${getCharImgHTML(char, 'pickup-img')}
