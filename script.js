@@ -1429,6 +1429,12 @@ function renderGames() {
     if (!gameList) return;
     
     const games = [
+        { 
+            title: "Psycho-Shooter (サイコシューター)", 
+            desc: "弾は『言葉』！ネガティブな感情を撃ち抜き、論破や精神統一で難局を乗り越えるメンタル・シューティング。", 
+            url: "https://mofu-mitsu.github.io/Psycho-Shooter/", 
+            icon: "fa-crosshairs" 
+        },
         { title: "ゆうきくんの気まぐれ猫占い", desc: "明るくノリの良いゆうきくんが未来を鑑定🔮✨", url: "https://mofu-mitsu.github.io/yuuki_fortune/", icon: "fa-cat" },
         { title: "タイピングマスター", desc: "教育実習コースでトリ’Sのキャラたちと特訓！", url: "https://mofu-mitsu.github.io/typing-Master/", icon: "fa-keyboard" },
         { title: "闇観測実験アーカイブ", desc: "入力速度や迷いまで観測……。あなたの心の「闇」を暴き出す本格実験ツール。", url: "https://mofu-mitsu.github.io/yami_kansoku_archive/", icon: "fa-eye" },
