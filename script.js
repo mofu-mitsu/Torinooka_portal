@@ -1430,6 +1430,12 @@ function renderGames() {
     
     const games = [
         { 
+            title: "UTAU音源：みりんてゃ", 
+            desc: "みりんてゃの歌声がついに解禁っ♡ 50音から濁音・促音まで完全撮り下ろしの本格音源。あなたの手でみりんてゃを歌わせてあげてね♪", 
+            url: "https://torisproject.booth.pm/items/8268069", 
+            icon: "fa-microphone-lines" 
+        },
+        { 
             title: "Psycho-Shooter (サイコシューター)", 
             desc: "弾は『言葉』！ネガティブな感情を撃ち抜き、論破や精神統一で難局を乗り越えるメンタル・シューティング。", 
             url: "https://mofu-mitsu.github.io/Psycho-Shooter/", 
