@@ -2,7 +2,7 @@ let currentStoryPage = 1;
 const storiesPerPage = 10;
 let filteredStories = [];
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxigr4izcWO4yY1yIH-Cb3E_DL08MuUfSTrX1mWzM3ygJ9JVc25ZBhto_9x_1KAQ_dDGw/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzJarLzLCs5RoM-GK7_GhTECh1jFHhuMQPwz1vXms8ugH3Ouz3eBAutqGpsH73ixr0YyQ/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
