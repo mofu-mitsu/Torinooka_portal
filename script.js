@@ -230,27 +230,27 @@ function renderStoryFilters() {
 // 高度な検索実行
 function executeStorySearch() {
     const textQuery = document.getElementById('search-text').value.toLowerCase();
-    const tagQuery = document.getElementById('filter-tag').value;
-    const classQuery = document.getElementById('filter-class').value;
-    const sortOrder = document.getElementById('sort-order') ? document.getElementById('sort-order').value : 'new'; // 並び順取得
+    const tagQuery = document.getElementById('filter-tag') ? document.getElementById('filter-tag').value : 'all';
+    const classQuery = document.getElementById('filter-class') ? document.getElementById('filter-class').value : 'all';
+    const sortOrder = document.getElementById('sort-order') ? document.getElementById('sort-order').value : 'new';
 
     filteredStories = allStories.filter(s => {
         const matchText = s.title.toLowerCase().includes(textQuery) || 
                          s.chars.toLowerCase().includes(textQuery) ||
                          s.content.toLowerCase().includes(textQuery);
-        const matchTag = (tagQuery === 'all' || s.tag === tagQuery);
+        // 複数タグの中に、選ばれたタグが含まれているかチェック！
+        const matchTag = (tagQuery === 'all' || (s.tag && s.tag.split(/[、,]/).map(t => t.trim()).includes(tagQuery)));
         const matchClass = (classQuery === 'all' || s.stage === classQuery);
         return matchText && matchTag && matchClass;
     });
 
-    // ★ 日付で並び替え！
     filteredStories.sort((a, b) => {
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();
         return sortOrder === 'new' ? dateB - dateA : dateA - dateB;
     });
 
-    currentStoryPage = 1; // 検索したら1ページ目に戻す
+    currentStoryPage = 1;
     renderStoryCards(filteredStories);
 }
 
@@ -409,12 +409,16 @@ function renderDynamicTagFilters(stories) {
     const filterArea = document.getElementById('story-filters');
     if (!filterArea) return;
 
-    // データにある全てのタグを抽出して重複を消す
-    const tags = [...new Set(stories.map(s => s.tag))].filter(t => t);
+    // 「、」や「,」で分割して、全てのタグを抽出して重複を消す！
+    let allTags = [];
+    stories.forEach(s => {
+        if (s.tag) {
+            allTags.push(...s.tag.split(/[、,]/).map(t => t.trim()).filter(t => t));
+        }
+    });
+    const tags = [...new Set(allTags)].sort(); // 五十音順に並べる
     
-    // 「すべて」ボタンだけ残してリセット
     filterArea.innerHTML = '<button class="filter-btn active" onclick="filterStories(\'all\')">すべて</button>';
-    
     tags.forEach(tag => {
         const btn = document.createElement('button');
         btn.className = 'filter-btn';
@@ -430,40 +434,33 @@ function renderStoryCards(stories) {
     if (!list) return;
     list.innerHTML = '';
     
-    filteredStories = stories;
     const start = (currentStoryPage - 1) * storiesPerPage;
-    const pagedStories = filteredStories.slice(start, start + storiesPerPage);
+    const pagedStories = stories.slice(start, start + storiesPerPage);
 
     if (pagedStories.length === 0) {
-        list.innerHTML = "<p>該当する物語はまだないゾッ。</p>";
+        list.innerHTML = "<p>該当する物語はないゾッ。</p>";
         return;
     }
 
     pagedStories.forEach(s => {
-        // キャラアイコンの生成
-        const charNames = s.chars ? s.chars.split(/[、,]/).map(name => name.trim()) :[];
+        const charNames = s.chars ? s.chars.split(/[、,]/).map(n => n.trim()) :[];
         const iconsHTML = charNames.map(name => {
             const charObj = schoolData.characters.find(c => c.name === name);
             let imgFile = charObj ? charObj.img : "";
-            
-            // ★ 文字列でもブール値でも、とにかく「trueっぽい」ならイラスト化！
-            const useIllustFlag = (s.useIllust === true || s.useIllust === "true" || s.useIllust === "TRUE");
-            if (charObj && charObj.imgIllust && useIllustFlag) {
-                imgFile = charObj.imgIllust;
-            }
-            
+            if (charObj && charObj.imgIllust && s.useIllust === "true") imgFile = charObj.imgIllust;
             return getCharImgHTML({ ...charObj, img: imgFile }, 'char-circle-mini');
         }).join('');
 
-        const card = document.createElement('div');
-        card.className = `story-card tag-${s.tag}`;
+        // 複数のタグを # をつけて横に並べる！
+        const tagsHTML = s.tag ? s.tag.split(/[、,]/).map(t => `<span class="story-tag">#${t.trim()}</span>`).join(' ') : '';
         const preview = s.content ? s.content.replace(/\n/g, ' ').substring(0, 50) : "";
-
+        
+        const card = document.createElement('div');
+        // ※ フィルター機能のために一つ目のタグを代表クラスにしておく
+        const primaryTag = s.tag ? s.tag.split(/[、,]/)[0].trim() : "none";
+        card.className = `story-card tag-${primaryTag}`;
         card.innerHTML = `
-            <div class="story-header">
-                <span class="story-tag">#${s.tag}</span>
-                <span class="story-stage">${s.stage}</span>
-            </div>
+            <div class="story-header">${tagsHTML}<span class="story-stage">${s.stage}</span></div>
             <h3>${s.title}</h3>
             <div class="story-char-icons-wrap">${iconsHTML}</div>
             <div class="story-preview">${preview}...</div>
@@ -471,7 +468,7 @@ function renderStoryCards(stories) {
         `;
         list.appendChild(card);
     });
-    renderStoryPagination(filteredStories.length);
+    renderStoryPagination(stories.length);
 }
 function toggleReplies(dateStr, count) {
     const postId = dateStr.replace(/[:\s/]/g, '');
@@ -515,50 +512,43 @@ function changeStoryPage(offset) {
 function openFullStory(dateStr) {
     const s = allStories.find(story => String(story.date) === String(dateStr));
     if (!s) return;
-
     const modal = document.getElementById('profile-modal');
     const body = document.getElementById('modal-body');
-
-    // 登場キャラのアイコンを生成（★イラスト切り替え判定を追加！）
-    const charNames = s.chars ? s.chars.split(/[、,]/).map(name => name.trim()) :[];
+    const charNames = s.chars ? s.chars.split(/[、,]/).map(n => n.trim()) : [];
     const iconsHTML = charNames.map(name => {
         const charObj = schoolData.characters.find(c => c.name === name);
         let imgFile = charObj ? charObj.img : "";
-        
-        // ★ 文字列でもブール値でも、とにかく「trueっぽい」ならイラスト化！
-        const useIllustFlag = (s.useIllust === true || s.useIllust === "true" || s.useIllust === "TRUE");
-        if (charObj && charObj.imgIllust && useIllustFlag) {
-            imgFile = charObj.imgIllust;
-        }
-        
+        if (charObj && charObj.imgIllust && s.useIllust === "true") imgFile = charObj.imgIllust;
         return getCharImgHTML({ ...charObj, img: imgFile }, 'char-circle-mini');
     }).join('');
+
+    // 複数タグの表示
+    const tagsHTML = s.tag ? s.tag.split(/[、,]/).map(t => `<span class="m-tag">${t.trim()}</span>`).join(' ') : '';
 
     body.innerHTML = `
         <div class="story-full-view" style="text-align:left">
             <span class="close-btn" onclick="closeProfile()">&times;</span>
-            <div class="story-modal-header">
-                <span class="m-tag">${s.tag}</span> <span class="m-tag">${s.stage}</span>
-            </div>
+            <div class="story-modal-header">${tagsHTML} <span class="m-tag">${s.stage}</span></div>
             <h2 class="story-modal-title" style="text-align:center">${s.title}</h2>
             <div class="story-char-icons-wrap" style="justify-content:center">${iconsHTML}</div>
             <p style="text-align:center; font-size:0.9rem; color:#666;">出演：${s.chars}</p>
             <hr>
             <div class="story-modal-content" style="white-space: pre-wrap;">${s.content}</div>
-            <p class="story-modal-date" style="text-align:right">${s.date} 記録</p>
+            <p class="story-modal-date" style="text-align:right">${new Date(s.date).toLocaleString()} 記録</p>
         </div>
     `;
     modal.style.display = "block";
 }
 function filterStories(tagName) {
-    // ボタンの見た目切り替え
     document.querySelectorAll('#story-filters .filter-btn').forEach(btn => {
         btn.classList.remove('active');
         if(btn.innerText === tagName || (tagName === 'all' && btn.innerText === 'すべて')) btn.classList.add('active');
     });
 
-    const filtered = tagName === 'all' ? allStories : allStories.filter(s => s.tag === tagName);
-    renderStoryCards(filtered);
+    // 文字列のどこかにタグが含まれているかで判定！
+    filteredStories = tagName === 'all' ? allStories : allStories.filter(s => s.tag && s.tag.split(/[、,]/).map(t => t.trim()).includes(tagName));
+    currentStoryPage = 1;
+    renderStoryCards(filteredStories);
 }
 
 
@@ -677,15 +667,15 @@ async function loadRanking() {
         const ranking = await response.json();
         rankingArea.innerHTML = '';
 
+        if (!ranking || ranking.length === 0) {
+            rankingArea.innerHTML = "<p>まだ集計はありません。</p>"; // 文言変更
+            return;
+        }
+
         rankingArea.innerHTML = ranking.map((r, i) => {
             const char = schoolData.characters.find(c => c.name === r.name);
             let imgFile = char ? char.img : "";
-            
-            // ★ imgIllustを持っている子は、ランキングでは常にイラストを表示する
-            if (char && char.imgIllust) {
-                imgFile = char.imgIllust;
-            }
-
+            if (char && char.imgIllust) { imgFile = char.imgIllust; }
             const imgHTML = getCharImgHTML({ ...char, img: imgFile }, 'rank-img');
             let rankMsg = "";
             if (i === 0) rankMsg = char?.rankQuote1 || "応援ありがとうございます！";
