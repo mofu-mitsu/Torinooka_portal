@@ -6739,7 +6739,7 @@ const schoolData = {
         "gender": "男子",
         "stage": "初等部",
         "class": "E-A",
-        "motif": "座敷わらし",
+        "motif": "メジロ",
         "birthday": "12/27",
         "bloodType": "A",
         "mbti": "ISTJ",
