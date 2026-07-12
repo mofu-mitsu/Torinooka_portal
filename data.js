@@ -1396,7 +1396,7 @@ const schoolData = {
             "motif": "鳥（イワシャコ）",
             "birthday": "9/20",
             "bloodType": "B",
-            "mbti": "ISTP",
+            "mbti": "ISFP",
             "socio": "SLI",
             "ennea": "9w8",
             "hometown": "長崎県",
