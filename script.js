@@ -254,22 +254,33 @@ function executeStorySearch() {
     renderStoryCards(filteredStories);
 }
 
-// 掲示板への書き込み
-async function sendBulletin(parentId = "") {
-    // 1. 返信か新規投稿かで入力元を切り替える
-    // parentIdがある場合は、プロンプトで内容を聞くか、動的に生成された入力欄から取る
-    let content;
-    if (parentId) {
-        content = prompt("返信内容を入力してください：");
-        if (!content) return; // キャンセル時は何もしない
-    } else {
-        const inputEl = document.getElementById('bulletin-input');
-        if (!inputEl) return;
-        content = inputEl.value;
-    }
+// ==========================================
+// 掲示板：投稿実行ロジック（新規 ＆ 返信）
+// ==========================================
+// 新規投稿用（一番上の入力欄から）
+async function sendBulletin() {
+    const inputEl = document.getElementById('bulletin-input');
+    if (!inputEl) return;
+    const content = inputEl.value;
+    if (!content) return alert("内容を入力してね！");
 
-    if (!content) return;
+    await executeSendBulletin(content, ""); // 親IDなしで送信
+    inputEl.value = ""; // 入力欄を空に
+}
 
+// モーダルからの返信用
+async function submitReply() {
+    const textarea = document.getElementById('reply-content');
+    if (!textarea) return;
+    const content = textarea.value;
+    if (!content) return alert("返信内容を入力してね！");
+
+    closeReplyModal(); // 送信する前にモーダルを閉じる
+    await executeSendBulletin(content, currentReplyParentId); // 記憶した親IDをつけて送信
+}
+
+// 通信（GASへ送る）の共通処理
+async function executeSendBulletin(content, parentId) {
     showToast("掲示板に刻んでいます...");
     try {
         await fetch(GAS_URL, { 
@@ -278,9 +289,15 @@ async function sendBulletin(parentId = "") {
             body: JSON.stringify({ type: "bulletin", content: content, parentId: parentId }) 
         });
         showToast("投稿成功だゾッ！");
-        if (!parentId) document.getElementById('bulletin-input').value = "";
-        loadBulletin(); // 再読み込み
-    } catch (e) { showToast("失敗したゾ..."); }
+        // 書き込みが終わったら最新の掲示板を読み込み直す
+        if (typeof currentBulletinPage !== 'undefined') {
+            loadBulletin(currentBulletinPage); // bulletin.html用
+        } else {
+            loadBulletin(); // index.html用
+        }
+    } catch (e) { 
+        showToast("失敗したゾ..."); 
+    }
 }
 
 async function deletePost(dateStr) {
@@ -712,7 +729,6 @@ function renderCharacterCards(characters) {
     });
 }
 
-// loadBulletin の中身をこれに差し替えて！
 async function loadBulletin(page = 1) {
     const board = document.getElementById('bulletin-board-display');
     if (!board) return;
@@ -740,14 +756,16 @@ async function loadBulletin(page = 1) {
                     <div class="post-header">
                         <span class="post-date">${p.date}</span>
                         <div class="post-actions">
-                            <button class="req-btn" onclick="sendBulletin('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
-                            <!-- ★ここに data-count をしっかり埋め込む！ -->
-                            <button id="btn-replies-${postId}" class="req-btn" onclick="toggleReplies('${p.date}', ${replyCount})">
+                            <!-- ★ 返信ボタンを「モーダルを開く」処理に変更！ -->
+                            <button class="req-btn" onclick="openReplyModal('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
+                            
+                            <button id="btn-replies-${postId}" class="req-btn" data-count="${replyCount}" onclick="toggleReplies('${p.date}')">
                                 <i class="fas fa-comments"></i> スレを開く (${replyCount})
                             </button>
                             <button class="req-btn delete-req" onclick="requestDelete('${p.date}', '${p.content}')">削除要請</button>
                         </div>
                     </div>
+                    <!-- ★ white-space: pre-wrap; のおかげで改行がそのまま出るゾ！ -->
                     <p class="post-content" style="white-space: pre-wrap;">${p.content}</p>
                     
                     <div id="replies-${postId}" class="replies-container" style="display:none;">
@@ -762,6 +780,27 @@ async function loadBulletin(page = 1) {
         }).join('');
     } catch (e) { console.error("掲示板エラー", e); }
 }
+// ==========================================
+// 掲示板：返信用モーダルの制御
+// ==========================================
+let currentReplyParentId = ""; // どの投稿に返信するかを記憶する変数
+
+function openReplyModal(parentId) {
+    currentReplyParentId = parentId; // 親投稿の日付（ID）を記憶！
+    const modal = document.getElementById('reply-modal');
+    const textarea = document.getElementById('reply-content');
+    if (modal && textarea) {
+        textarea.value = ""; // 入力欄をまっさらにする
+        modal.style.display = "block";
+    }
+}
+
+function closeReplyModal() {
+    const modal = document.getElementById('reply-modal');
+    if (modal) modal.style.display = "none";
+    currentReplyParentId = ""; // 記憶をリセット
+}
+
 
 // --- クラス分けラベル（H1-1, H1-2...）を自動生成 ---
 function renderClassFilters() {
