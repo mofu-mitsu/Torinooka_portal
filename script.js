@@ -2,7 +2,7 @@ let currentStoryPage = 1;
 const storiesPerPage = 10;
 let filteredStories = [];
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzJarLzLCs5RoM-GK7_GhTECh1jFHhuMQPwz1vXms8ugH3Ouz3eBAutqGpsH73ixr0YyQ/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyxJOvlwev_qZKyTAZEmE1QpZcrtIiPftzsLSPgMjOfDrQTA3JDgtoerYzjfGaUx-NQ8w/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
@@ -420,17 +420,33 @@ async function loadStories() {
     const list = document.getElementById('story-list');
     if (!list) return;
 
-    list.innerHTML = `<div class="loading-area"><div class="loading-spinner"></div><p>記録を読み込み中...</p></div>`;
+    // 1. まずブラウザの「短期記憶」があれば、一瞬で表示する！
+    const cached = sessionStorage.getItem('torinooka_stories');
+    if (cached) {
+        allStories = JSON.parse(cached);
+        filteredStories = allStories;
+        renderStoryFilters();
+        renderStoryCards(allStories);
+    } else {
+        // 記憶がない時だけローディングを出す
+        list.innerHTML = `<div class="loading-area"><div class="loading-spinner"></div><p>記録を読み込み中...</p></div>`;
+    }
 
+    // 2. 裏でこっそりGASに最新データを聞きに行く
     try {
         const response = await fetch(GAS_URL + "?type=stories");
-        allStories = await response.json();
-        filteredStories = allStories; // 初期状態は全件
-        renderStoryFilters(); // フィルタ作成
-        renderStoryCards(allStories); // 描画！
+        const freshData = await response.json();
+        
+        // 最新データと記憶が違ったら、画面を最新に塗り替える！
+        if (JSON.stringify(allStories) !== JSON.stringify(freshData)) {
+            allStories = freshData;
+            filteredStories = allStories;
+            sessionStorage.setItem('torinooka_stories', JSON.stringify(allStories)); // 記憶を更新
+            renderStoryFilters();
+            renderStoryCards(allStories);
+        }
     } catch (e) {
-        console.error("Story load error:", e);
-        list.innerHTML = "<p>物語の読み込みに失敗したゾッ。</p>";
+        if (!cached) list.innerHTML = "<p>物語の読み込みに失敗したゾッ。</p>";
     }
 }
 
@@ -727,19 +743,21 @@ async function loadRanking() {
 function renderCharacterCards(characters) {
     const grid = document.getElementById('char-grid');
     if (!grid) return;
-    grid.innerHTML = '';
     
+    // HTMLを文字列として一気に繋げる
+    let htmlString = "";
     characters.forEach(c => {
-        const card = document.createElement('div');
-        card.className = 'char-card';
-        card.onclick = () => showProfile(c.id); 
-        card.innerHTML = `
-            ${getCharImgHTML(c, 'char-circle-small')}
-            <h4>${c.name}</h4>
-            <small>${c.class || 'クラス不明'} / ${c.motif}</small>
+        htmlString += `
+            <div class="char-card" onclick="showProfile('${c.id}')">
+                ${getCharImgHTML(c, 'char-circle-small')}
+                <h4>${c.name}</h4>
+                <small>${c.class || 'クラス不明'} / ${c.motif}</small>
+            </div>
         `;
-        grid.appendChild(card);
     });
+    
+    // 最後に1回だけ画面に流し込む（これが爆速の秘訣！）
+    grid.innerHTML = htmlString;
 }
 
 async function loadBulletin(page = 1) {
