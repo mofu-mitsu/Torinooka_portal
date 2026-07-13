@@ -269,14 +269,27 @@ async function sendBulletin() {
 }
 
 // モーダルからの返信用
+// モーダルからの返信用
 async function submitReply() {
     const textarea = document.getElementById('reply-content');
     if (!textarea) return;
     const content = textarea.value;
     if (!content) return alert("返信内容を入力してね！");
 
-    closeReplyModal(); // 送信する前にモーダルを閉じる
-    await executeSendBulletin(content, currentReplyParentId); // 記憶した親IDをつけて送信
+    // ★ 記憶がリセットされる前に、親IDを別の変数に避難させる！
+    const savedParentId = currentReplyParentId; 
+    
+    // その後にモーダルを閉じる
+    closeReplyModal(); 
+    
+    // 避難させておいた親IDを使って送信する！
+    await executeSendBulletin(content, savedParentId); 
+}
+
+function closeReplyModal() {
+    const modal = document.getElementById('reply-modal');
+    if (modal) modal.style.display = "none";
+    currentReplyParentId = ""; // 記憶をリセット
 }
 
 // 通信（GASへ送る）の共通処理
