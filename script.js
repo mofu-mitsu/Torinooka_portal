@@ -2,7 +2,7 @@ let currentStoryPage = 1;
 const storiesPerPage = 10;
 let filteredStories = [];
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbyxJOvlwev_qZKyTAZEmE1QpZcrtIiPftzsLSPgMjOfDrQTA3JDgtoerYzjfGaUx-NQ8w/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbwwaWHq9IaofthR5tEe1RE6IDplCS6ZzcjVISDXr1juSQ_-cyTzhNtDY8B4Tg7psWpSrA/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
@@ -108,12 +108,13 @@ function scheduleNextGohobi() {
 // 2. 画像 ＆ 丸枠 ＆ Coming Soon の鉄壁ガード
 // ==========================================
 function getCharImgHTML(char, sizeClass = 'char-circle-small') {
-    const defaultImg = "images/coming_soon.png"; // みつきが用意する画像名
+    const defaultImg = "images/coming_soon.png";
     const charImg = (char && char.img && char.img.trim() !== "") ? `images/${char.img}` : defaultImg;
 
     return `
         <div class="img-container ${sizeClass}">
-            <img src="${charImg}" alt="character" onerror="this.src='${defaultImg}'">
+            <!-- ★ loading="lazy" を入れると、画面に見えるまで画像を読み込まず、超軽くなる！ -->
+            <img src="${charImg}" alt="character" loading="lazy" onerror="this.src='${defaultImg}'">
         </div>
     `;
 }
@@ -154,7 +155,7 @@ function showTodayMenu() {
 
 
 // toggleReplies 関数を修正
-function toggleReplies(dateStr) {
+function toggleReplies(dateStr, count) {
     const postId = dateStr.replace(/[:\s/]/g, '');
     const container = document.getElementById(`replies-${postId}`);
     const btn = document.getElementById(`btn-replies-${postId}`);
@@ -165,8 +166,8 @@ function toggleReplies(dateStr) {
         btn.innerHTML = `<i class="fas fa-times"></i> スレを閉じる`;
     } else {
         container.style.display = 'none';
-        // ★裏側に保存しておいたHTMLをそのまま戻す！
-        btn.innerHTML = btn.getAttribute('data-original');
+        // 受け取った count（数字）をそのまま表示するから、絶対に undefined にならない！
+        btn.innerHTML = `<i class="fas fa-comments"></i> スレを開く (${count})`;
     }
 }
 function openImageModal(imgSrc) {
@@ -744,20 +745,23 @@ function renderCharacterCards(characters) {
     const grid = document.getElementById('char-grid');
     if (!grid) return;
     
-    // HTMLを文字列として一気に繋げる
-    let htmlString = "";
-    characters.forEach(c => {
-        htmlString += `
-            <div class="char-card" onclick="showProfile('${c.id}')">
-                ${getCharImgHTML(c, 'char-circle-small')}
-                <h4>${c.name}</h4>
-                <small>${c.class || 'クラス不明'} / ${c.motif}</small>
-            </div>
-        `;
-    });
+    // 一瞬だけローディングを見せて、画面遷移をフリーズさせない！
+    grid.innerHTML = '<div style="text-align:center; padding:50px; width: 100%;"><div class="loading-spinner"></div><p>生徒を呼び出しています...</p></div>';
     
-    // 最後に1回だけ画面に流し込む（これが爆速の秘訣！）
-    grid.innerHTML = htmlString;
+    // 50ミリ秒だけ待ってから300人分を一気に作る（これでスマホもサクサク！）
+    setTimeout(() => {
+        let htmlString = "";
+        characters.forEach(c => {
+            htmlString += `
+                <div class="char-card" onclick="showProfile('${c.id}')">
+                    ${getCharImgHTML(c, 'char-circle-small')}
+                    <h4>${c.name}</h4>
+                    <small>${c.class || 'クラス不明'} / ${c.motif}</small>
+                </div>
+            `;
+        });
+        grid.innerHTML = htmlString;
+    }, 50);
 }
 
 async function loadBulletin(page = 1) {
