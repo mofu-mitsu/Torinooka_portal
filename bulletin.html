@@ -111,5 +111,16 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
+<!-- ★追加！ 掲示板の返信用モーダル -->
+    <div id="reply-modal" class="modal">
+        <div class="modal-content" style="background:white; border-radius:20px; border:3px solid var(--navy); padding:20px; max-width: 500px;">
+            <span class="close-btn" onclick="closeReplyModal()" style="color: var(--navy);">&times;</span>
+            <h2 class="gold-title" style="margin-top: 10px; font-size: 1.5rem;">返信を書く</h2>
+            <div class="letter-form">
+                <textarea id="reply-content" placeholder="返信内容をどうぞ...（改行もちゃんと反映されるゾッ！）" style="height: 150px;"></textarea>
+                <button onclick="submitReply()" class="premium-btn">返信を投稿する</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
