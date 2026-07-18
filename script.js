@@ -11,7 +11,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 全キャラのデータから、クラス名だけを重複なしで抜き出す
     const classList =[...new Set(schoolData.characters.map(c => c.class))].filter(Boolean).sort();
     console.log("【デバッグ報告】抽出したクラスリスト（これがないとヤバい）:", classList);
-
+    // ★これを追加！ストーリー投稿フォームのクラス選択肢も全自動生成！
+    const storyStageSelect = document.getElementById('story-stage');
+    if (storyStageSelect) {
+        storyStageSelect.innerHTML = '<option value="共通">共通エピソード</option>' + 
+            classList.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
     // --- 生徒名簿 (chara.html) の初期化 ---
     const charGrid = document.getElementById('char-grid');
     if (charGrid) {
@@ -216,12 +221,19 @@ function renderStoryFilters() {
     const classSelect = document.getElementById('filter-class');
     if (!tagSelect || !classSelect) return;
 
-    // スプレッドシートにあるタグを全部拾って、重複を消す
-    const tags = [...new Set(allStories.map(s => s.tag))].filter(t => t);
+    let allTags = [];
+    allStories.forEach(s => {
+        if (s.tag) {
+            // ★「、」や「,」で分割して、前後の空白を消してリストに追加
+            allTags.push(...s.tag.split(/[、,]/).map(t => t.trim()).filter(t => t));
+        }
+    });
+    // 重複を消して五十音順に並べる
+    const tags = [...new Set(allTags)].sort();
+    
     tagSelect.innerHTML = '<option value="all">すべてのタグ</option>' + 
                           tags.map(t => `<option value="${t}">${t}</option>`).join('');
 
-    // クラス一覧も取得
     const classes = [...new Set(allStories.map(s => s.stage))].filter(c => c);
     classSelect.innerHTML = '<option value="all">すべてのクラス</option>' + 
                             classes.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -231,27 +243,31 @@ function renderStoryFilters() {
 // 高度な検索実行
 function executeStorySearch() {
     const textQuery = document.getElementById('search-text').value.toLowerCase();
-    const tagQuery = document.getElementById('filter-tag') ? document.getElementById('filter-tag').value : 'all';
-    const classQuery = document.getElementById('filter-class') ? document.getElementById('filter-class').value : 'all';
+    const tagQuery = document.getElementById('filter-tag').value;
+    const classQuery = document.getElementById('filter-class').value;
     const sortOrder = document.getElementById('sort-order') ? document.getElementById('sort-order').value : 'new';
 
     filteredStories = allStories.filter(s => {
         const matchText = s.title.toLowerCase().includes(textQuery) || 
                          s.chars.toLowerCase().includes(textQuery) ||
                          s.content.toLowerCase().includes(textQuery);
-        // 複数タグの中に、選ばれたタグが含まれているかチェック！
+        
+        // ★ タグを「、」で分割した配列の中に、検索したいタグが含まれているかチェック！
         const matchTag = (tagQuery === 'all' || (s.tag && s.tag.split(/[、,]/).map(t => t.trim()).includes(tagQuery)));
+        
         const matchClass = (classQuery === 'all' || s.stage === classQuery);
+        
         return matchText && matchTag && matchClass;
     });
 
+    // 日付で並び替え
     filteredStories.sort((a, b) => {
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();
         return sortOrder === 'new' ? dateB - dateA : dateA - dateB;
     });
 
-    currentStoryPage = 1;
+    currentStoryPage = 1; // 検索したら1ページ目に戻す
     renderStoryCards(filteredStories);
 }
 
