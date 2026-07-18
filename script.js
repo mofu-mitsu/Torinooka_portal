@@ -113,13 +113,13 @@ function scheduleNextGohobi() {
 // 2. 画像 ＆ 丸枠 ＆ Coming Soon の鉄壁ガード
 // ==========================================
 function getCharImgHTML(char, sizeClass = 'char-circle-small') {
-    const defaultImg = "images/coming_soon.png";
+    const defaultImg = "images/coming_soon.png"; // みつきが用意する画像名
     const charImg = (char && char.img && char.img.trim() !== "") ? `images/${char.img}` : defaultImg;
 
     return `
         <div class="img-container ${sizeClass}">
-            <!-- ★ loading="lazy" を入れると、画面に見えるまで画像を読み込まず、超軽くなる！ -->
-            <img src="${charImg}" alt="character" loading="lazy" onerror="this.src='${defaultImg}'">
+            <!-- ★ loading="lazy" を削除して、すぐにパッと表示させるように戻したゾ！ -->
+            <img src="${charImg}" alt="character" onerror="this.src='${defaultImg}'">
         </div>
     `;
 }
