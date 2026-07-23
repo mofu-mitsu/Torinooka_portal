@@ -6843,7 +6843,7 @@ const schoolData = {
         "rankQuote3": "「3位。評価に感謝します。皆さんの声に応えられるよう、精進しますね。」"
     },
     {
-        "id": "kotarou",
+        "id": "koutarou",
         "fullName": "川上 光太郎（かわかみ こうたろう）",
         "name": "こうたろう先生",
         "gender": "男子",
