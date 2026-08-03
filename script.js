@@ -2,7 +2,7 @@ let currentStoryPage = 1;
 const storiesPerPage = 10;
 let filteredStories = [];
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbz7Qe6TtsNHUC_9GVhemneWdE0PAqAcn2NsDnXcVOsgofI1mN9j99HbojAMrrKzfyAkeQ/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzDxFS4mEfeL982zJ_67A_HBCtWYEccYBdjeovGqXh4sN_B5lC4eAR2v7hUODqcpRHckw/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
@@ -279,7 +279,7 @@ async function sendBulletin(parentId = "") {
     let content;
     if (parentId) {
         content = prompt("返信内容を入力してください：");
-        if (!content) return; 
+        if (!content) return; // キャンセル時は何もしない
     } else {
         const inputEl = document.getElementById('bulletin-input');
         if (!inputEl) return;
@@ -287,7 +287,7 @@ async function sendBulletin(parentId = "") {
     }
     if (!content) return;
 
-    // ★ 自分が書いた証拠として、ランダムなIDを生成してブラウザに記憶させる
+    // ★ 自分が書いた証拠として、ランダムなIDを生成してブラウザに記憶させる！
     const myPostId = "post_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
     let myPosts = JSON.parse(localStorage.getItem('my_bulletin_posts') || '[]');
     myPosts.push(myPostId);
@@ -298,6 +298,7 @@ async function sendBulletin(parentId = "") {
         await fetch(GAS_URL, { 
             method: "POST", 
             mode: "no-cors", 
+            // ★ 作った myPostId をGASに送る！
             body: JSON.stringify({ type: "bulletin", content: content, parentId: parentId, myPostId: myPostId }) 
         });
         showToast("投稿成功だゾッ！");
@@ -319,6 +320,7 @@ async function deleteMyPost(dateStr) {
         });
         showToast("投稿を消去したゾ！");
         
+        // 読み込み直して画面から消す
         if (typeof currentBulletinPage !== 'undefined') loadBulletin(currentBulletinPage);
         else loadBulletin();
     } catch (e) { showToast("失敗したゾ..."); }
@@ -834,31 +836,37 @@ async function loadBulletin(page = 1) {
 
         const mainPosts = allPosts.filter(p => !p.parentId);
         const replies = allPosts.filter(p => p.parentId);
+        
+        // ★ ブラウザの記憶を取り出す！
+        const myPosts = JSON.parse(localStorage.getItem('my_bulletin_posts') || '[]');
 
         board.innerHTML = mainPosts.map(p => {
             const threadReplies = replies.filter(r => r.parentId === p.date);
             const replyCount = threadReplies.length;
             const postId = p.date.replace(/[:\s/]/g, '');
 
-            // ★ リアクションのデータを読み込む
             let reacts = {};
             try { reacts = JSON.parse(p.reactions) || {}; } catch(e) {}
+
+            // ★ 自分が書いた投稿なら、赤い削除ボタンを作る！
+            const isMyPost = myPosts.includes(p.myPostId);
+            const myDeleteBtn = isMyPost ? `<button class="req-btn delete-req" onclick="deleteMyPost('${p.date}')"><i class="fas fa-trash"></i> 削除(自分)</button>` : '';
 
             return `
                 <div class="bulletin-post thread-style">
                     <div class="post-header">
                         <span class="post-date">${p.date}</span>
                         <div class="post-actions">
+                            ${myDeleteBtn} <!-- ★ 削除ボタンをここに配置！ -->
                             <button class="req-btn" onclick="sendBulletin('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
-                            <button id="btn-replies-${postId}" class="req-btn" data-count="${replyCount}" onclick="toggleReplies('${p.date}')">
+                            <button id="btn-replies-${postId}" class="req-btn" data-count="${replyCount}" onclick="toggleReplies('${p.date}', ${replyCount})">
                                 <i class="fas fa-comments"></i> スレを開く (${replyCount})
                             </button>
-                            <button class="req-btn delete-req" onclick="requestDelete('${p.date}', '${p.content}')">削除要請</button>
+                            <button class="req-btn" style="color:#aaa; border-color:#eee;" onclick="requestDelete('${p.date}', '${p.content}')">削除要請</button>
                         </div>
                     </div>
                     <p class="post-content" style="white-space: pre-wrap;">${p.content}</p>
                     
-                    <!-- ★ リアクションボタン群 -->
                     <div class="post-reactions">
                         <span class="reaction-btn" onclick="sendReaction('${p.date}', '👍')">👍 ${reacts['👍'] || 0}</span>
                         <span class="reaction-btn" onclick="sendReaction('${p.date}', '❤️')">❤️ ${reacts['❤️'] || 0}</span>
@@ -866,14 +874,21 @@ async function loadBulletin(page = 1) {
                         <span class="reaction-btn" onclick="sendReaction('${p.date}', '👀')">👀 ${reacts['👀'] || 0}</span>
                     </div>
 
-                    <!-- 返信エリア -->
                     <div id="replies-${postId}" class="replies-container" style="display:none;">
                         ${threadReplies.length > 0 ? threadReplies.map(r => {
                             let rReacts = {};
                             try { rReacts = JSON.parse(r.reactions) || {}; } catch(e) {}
+                            
+                            // ★ 返信も自分のものなら削除ボタンを作る！
+                            const isMyReply = myPosts.includes(r.myPostId);
+                            const myReplyDelBtn = isMyReply ? `<button class="req-btn delete-req" style="padding:2px 8px; font-size:0.7rem;" onclick="deleteMyPost('${r.date}')"><i class="fas fa-trash"></i> 削除</button>` : '';
+                            
                             return `
                             <div class="reply-item">
-                                <small>${r.date}</small>
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <small>${r.date}</small>
+                                    ${myReplyDelBtn} <!-- ★ 返信用の削除ボタンを配置！ -->
+                                </div>
                                 <p style="white-space: pre-wrap;">${r.content}</p>
                                 <div class="post-reactions" style="margin-top: 5px;">
                                     <span class="reaction-btn" onclick="sendReaction('${r.date}', '👍')">👍 ${rReacts['👍'] || 0}</span>
