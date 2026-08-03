@@ -2,7 +2,7 @@ let currentStoryPage = 1;
 const storiesPerPage = 10;
 let filteredStories = [];
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbz6abeDxVmJG-UgxI-q0SqNKK8dtgAsQMIoWBxWwkHlgMGZ4vqoeNPMX9GqxQF4DqlQ0A/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbz7Qe6TtsNHUC_9GVhemneWdE0PAqAcn2NsDnXcVOsgofI1mN9j99HbojAMrrKzfyAkeQ/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
@@ -275,17 +275,55 @@ function executeStorySearch() {
 // 掲示板：投稿実行ロジック（新規 ＆ 返信）
 // ==========================================
 // 新規投稿用（一番上の入力欄から）
-async function sendBulletin() {
-    const inputEl = document.getElementById('bulletin-input');
-    if (!inputEl) return;
-    const content = inputEl.value;
-    if (!content) return alert("内容を入力してね！");
+async function sendBulletin(parentId = "") {
+    let content;
+    if (parentId) {
+        content = prompt("返信内容を入力してください：");
+        if (!content) return; 
+    } else {
+        const inputEl = document.getElementById('bulletin-input');
+        if (!inputEl) return;
+        content = inputEl.value;
+    }
+    if (!content) return;
 
-    await executeSendBulletin(content, ""); // 親IDなしで送信
-    inputEl.value = ""; // 入力欄を空に
+    // ★ 自分が書いた証拠として、ランダムなIDを生成してブラウザに記憶させる
+    const myPostId = "post_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+    let myPosts = JSON.parse(localStorage.getItem('my_bulletin_posts') || '[]');
+    myPosts.push(myPostId);
+    localStorage.setItem('my_bulletin_posts', JSON.stringify(myPosts));
+
+    showToast("掲示板に刻んでいます...");
+    try {
+        await fetch(GAS_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ type: "bulletin", content: content, parentId: parentId, myPostId: myPostId }) 
+        });
+        showToast("投稿成功だゾッ！");
+        if (!parentId) document.getElementById('bulletin-input').value = "";
+        
+        // 最新の掲示板を読み込み直す
+        if (typeof currentBulletinPage !== 'undefined') loadBulletin(currentBulletinPage);
+        else loadBulletin();
+    } catch (e) { showToast("失敗したゾ..."); }
+}
+async function deleteMyPost(dateStr) {
+    if(!confirm("自分の投稿を削除しますか？")) return;
+    showToast("削除中...");
+    try {
+        await fetch(GAS_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ type: "delete_my_bulletin", date: dateStr }) 
+        });
+        showToast("投稿を消去したゾ！");
+        
+        if (typeof currentBulletinPage !== 'undefined') loadBulletin(currentBulletinPage);
+        else loadBulletin();
+    } catch (e) { showToast("失敗したゾ..."); }
 }
 
-// モーダルからの返信用
 // モーダルからの返信用
 async function submitReply() {
     const textarea = document.getElementById('reply-content');
@@ -802,35 +840,71 @@ async function loadBulletin(page = 1) {
             const replyCount = threadReplies.length;
             const postId = p.date.replace(/[:\s/]/g, '');
 
+            // ★ リアクションのデータを読み込む
+            let reacts = {};
+            try { reacts = JSON.parse(p.reactions) || {}; } catch(e) {}
+
             return `
                 <div class="bulletin-post thread-style">
                     <div class="post-header">
                         <span class="post-date">${p.date}</span>
                         <div class="post-actions">
-                            <!-- ★ 返信ボタンを「モーダルを開く」処理に変更！ -->
-                            <button class="req-btn" onclick="openReplyModal('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
-                            
+                            <button class="req-btn" onclick="sendBulletin('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
                             <button id="btn-replies-${postId}" class="req-btn" data-count="${replyCount}" onclick="toggleReplies('${p.date}')">
                                 <i class="fas fa-comments"></i> スレを開く (${replyCount})
                             </button>
                             <button class="req-btn delete-req" onclick="requestDelete('${p.date}', '${p.content}')">削除要請</button>
                         </div>
                     </div>
-                    <!-- ★ white-space: pre-wrap; のおかげで改行がそのまま出るゾ！ -->
                     <p class="post-content" style="white-space: pre-wrap;">${p.content}</p>
                     
+                    <!-- ★ リアクションボタン群 -->
+                    <div class="post-reactions">
+                        <span class="reaction-btn" onclick="sendReaction('${p.date}', '👍')">👍 ${reacts['👍'] || 0}</span>
+                        <span class="reaction-btn" onclick="sendReaction('${p.date}', '❤️')">❤️ ${reacts['❤️'] || 0}</span>
+                        <span class="reaction-btn" onclick="sendReaction('${p.date}', '😂')">😂 ${reacts['😂'] || 0}</span>
+                        <span class="reaction-btn" onclick="sendReaction('${p.date}', '👀')">👀 ${reacts['👀'] || 0}</span>
+                    </div>
+
+                    <!-- 返信エリア -->
                     <div id="replies-${postId}" class="replies-container" style="display:none;">
-                        ${threadReplies.length > 0 ? threadReplies.map(r => `
+                        ${threadReplies.length > 0 ? threadReplies.map(r => {
+                            let rReacts = {};
+                            try { rReacts = JSON.parse(r.reactions) || {}; } catch(e) {}
+                            return `
                             <div class="reply-item">
                                 <small>${r.date}</small>
                                 <p style="white-space: pre-wrap;">${r.content}</p>
-                            </div>
-                        `).join('') : '<p style="font-size:0.8rem; color:#888;">まだ返信はないゾッ。</p>'}
+                                <div class="post-reactions" style="margin-top: 5px;">
+                                    <span class="reaction-btn" onclick="sendReaction('${r.date}', '👍')">👍 ${rReacts['👍'] || 0}</span>
+                                    <span class="reaction-btn" onclick="sendReaction('${r.date}', '❤️')">❤️ ${rReacts['❤️'] || 0}</span>
+                                </div>
+                            </div>`
+                        }).join('') : '<p style="font-size:0.8rem; color:#888;">まだ返信はないゾッ。</p>'}
                     </div>
                 </div>`;
         }).join('');
     } catch (e) { console.error("掲示板エラー", e); }
 }
+
+async function sendReaction(dateStr, emoji) {
+    showToast("リアクション送信中...");
+    try {
+        await fetch(GAS_URL, { 
+            method: "POST", 
+            mode: "no-cors", 
+            body: JSON.stringify({ type: "reaction", date: dateStr, emoji: emoji }) 
+        });
+        showToast("リアクションしたゾッ！");
+        
+        // 数値を最新にするために少し待ってから読み込み直す
+        setTimeout(() => {
+            if (typeof currentBulletinPage !== 'undefined') loadBulletin(currentBulletinPage);
+            else loadBulletin();
+        }, 500);
+    } catch (e) { showToast("失敗したゾ..."); }
+}
+
 // ==========================================
 // 掲示板：返信用モーダルの制御
 // ==========================================
@@ -1367,7 +1441,18 @@ function gameOverGohobi(msg) {
     showToast(msg);
 }
 function triggerSoupEvent() {
-    const overlay = document.getElementById('soup-overlay');
+    let overlay = document.getElementById('soup-overlay');
+    // ページにスープの要素がなければ、JSで強制的に作り出す！
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'soup-overlay';
+        overlay.className = 'soup-overlay';
+        overlay.innerHTML = `
+            <h1 style="color: #8b4513; font-size: 2.5rem; text-shadow: 2px 2px white;">🍜 豚骨スープの海 🍜</h1>
+            <p style="font-weight: bold;">「拙者のエキスだゾッ♡」</p>
+        `;
+        document.body.appendChild(overlay);
+    }
     overlay.style.display = 'flex';
     showToast("ご褒美特製・濃厚豚骨スープが溢れ出した！");
     setTimeout(() => { overlay.style.display = 'none'; }, 5000);
