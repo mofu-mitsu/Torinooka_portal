@@ -1289,4 +1289,59 @@ body {
     color: var(--navy);
     transform: translateY(-2px);
 }
+/* ==========================================
+   お返事カードの豪華デザイン
+   ========================================== */
+.reply-card {
+    background: #fff;
+    border: 2px solid #f0f0f0;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: 0.3s;
+}
+
+.reply-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 8px 20px rgba(212, 175, 55, 0.15);
+}
+
+.reply-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px dashed #ddd;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+.to-name {
+    font-size: 1.1rem;
+    color: var(--navy);
+}
+
+.reply-date {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+/* ユーザーからの質問部分（吹き出し風） */
+.user-msg-box {
+    background: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border-left: 4px solid #ccc;
+    font-style: italic;
+}
+
+/* キャラからのお返事部分 */
+.char-reply-box {
+    background: var(--sakura);
+    padding: 20px;
+    border-radius: 15px;
+    border: 1px solid #ffb7c5;
+    color: #333;
+}
 
