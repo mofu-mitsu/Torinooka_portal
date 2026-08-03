@@ -1262,3 +1262,31 @@ body {
         z-index: 9999 !important; 
     }
 }
+/* --- 掲示板リアクションボタン --- */
+.post-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.reaction-btn {
+    background: #fdfdfd;
+    border: 1px solid #ddd;
+    color: #555;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+    user-select: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.reaction-btn:hover {
+    background: var(--sakura);
+    border-color: var(--gold);
+    color: var(--navy);
+    transform: translateY(-2px);
+}
+
