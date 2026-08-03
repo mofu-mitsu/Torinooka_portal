@@ -1017,38 +1017,103 @@ function renderCharactersByClass(className) {
         grid.appendChild(card);
     });
 }
+// ==========================================
+// お手紙のお返事表示（絞り込み対応 ＆ カード型）
+// ==========================================
+let allRepliesData = []; // 取得した全お返事を保存しておく変数
+
 async function loadReplies() {
     const replyArea = document.getElementById('reply-display');
     if (!replyArea) return;
-    toggleLoading('reply-display', true);
+
+    const cached = sessionStorage.getItem('cache_replies');
+    if (cached) {
+        allRepliesData = JSON.parse(cached);
+        setupReplyFilter(); // プルダウンを準備
+        renderRepliesHTML(allRepliesData);
+    } else {
+        replyArea.innerHTML = `<div style="text-align:center; padding:40px;"><div class="loading-spinner"></div><p>お返事を探しています...</p></div>`;
+    }
 
     try {
         const response = await fetch(GAS_URL + "?type=replies");
-        const replies = await response.json();
+        const freshData = await response.json();
         
-        replyArea.innerHTML = ''; // ローディング消去
-        if (!replies || replies.length === 0) {
-            replyArea.innerHTML = "<p style='text-align:center;'>まだ学園からの返信はありません。</p>";
-            return;
+        if (JSON.stringify(freshData) !== cached) {
+            allRepliesData = freshData;
+            sessionStorage.setItem('cache_replies', JSON.stringify(freshData));
+            setupReplyFilter();
+            renderRepliesHTML(allRepliesData);
         }
-
-        replyArea.innerHTML = replies.map(r => `
-            <div class="reply-card">
-                <div class="reply-header">
-                    <span class="to-name">To: ${r.toName} 様</span>
-                    <span class="reply-date">${new Date(r.date).toLocaleDateString()}</span>
-                </div>
-                <div class="user-msg">「${r.content}」</div>
-                <div class="char-reply">
-                    <strong>${r.toName}からのお返事：</strong><br>
-                    ${r.reply.replace(/\n/g, '<br>')}
-                </div>
-            </div>
-        `).join('');
     } catch (e) {
-        console.error("お返事の読み込み失敗", e);
-        replyArea.innerHTML = "<p>返信の取得に失敗しました。</p>";
+        if (!cached) replyArea.innerHTML = "<p>お返事の取得に失敗したゾッ。</p>";
     }
+}
+function setupReplyFilter() {
+    const filterSelect = document.getElementById('reply-class-filter');
+    if (!filterSelect) return;
+
+    // スプレッドシートには「クラス」データがないので、宛先名(toName)から逆引きしてクラス一覧を作る
+    const classSet = new Set();
+    allRepliesData.forEach(r => {
+        const char = schoolData.characters.find(c => c.name === r.toName);
+        if (char && char.class) classSet.add(char.class);
+    });
+
+    const sortedClasses = Array.from(classSet).sort();
+    filterSelect.innerHTML = '<option value="all">すべてのお返事を見る</option>' + 
+                             sortedClasses.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+// --- プルダウンで選ばれた時の絞り込み実行 ---
+function filterReplies(className) {
+    if (className === 'all') {
+        renderRepliesHTML(allRepliesData);
+        return;
+    }
+    // 選ばれたクラスに属するキャラクターの宛先だけを抽出
+    const filtered = allRepliesData.filter(r => {
+        const char = schoolData.characters.find(c => c.name === r.toName);
+        return char && char.class === className;
+    });
+    renderRepliesHTML(filtered);
+}
+// --- お返事のHTMLを美しく組み立てる（カード型） ---
+function renderRepliesHTML(replies) {
+    const replyArea = document.getElementById('reply-display');
+    if (!replyArea) return;
+
+    replyArea.innerHTML = '';
+    if (!replies || replies.length === 0) {
+        replyArea.innerHTML = "<p style='text-align:center;'>まだお返事はないみたいだゾッ。</p>";
+        return;
+    }
+
+    replyArea.innerHTML = replies.map(r => {
+        const dateStr = r.date instanceof Date ? r.date.toLocaleDateString() : r.date;
+        
+        // アイコンを取得（なければComing Soon）
+        const charObj = schoolData.characters.find(c => c.name === r.toName);
+        const iconHTML = getCharImgHTML(charObj, 'char-circle-mini'); // ストーリーで使ったミニ丸枠を再利用
+
+        return `
+        <div class="reply-card">
+            <div class="reply-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    ${iconHTML}
+                    <span class="to-name">To: <strong>${r.toName}</strong></span>
+                </div>
+                <span class="reply-date">${dateStr}</span>
+            </div>
+            <div class="user-msg-box">
+                <p style="margin:0; font-size:0.9rem; color:#555;">💌 「${r.content.replace(/\n/g, '<br>')}」</p>
+            </div>
+            <div class="char-reply-box">
+                <strong style="color:var(--navy);"><i class="fas fa-reply"></i> お返事：</strong>
+                <p style="margin-top:10px; line-height: 1.8; white-space: pre-wrap;">${r.reply ? r.reply.replace(/\n/g, '<br>') : ''}</p>
+            </div>
+        </div>
+        `;
+    }).join('');
 }
 // --- 今日のとり表示（真・ランダム ＆ 画像ありキャラ限定版） ---
 function showTodayPickup() {
