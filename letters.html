@@ -48,6 +48,14 @@
 
         <section class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-reply-all"></i> 学園からのお返事</h2>
+            <!-- ★追加：お返事を探すためのプルダウン -->
+            <div style="text-align: center; margin-bottom: 20px;">
+                <select id="reply-class-filter" class="premium-select" style="max-width: 300px;" onchange="filterReplies(this.value)">
+                    <option value="all">すべてのお返事を見る</option>
+                    <!-- JSでクラス一覧が自動追加されます -->
+                </select>
+            </div>
+
             <div id="reply-display">
                 <!-- ここにお返事が並びます -->
             </div>
