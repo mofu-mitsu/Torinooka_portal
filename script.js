@@ -1710,6 +1710,12 @@ function renderGames() {
     
     const games = [
         { 
+            title: "Pair Palette (ペアパレット)", 
+            desc: "2vs2でNPCと対戦！アクション、囲み、パズル、オセロの4つのモードで遊べる陣取りゲーム🎨✨", 
+            url: "https://mofu-mitsu.github.io/PairPalette/", 
+            icon: "fa-palette" 
+        },
+        { 
             title: "UTAU音源：みりんてゃ", 
             desc: "みりんてゃの歌声がついに解禁っ♡ 50音から濁音・促音まで完全撮り下ろしの本格音源。あなたの手でみりんてゃを歌わせてあげてね♪", 
             url: "https://torisproject.booth.pm/items/8268069", 
