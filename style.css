@@ -1344,4 +1344,49 @@ body {
     border: 1px solid #ffb7c5;
     color: #333;
 }
+/* ==========================================
+   モーダル（ど真ん中固定 ＆ バツボタン見やすく）
+   ========================================== */
+.modal { 
+    display: none; 
+    position: fixed; 
+    z-index: 10000; 
+    left: 0; top: 0; 
+    width: 100vw; height: 100vh; /* 画面全体を確実に覆う */
+    background: rgba(0,0,0,0.85); 
+    backdrop-filter: blur(5px); 
+    overflow-y: auto; 
+    padding: 20px 0;
+    /* モーダルの中身を常にど真ん中にする魔法！ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
+/* ★初期表示時は flex ではなく none に戻しておくための上書き */
+#profile-modal, #secret-modal, #reply-modal {
+    display: none;
+}
+
+.modal-content { 
+    background: white; 
+    margin: auto; /* margin autoで中央寄せ */
+    padding: 35px; 
+    width: 90%; 
+    max-width: 600px; /* PCでも大きくなりすぎない */
+    border-radius: 30px; 
+    position: relative; 
+    text-align: center; 
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.close-btn { 
+    position: absolute; 
+    right: 20px; top: 15px; 
+    font-size: 2.5rem; 
+    color: #333; /* 確実に黒で見やすく！ */
+    cursor: pointer; 
+    z-index: 10000;
+    /* 背景が何色でも見えるように白枠をつける */
+    text-shadow: 0 0 5px white, 0 0 10px white; 
+}
