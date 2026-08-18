@@ -2,7 +2,7 @@ let currentStoryPage = 1;
 const storiesPerPage = 10;
 let filteredStories = [];
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbz8ZTPZCgmDJVhuyOVW1BeAVgwJf4e9yB-TI1m1jcESIDafQJQ7lgDDqkf4JBFAsm4SBQ/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbxGS5h8Tz2Vpfyts9YgfgaSuaFkmTlTRDsEgdVtsPP88M2gzL5STCgKnb3wqMehE6C-oA/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
@@ -393,8 +393,13 @@ async function executeSendBulletin(content, parentId) {
             body: JSON.stringify({ type: "bulletin", content: content, parentId: parentId, myPostId: myPostId }) 
         });
         showToast("投稿成功だゾッ！");
-        if (typeof currentBulletinPage !== 'undefined') loadBulletin(currentBulletinPage);
-        else loadBulletin();
+        
+        // ★ここを修正！確実に画面をリロード（再読み込み）させる！
+        // 非同期処理のズレを防ぐために少し待ってからリロードする
+        setTimeout(() => {
+            location.reload(); 
+        }, 1000);
+        
     } catch (e) { showToast("失敗したゾ..."); }
 }
 
