@@ -2,7 +2,7 @@ let currentStoryPage = 1;
 const storiesPerPage = 10;
 let filteredStories = [];
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbxGS5h8Tz2Vpfyts9YgfgaSuaFkmTlTRDsEgdVtsPP88M2gzL5STCgKnb3wqMehE6C-oA/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbzgARXg4twRp1hs7HuD1_Z48Pb0y8helDQV7ebO-a6kYSI-tWtCvk4Vkl6n36a0HmBdkQ/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
@@ -355,7 +355,7 @@ async function deleteMyPost(dateStr) {
 }
 
 // モーダルからの返信用
-async function submitReply() {
+function submitReply() {
     const textarea = document.getElementById('reply-content');
     if (!textarea) return;
     const content = textarea.value;
@@ -363,7 +363,7 @@ async function submitReply() {
 
     const savedParentId = currentReplyParentId; 
     closeReplyModal(); 
-    await executeSendBulletin(content, savedParentId); 
+    executeSendBulletin(content, savedParentId); 
 }
 
 function closeReplyModal() {
@@ -371,13 +371,17 @@ function closeReplyModal() {
     if (modal) modal.style.display = "none";
     currentReplyParentId = ""; // 記憶をリセット
 }
-async function sendBulletin() {
+function sendBulletin() {
     const inputEl = document.getElementById('bulletin-input');
-    if (!inputEl) return;
+    if (!inputEl) {
+        showToast("入力欄が見つからないゾッ！");
+        return;
+    }
     const content = inputEl.value;
-    if (!content) return;
-    await executeSendBulletin(content, ""); 
-    inputEl.value = ""; 
+    if (!content) return alert("内容を入力してね！");
+
+    executeSendBulletin(content, ""); 
+    inputEl.value = ""; // 入力欄を空に
 }
 // 通信（GASへ送る）の共通処理
 async function executeSendBulletin(content, parentId) {
@@ -389,20 +393,38 @@ async function executeSendBulletin(content, parentId) {
     showToast("掲示板に刻んでいます...");
     try {
         await fetch(GAS_URL, { 
-            method: "POST", mode: "no-cors", 
+            method: "POST", 
+            mode: "no-cors", 
+            // ★ 超重要：これがないとブラウザが通信をブロックする！
+            headers: { "Content-Type": "text/plain" },
             body: JSON.stringify({ type: "bulletin", content: content, parentId: parentId, myPostId: myPostId }) 
         });
         showToast("投稿成功だゾッ！");
-        
-        // ★ここを修正！確実に画面をリロード（再読み込み）させる！
-        // 非同期処理のズレを防ぐために少し待ってからリロードする
-        setTimeout(() => {
-            location.reload(); 
-        }, 1000);
-        
-    } catch (e) { showToast("失敗したゾ..."); }
+        setTimeout(() => { location.reload(); }, 1000); // 1秒待って確実にリロード
+    } catch (e) { 
+        showToast("失敗したゾ..."); 
+        console.error("POSTエラー:", e);
+    }
 }
 
+function requestDelete(dateStr, contentStr) {
+    if(!confirm("この投稿の削除要請を管理者に送りますか？")) return;
+    
+    // メールが長すぎないように内容を切り詰める
+    const shortContent = contentStr.substring(0, 50);
+
+    showToast("要請を送信中...");
+    fetch(GAS_URL, { 
+        method: "POST", 
+        mode: "no-cors", 
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ type: "delete_request", date: dateStr, content: shortContent }) 
+    }).then(() => {
+        showToast("管理者に通知したゾッ！");
+    }).catch(e => {
+        showToast("送信失敗だゾ...");
+    });
+}
 async function deletePost(dateStr) {
     const key = prompt("管理用合言葉を入れてね：");
     if (key !== "momoka11") return alert("合言葉が違うゾ！");
