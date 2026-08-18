@@ -2,7 +2,7 @@ let currentStoryPage = 1;
 const storiesPerPage = 10;
 let filteredStories = [];
 
-const GAS_URL = "https://script.google.com/macros/s/AKfycbzDxFS4mEfeL982zJ_67A_HBCtWYEccYBdjeovGqXh4sN_B5lC4eAR2v7hUODqcpRHckw/exec";
+const GAS_URL = "https://script.google.com/macros/s/AKfycbz8ZTPZCgmDJVhuyOVW1BeAVgwJf4e9yB-TI1m1jcESIDafQJQ7lgDDqkf4JBFAsm4SBQ/exec";
 
 document.addEventListener('DOMContentLoaded', () => {
     // 共通データの準備
@@ -361,13 +361,8 @@ async function submitReply() {
     const content = textarea.value;
     if (!content) return alert("返信内容を入力してね！");
 
-    // ★ 記憶がリセットされる前に、親IDを別の変数に避難させる！
     const savedParentId = currentReplyParentId; 
-    
-    // その後にモーダルを閉じる
     closeReplyModal(); 
-    
-    // 避難させておいた親IDを使って送信する！
     await executeSendBulletin(content, savedParentId); 
 }
 
@@ -376,26 +371,31 @@ function closeReplyModal() {
     if (modal) modal.style.display = "none";
     currentReplyParentId = ""; // 記憶をリセット
 }
-
+async function sendBulletin() {
+    const inputEl = document.getElementById('bulletin-input');
+    if (!inputEl) return;
+    const content = inputEl.value;
+    if (!content) return;
+    await executeSendBulletin(content, ""); 
+    inputEl.value = ""; 
+}
 // 通信（GASへ送る）の共通処理
 async function executeSendBulletin(content, parentId) {
+    const myPostId = "post_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+    let myPosts = JSON.parse(localStorage.getItem('my_bulletin_posts') || '[]');
+    myPosts.push(myPostId);
+    localStorage.setItem('my_bulletin_posts', JSON.stringify(myPosts));
+
     showToast("掲示板に刻んでいます...");
     try {
         await fetch(GAS_URL, { 
-            method: "POST", 
-            mode: "no-cors", 
-            body: JSON.stringify({ type: "bulletin", content: content, parentId: parentId }) 
+            method: "POST", mode: "no-cors", 
+            body: JSON.stringify({ type: "bulletin", content: content, parentId: parentId, myPostId: myPostId }) 
         });
         showToast("投稿成功だゾッ！");
-        // 書き込みが終わったら最新の掲示板を読み込み直す
-        if (typeof currentBulletinPage !== 'undefined') {
-            loadBulletin(currentBulletinPage); // bulletin.html用
-        } else {
-            loadBulletin(); // index.html用
-        }
-    } catch (e) { 
-        showToast("失敗したゾ..."); 
-    }
+        if (typeof currentBulletinPage !== 'undefined') loadBulletin(currentBulletinPage);
+        else loadBulletin();
+    } catch (e) { showToast("失敗したゾ..."); }
 }
 
 async function deletePost(dateStr) {
@@ -901,7 +901,7 @@ function renderBulletinHTML(data) {
                     <span class="post-date">${p.date}</span>
                     <div class="post-actions">
                         ${myDeleteBtn}
-                        <button class="req-btn" onclick="sendBulletin('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
+                        <button class="req-btn" onclick="openReplyModal('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
                         <button id="btn-replies-${postId}" class="req-btn" data-count="${replyCount}" onclick="toggleReplies('${p.date}', ${replyCount})">
                             <i class="fas fa-comments"></i> スレを開く (${replyCount})
                         </button>
@@ -958,22 +958,26 @@ async function sendReaction(dateStr, emoji) {
 // ==========================================
 // 掲示板：返信用モーダルの制御
 // ==========================================
-let currentReplyParentId = ""; // どの投稿に返信するかを記憶する変数
+let currentReplyParentId = ""; 
 
 function openReplyModal(parentId) {
-    currentReplyParentId = parentId; // 親投稿の日付（ID）を記憶！
+    currentReplyParentId = parentId; 
     const modal = document.getElementById('reply-modal');
     const textarea = document.getElementById('reply-content');
     if (modal && textarea) {
-        textarea.value = ""; // 入力欄をまっさらにする
+        textarea.value = ""; 
         modal.style.display = "block";
+    } else {
+        // もしHTMLにモーダルを貼り忘れていた場合の緊急用アラート
+        const content = prompt("返信内容を入力してください：");
+        if (content) executeSendBulletin(content, parentId);
     }
 }
 
 function closeReplyModal() {
     const modal = document.getElementById('reply-modal');
     if (modal) modal.style.display = "none";
-    currentReplyParentId = ""; // 記憶をリセット
+    currentReplyParentId = ""; 
 }
 
 
