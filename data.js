@@ -1290,7 +1290,7 @@ news:[
             "stage": "高等部",
             "class": "H1-3",
             "motif": "クマ",
-            "birthday": "3/3",
+            "birthday": "11/1",
             "bloodType": "O",
             "mbti": "ENFP",
             "socio": "IEE",
