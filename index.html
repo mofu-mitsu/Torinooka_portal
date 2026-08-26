@@ -1,122 +1,242 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <meta name="description" content="VISUAL ACCURACY — 視覚の精度に挑戦するミニゲーム集。">
-  <title>VISUAL ACCURACY | もふみつ工房</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- スマホ対応必須！ -->
+    <title>とりの丘学園 | 300人以上のキャラが登場する一次創作・学園ストーリー＆キャラ図鑑</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GNTX973GET"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-GNTX973GET');
+    </script>
+    <!-- ▼ここからSEO・OGP対策▼ -->
+    <meta name="description" content="300人以上の個性豊かなキャラクターが登場する一次創作「とりの丘学園」の公式ポータルサイト。キャラクター名鑑、ショートストーリー、MBTI性格分類、学園設定、ミニゲームなど豊富なコンテンツを掲載。">
+    <meta name="keywords" content="とりの丘学園, 一次創作, キャラクター, MBTI, 小説, ゲーム">
+    
+    <!-- OGP (SNSシェア時のカード表示) -->
+    <meta property="og:site_name" content="とりの丘学園 総合ポータル">
+    <meta property="og:title" content="とりの丘学園 | 総合ポータル">
+    <meta property="og:description" content="300人以上の個性豊かなキャラクターたちが織りなす一次創作「とりの丘学園」公式ポータル。">
+    <meta property="og:url" content="https://mofu-mitsu.github.io/Torinooka_portal/">
+    <meta property="og:image" content="https://mofu-mitsu.github.io/Torinooka_portal/images/ogp.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <!-- ▲ここまで▲ -->
+    
+    <link rel="icon" href="favicon.ico?v=2" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico?v=2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <div class="ambient ambient-a"></div>
-  <div class="ambient ambient-b"></div>
+<body class="home-page">
 
-  <!-- タイトル画面 -->
-  <main class="app-shell" id="appShell">
-    <!-- パンくずリスト -->
-    <nav class="breadcrumb">
-      <a href="https://mofu-mitsu.github.io/index.html">もふみつ工房</a> <span class="separator">＜</span> VISUAL ACCURACY
-    </nav>
+    <!-- ★ オープニングアニメーション -->
+    <div class="home-intro-overlay">
+        <img src="images/logo.png?v=1" class="intro-logo" alt="とりの丘学園">
+    </div>
 
-    <header class="hero landing-hero">
-      <div class="brand-mark" aria-hidden="true">
-        <span class="eye-orbit"></span>
-        <span class="eye-core"></span>
-      </div>
-      <p class="eyebrow">
-        VISUAL / ACCURACY<br>
-        <span class="jp-title">視覚感覚ゲーム</span>
-      </p>
-      <h1>YOUR EYES.<br><span>YOUR SCORE.</span></h1>
-      <p class="hero-copy">見て、合わせて、当てる。<br>6つのミニゲームで視覚の精度に挑戦。</p>
-      <button class="start-button" id="startButton">PLAY <span>→</span></button>
+    <!-- ヘッダー -->
+    <header class="main-header"> 
+        <div class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </div>
+        
+        <div class="logo-area" style="text-align: center;">
+            <!-- ★ onclick="secretClick(event)" を追加！ -->
+            <a href="index.html" onclick="secretClick(event)">
+                <img src="images/logo.png?v=1" alt="とりの丘学園" style="max-width: 250px; cursor: pointer;">
+            </a>
+            <p class="sub-title">Torinooka Academy Portal</p>
+        </div>
+        
+        <nav class="premium-nav" id="global-nav">
+            <a href="index.html" class="nav-item active">HOME</a>
+            <a href="chara.html" class="nav-item">生徒名簿</a>
+            <a href="life.html" class="nav-item">学校生活</a>
+            <a href="story.html" class="nav-item">ストーリー</a>
+            <a href="bulletin.html" class="nav-item">掲示板</a>
+            <a href="letters.html" class="nav-item">お手紙</a>
+            <a href="games.html" class="nav-item">コンテンツ</a>
+        </nav>
     </header>
 
-    <section class="landing-games" aria-label="ゲーム一覧">
-      <div class="landing-game-card" data-game="color"><b>01</b><strong>🎨 COLOR</strong><small>色を合わせる</small></div>
-      <div class="landing-game-card" data-game="angle"><b>02</b><strong>📐 ANGLE</strong><small>角度を合わせる</small></div>
-      <div class="landing-game-card" data-game="center"><b>03</b><strong>🎯 CENTER</strong><small>中心を狙う</small></div>
-      <div class="landing-game-card" data-game="length"><b>04</b><strong>📏 LENGTH</strong><small>長さを見抜く</small></div>
-      <div class="landing-game-card" data-game="difference"><b>05</b><strong>👁 DIFFERENCE</strong><small>違う色を探す</small></div>
-      <div class="landing-game-card" data-game="area"><b>06</b><strong>🔺 AREA</strong><small>面積を見積もる</small></div>
-    </section>
-
-    <footer class="landing-footer">VISUAL ACCURACY · SEE HOW CLOSE YOU CAN GET</footer>
-  </main>
-
-  <!-- ゲーム画面 -->
-  <section class="game-shell hidden" id="gameShell">
-    <div class="game-topbar">
-      <button class="back-button" id="backButton">← MENU</button>
-      <span>VISUAL ACCURACY</span>
-    </div>
-    
-    <div class="game-select" aria-label="ゲーム選択">
-      <button class="game-tab active" data-game="color"><span class="tab-icon">◆</span><strong>COLOR</strong><small>色を合わせる</small></button>
-      <button class="game-tab" data-game="angle"><span class="tab-icon">∠</span><strong>ANGLE</strong><small>角度を合わせる</small></button>
-      <button class="game-tab" data-game="center"><span class="tab-icon">⌾</span><strong>CENTER</strong><small>中心を狙う</small></button>
-      <button class="game-tab" data-game="length"><span class="tab-icon">↔</span><strong>LENGTH</strong><small>長さを見抜く</small></button>
-      <button class="game-tab" data-game="difference"><span class="tab-icon">◈</span><strong>DIFFERENCE</strong><small>違う色を探す</small></button>
-      <button class="game-tab" data-game="area"><span class="tab-icon">▧</span><strong>AREA</strong><small>面積を見積もる</small></button>
+    <!-- 豚骨スープの海 -->
+    <div id="soup-overlay" class="soup-overlay">
+        <h1 style="color: #8b4513;">🍜 豚骨スープの海 🍜</h1>
+        <p>「拙者のエキスだゾッ♡」</p>
     </div>
 
-    <section class="game-card" id="gameCard">
-      <div class="game-head">
-        <div>
-          <p class="game-kicker" id="gameKicker">GAME 01</p>
-          <h2 id="gameTitle">COLOR</h2>
+    <main class="container">
+        <!-- 学園理念 -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-university"></i> 学園理念</h2>
+            <div class="philosophy-box">
+                <p class="main-philo" id="school-philosophy"></p>
+                <p class="concept-text" id="school-concept"></p>
+            </div>
+        </section>
+        <!-- はじめての方へ（Welcomeガイド・開閉式） -->
+        <section class="luxury-section" id="welcome-guide">
+            <!-- ここをクリックで開閉！ -->
+            <div class="welcome-header" onclick="toggleWelcome()" style="cursor: pointer; text-align: center;">
+                <h2 class="gold-title" style="margin-bottom: 0; border-bottom: none; display: inline-block;">
+                    <i class="fas fa-map-signs"></i> はじめての方へ（楽しみ方ガイド） 
+                    <i class="fas fa-chevron-down" id="welcome-arrow" style="transition: 0.3s; color: var(--gold); margin-left: 10px;"></i>
+                </h2>
+            </div>
+
+            <!-- 最初は display: none; で隠しておく -->
+            <div id="welcome-content" style="display: none; padding-top: 20px; border-top: 2px solid var(--gold); margin-top: 15px;">
+                <p style="text-align: center; margin-bottom: 30px; font-weight: bold; color: var(--navy);">
+                    とりの丘学園へようこそ！まずはこの3つのステップで学園を楽しんでみてね。
+                </p>
+                <div class="step-grid">
+                    <!-- Step 1 -->
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <div class="step-icon"><i class="fas fa-id-badge"></i></div>
+                        <h3>生徒と出会う</h3>
+                        <p>300人以上の個性豊かな生徒から「推し」を見つけよう！プロフを見て、<strong>応援投票</strong>や匿名のお手紙を送ってみてね。</p>
+                        <a href="chara.html" class="step-btn">生徒名簿を見る</a>
+                    </div>
+                    <!-- Step 2 -->
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <div class="step-icon"><i class="fas fa-comments"></i></div>
+                        <h3>日常を楽しむ</h3>
+                        <p>学園の「今」を体験！<strong>掲示板</strong>で推しへの愛を語り合ったり、日替わりの学食を覗いたり、ミニゲームで遊んでみよう。</p>
+                        <a href="bulletin.html" class="step-btn">掲示板へ行く</a>
+                    </div>
+                    <!-- Step 3 -->
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <div class="step-icon"><i class="fas fa-book-open"></i></div>
+                        <h3>物語を辿る</h3>
+                        <p>学園で起きた事件や、生徒たちの過去・日常の記録。タグやクラスで検索して、彼らの深い関係性や秘密を知ろう。</p>
+                        <a href="story.html" class="step-btn">ストーリーを読む</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- 制作秘話 -->
+        <section class="luxury-section" id="about-torinooka">
+            <h2 class="gold-title"><i class="fas fa-book-reader"></i> とりの丘学園とは？</h2>
+            <div style="line-height: 1.8; color: #5d4037; padding: 20px; background: #fffcf0; border-radius: 15px; border: 1px solid #f8e1b4;">
+                <p><strong>300人以上のキャラクターたちが織りなす、一次創作の世界へようこそ！</strong></p>
+                <p>この学園の起源は、私がまだ子供だった頃にさかのぼります。<br>
+                愛犬の「桃花（ももか）」や、白猫のぬいぐるみ「みみか」たちを集めて、学校ごっこをして遊んでいたのがすべての始まりでした。</p>
+                <p>それから今日までずっと、私はキャラクターたちの設定を練り上げてきました。知識を得るたびに、彼らに深い命を吹き込んできたのです。<br>
+                <strong>「今まで構築してきたこの膨大な世界観を、活かさないのはもったいない！」</strong><br>
+                そんな強い思いから、プログラミングを学び、ツールを作り続け、ついにこの『公式ポータルサイト』が誕生しました。</p>
+                <p>このサイトは、彼らの物語を記録し、誰が見ても「この子はこういうキャラなんだ！」と一目でわかるようにするための場所です。<br>
+                とりの丘学園で生きる彼らの日常を、どうぞゆっくりと覗いていってください。</p>
+            </div>
+        </section>
+
+        <!-- 学園ニュース -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-newspaper"></i> 学園ニュース</h2>
+            <div id="news-display" class="news-container">
+                <!-- JSで描画 -->
+            </div>
+        </section>
+
+        <!-- 制服紹介 -->
+        <section class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-tshirt"></i> 制服コレクション</h2>
+            <p id="uniform-policy" class="policy-text"></p>
+            <div class="uniform-grid" id="uniform-display"></div>
+        </section>
+
+        <!-- 今日のとり -->
+        <section id="today-pickup" class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-star"></i> 今日のとり</h2>
+            <div id="random-char-display" class="pickup-content">
+                <!-- script.jsから入るよ -->
+            </div>
+        </section>
+
+        <!-- 学食・掲示板・カレンダー -->
+        <section class="luxury-section">
+            <div class="three-column">
+                <div class="menu-section">
+                    <h2 class="gold-title"><i class="fas fa-utensils"></i> 本日の学食</h2>
+                    <div id="today-menu-display"></div>
+                </div>
+                <div class="bulletin-section">
+                    <h2 class="gold-title"><i class="fas fa-clipboard"></i> 掲示板</h2>
+                    <div style="text-align:center; padding:20px;">
+                        <p>生徒たちの日常をのぞいてみよう</p>
+                        <a href="bulletin.html" class="premium-btn" style="text-decoration:none; display:inline-block;">掲示板を見に行く</a>
+                    </div>
+                </div>
+                <div class="calendar-section">
+                    <h2 class="gold-title"><i class="fas fa-calendar-alt"></i> カレンダー</h2>
+                    <div id="calendar-display"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 人気投票セクション -->
+        <section id="vote-section" class="luxury-section">
+            <h2 class="gold-title"><i class="fas fa-crown"></i> 月間人気投票</h2>
+            <p style="text-align:center;">お気に入りの生徒にエールを送りましょう！</p>
+            <div id="quick-vote-area" class="vote-grid"></div>
+            
+            <div id="ranking-board" style="margin-top: 30px;">
+                <h3><i class="fas fa-trophy"></i> 人気ランキング</h3>
+                <div id="ranking-display" class="ranking-container">
+                    <!-- GASから読み込まれます -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 秘密の部屋（イースターエッグ） -->
+        <div id="secret-modal" class="modal">
+            <div class="modal-content" style="background: #ffffd0; border: 10px solid #8b4513;">
+                <span class="close-btn" onclick="closeSecret()" style="color: #333;">&times;</span>
+                <div id="secret-body" style="text-align: center;">
+                    <h1 style="color: #d35400;">💪 汗と脂のファンタジー 💪</h1>
+                    <p>「よく来たな。プロテインと豚骨スープ、どっちがいいゾ？」</p>
+                    <div style="display: flex; justify-content: space-around; margin: 20px;">
+                        <div class="img-container char-circle-small"><img src="images/gohobi.png" onerror="this.src='images/coming_soon.png'"></div>
+                        <div class="img-container char-circle-small"><img src="images/eiji.png" onerror="this.src='images/coming_soon.png'"></div>
+                    </div>
+                    <button onclick="drinkFantasy()" class="drink-btn">秘伝のスープを飲み干す</button>
+                </div>
+            </div>
         </div>
-        <div class="round" id="roundLabel">ROUND 1</div>
-      </div>
-      <div id="gameContent"></div>
-      <div class="game-actions">
-        <button class="primary-button" id="submitButton">判定する <span>→</span></button>
-        <button class="ghost-button hidden" id="nextButton">NEXT ROUND →</button>
-        <button class="share-button hidden" id="shareButton">↗ SHARE</button>
-        <button class="save-button hidden" id="saveButton">↓ SAVE IMAGE</button>
-      </div>
-      <div class="feedback" id="feedback" aria-live="polite"></div>
-    </section>
+        
+        <!-- プロフィール等汎用モーダル -->
+        <div id="profile-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn" onclick="closeProfile()">&times;</span>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+    </main>
 
-    <section class="score-panel">
-      <div class="score-title">
-        <span>YOUR SCORES</span>
-        <span class="score-hint">SESSION HISTORY</span>
-      </div>
-      <div class="score-grid">
-        <div class="score-item"><span>🎨 COLOR</span><strong id="colorScore">—</strong></div>
-        <div class="score-item"><span>📐 ANGLE</span><strong id="angleScore">—</strong></div>
-        <div class="score-item"><span>🎯 CENTER</span><strong id="centerScore">—</strong></div>
-        <div class="score-item"><span>📏 LENGTH</span><strong id="lengthScore">—</strong></div>
-        <div class="score-item"><span>👁 DIFFERENCE</span><strong id="differenceScore">—</strong></div>
-        <div class="score-item"><span>🔺 AREA</span><strong id="areaScore">—</strong></div>
-      </div>
-      <div class="total-score">
-        <span>TOTAL ACCURACY</span><strong id="totalScore">—</strong>
-      </div>
-      <button class="result-button" id="resultButton">VIEW SESSION RESULT →</button>
-    </section>
-    <footer>VISUAL ACCURACY · SEE HOW CLOSE YOU CAN GET</footer>
-  </section>
+    <footer class="site-footer">
+        <div class="footer-container">
+            <div class="footer-links">
+                <a href="policy.html">プライバシーポリシー</a>
+                <a href="terms.html">利用規約</a>
+                <a href="mailto:momoka.mimika1122@gmail.com">お問い合わせ</a>
+            </div>
+            <a href="https://mofu-mitsu.github.io/" class="back-to-kobo-btn">
+                <i class="fas fa-home"></i> もふみつ工房へ戻る
+            </a>
+            <p class="copyright">&copy; 2026 もふみつ工房 / とりの丘学園 All Rights Reserved.</p>
+        </div>
+    </footer>
 
-  <!-- リザルト画面 -->
-  <section class="result-shell hidden" id="resultShell">
-    <div class="result-card" id="resultCard">
-      <div class="result-brand">VISUAL / ACCURACY</div>
-      <p class="result-kicker">SESSION RESULT</p>
-      <div class="result-total" id="resultTotal">—</div>
-      <div class="result-rank" id="resultRank">SHARP EYE</div>
-      <div class="result-divider"></div>
-      <div class="result-highlight">
-        <div><span>BEST GAME</span><strong id="bestGame">—</strong></div>
-        <div><span>HIGHEST SCORE</span><strong id="highestScore">—</strong></div>
-      </div>
-    </div>
-    <div class="result-actions">
-      <button class="ghost-button" id="resultBackButton">← BACK TO GAME</button>
-    </div>
-  </section>
+    <!-- トースト通知 -->
+    <div id="toast-container"></div>
 
-  <script src="script.js"></script>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
