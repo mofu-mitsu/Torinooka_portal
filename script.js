@@ -596,15 +596,22 @@ function renderStoryCards(stories) {
         return;
     }
 
+// --- renderStoryCards 関数の中の iconsHTML を作る部分をこれに上書き ---
     pagedStories.forEach(s => {
         const charNames = s.chars ? s.chars.split(/[、,]/).map(n => n.trim()) :[];
         const iconsHTML = charNames.map(name => {
             const charObj = schoolData.characters.find(c => c.name === name);
             let imgFile = charObj ? charObj.img : "";
-            if (charObj && charObj.imgIllust && s.useIllust === "true") imgFile = charObj.imgIllust;
+            
+            // ★最強のイラスト判定（大文字小文字・真偽値なんでもこい！）
+            const useIllustFlag = String(s.useIllust).toLowerCase() === "true";
+            
+            if (charObj && charObj.imgIllust && useIllustFlag) {
+                imgFile = charObj.imgIllust;
+            }
             return getCharImgHTML({ ...charObj, img: imgFile }, 'char-circle-mini');
         }).join('');
-
+        // ... (カードHTMLを組み立てる処理が続く) ...
         // 複数のタグを # をつけて横に並べる！
         const tagsHTML = s.tag ? s.tag.split(/[、,]/).map(t => `<span class="story-tag">#${t.trim()}</span>`).join(' ') : '';
         const preview = s.content ? s.content.replace(/\n/g, ' ').substring(0, 50) : "";
@@ -663,18 +670,29 @@ function changeStoryPage(offset) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 // --- ストーリー詳細表示（エラー対策版） ---
+// --- openFullStory 関数の中の iconsHTML を作る部分をこれに上書き ---
 function openFullStory(dateStr) {
     const s = allStories.find(story => String(story.date) === String(dateStr));
     if (!s) return;
+
     const modal = document.getElementById('profile-modal');
     const body = document.getElementById('modal-body');
+
     const charNames = s.chars ? s.chars.split(/[、,]/).map(n => n.trim()) : [];
     const iconsHTML = charNames.map(name => {
         const charObj = schoolData.characters.find(c => c.name === name);
         let imgFile = charObj ? charObj.img : "";
-        if (charObj && charObj.imgIllust && s.useIllust === "true") imgFile = charObj.imgIllust;
+        
+        // ★ここも最強のイラスト判定に！
+        const useIllustFlag = String(s.useIllust).toLowerCase() === "true";
+        
+        if (charObj && charObj.imgIllust && useIllustFlag) {
+            imgFile = charObj.imgIllust;
+        }
         return getCharImgHTML({ ...charObj, img: imgFile }, 'char-circle-mini');
     }).join('');
+
+    // ... (モーダルHTMLを組み立てる処理が続く) ...
 
     // 複数タグの表示
     const tagsHTML = s.tag ? s.tag.split(/[、,]/).map(t => `<span class="m-tag">${t.trim()}</span>`).join(' ') : '';
