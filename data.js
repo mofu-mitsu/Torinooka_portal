@@ -4311,7 +4311,7 @@ news:[
             "motif": "柊",
             "birthday": "11/8",
             "bloodType": "A",
-            "mbti": "INFP",
+            "mbti": "INFJ",
             "socio": "EII",
             "ennea": "6w5",
             "hometown": "埼玉県",
