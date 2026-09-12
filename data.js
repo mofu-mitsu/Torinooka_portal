@@ -5504,7 +5504,7 @@ news:[
             "motif": "猫",
             "birthday": "12/24",
             "bloodType": "AB",
-            "mbti": "INFP",
+            "mbti": "INFJ",
             "socio": "EII",
             "ennea": "4w5",
             "hometown": "東京都",
