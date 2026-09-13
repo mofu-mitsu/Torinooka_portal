@@ -6552,7 +6552,7 @@ news:[
     },
     {
         "id": "homare",
-        "fullName": "閤師 誉（こうし こまれ）",
+        "fullName": "閤師 誉（こうし ほまれ）",
         "name": "ほまれ",
         "gender": "男子",
         "stage": "初等部",
