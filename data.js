@@ -6073,7 +6073,7 @@ news:[
             "gender": "男子",
             "stage": "大学部",
             "class": "university",
-            "motif": "ツグミ",
+            "motif": "烏骨鶏",
             "birthday": "8/26",
             "bloodType": "A",
             "mbti": "ESFJ",
