@@ -4313,7 +4313,7 @@ news:[
             "gender": "女子",
             "stage": "中等部",
             "class": "M2-1",
-            "motif": "柊",
+            "motif": "ツグミ",
             "birthday": "11/8",
             "bloodType": "A",
             "mbti": "INFJ",
