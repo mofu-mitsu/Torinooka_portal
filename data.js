@@ -2928,7 +2928,7 @@ news:[
             "stage": "高等部",
             "class": "H3-2",
             "motif": "猫",
-            "birthday": "8/2",
+            "birthday": "9/13",
             "bloodType": "A",
             "mbti": "ESTP",
             "socio": "SEE",
