@@ -2114,7 +2114,7 @@ news:[
         "stage": "高等部",
         "class": "H2-1",
         "motif": "猫",
-        "birthday": "2/29",
+        "birthday": "4/21",
         "bloodType": "B",
         "mbti": "ENTP",
         "socio": "ILE",
