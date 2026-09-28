@@ -2972,7 +2972,7 @@ news:[
             "stage": "高等部",
             "class": "H3-2",
             "motif": "コアラ",
-            "birthday": "3/30",
+            "birthday": "6/24",
             "bloodType": "O",
             "mbti": "ESTP",
             "socio": "SLI",
