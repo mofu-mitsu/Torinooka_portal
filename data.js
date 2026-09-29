@@ -6646,7 +6646,7 @@ news:[
         "stage": "初等部",
         "class": "E-A",
         "motif": "猫",
-        "birthday": "7/27",
+        "birthday": "4/8",
         "bloodType": "B",
         "mbti": "ESFJ",
         "socio": "ESE",
