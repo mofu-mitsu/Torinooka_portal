@@ -850,25 +850,79 @@ function showVoteCharsByClass(className) {
         display.appendChild(card);
     });
 }
+// ==========================================
+// ランキングの爆速表示 ＆ 描画
+// ==========================================
 async function loadRanking() {
     const rankingArea = document.getElementById('ranking-display');
     if (!rankingArea) return;
 
+    // 1. まずブラウザの記憶があれば一瞬で表示！
     const cached = safeGetStorage('cache_ranking');
-    if (cached) renderRankingHTML(JSON.parse(cached));
-    else toggleLoading('ranking-display', true);
+    if (cached) {
+        try { 
+            renderRankingHTML(JSON.parse(cached)); 
+        } catch(e) {}
+    } else {
+        // 記憶がない時だけローディング
+        toggleLoading('ranking-display', true);
+    }
 
+    // 2. 裏で最新のランキングを取得しにいく
     try {
         const response = await fetchWithRetry(GAS_URL + "?type=ranking");
         const ranking = await response.json();
         
+        // 記憶と違う（票が動いた）場合だけ画面を更新！
         if (JSON.stringify(ranking) !== cached) {
             safeSetStorage('cache_ranking', JSON.stringify(ranking));
-            renderRankingHTML(ranking);
+            renderRankingHTML(ranking); // ★ここで下の関数を呼び出しているよ！
         }
     } catch (e) {
-        if (!cached) rankingArea.innerHTML = "<p>ランキング取得に失敗しました</p>";
+        if (!cached) rankingArea.innerHTML = "<p style='text-align:center'>ランキング取得に失敗しました</p>";
     }
+}
+
+// ★ここが抜け落ちていた「HTMLを作るための専用関数」だゾッ！
+function renderRankingHTML(ranking) {
+    const rankingArea = document.getElementById('ranking-display');
+    if (!rankingArea) return;
+
+    rankingArea.innerHTML = '';
+    
+    // もし誰も投票していなかったら
+    if (!ranking || ranking.length === 0) {
+        rankingArea.innerHTML = "<p style='text-align:center;'>今月の集計はまだありません。</p>";
+        return;
+    }
+
+    // 取得したランキングデータをHTMLに変換して並べる！
+    rankingArea.innerHTML = ranking.map((r, i) => {
+        const char = schoolData.characters.find(c => c.name === r.name);
+        let imgFile = char ? char.img : "";
+        
+        // ★ imgIllustを持っている子は、ランキングでは常にイラストを表示する
+        if (char && char.imgIllust) {
+            imgFile = char.imgIllust;
+        }
+
+        const imgHTML = getCharImgHTML({ ...char, img: imgFile }, 'rank-img');
+        
+        let rankMsg = "";
+        if (i === 0) rankMsg = char?.rankQuote1 || "「応援ありがとうだゾッ！」";
+        else if (i === 1) rankMsg = char?.rankQuote2 || "「2位、嬉しいです！」";
+        else if (i === 2) rankMsg = char?.rankQuote3 || "「3位、感謝です！」";
+
+        return `
+            <div class="ranking-item rank-${i+1}">
+                <div class="rank-badge">${i + 1}</div>
+                <div class="rank-img-wrap">${imgHTML}</div>
+                <div class="rank-content">
+                    <span class="rank-name-text">${r.name} ${r.count} 票</span>
+                    <p class="rank-quote">${rankMsg}</p>
+                </div>
+            </div>`;
+    }).join('');
 }
 function renderCharacterCards(characters) {
     const grid = document.getElementById('char-grid');
