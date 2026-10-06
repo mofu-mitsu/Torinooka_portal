@@ -1759,6 +1759,18 @@ function renderGames() {
     
     const games = [
         { 
+            title: "Botanical Fleur (ボタニカル・フルール)", 
+            desc: "花言葉や誕生花を調べられる美しいサイト。キャラのイメージフラワーを探してみてね🌸", 
+            url: "https://botanical-fleur.vercel.app/", 
+            icon: "fa-seedling" 
+        },
+        { 
+            title: "ネオンホッケー", 
+            desc: "ネオン輝く盤面で白熱バトル！ホッケーを中心に、ビリヤードやカーリングでも遊べるよ🏑", 
+            url: "https://neon-hockey-mu.vercel.app/", 
+            icon: "fa-hockey-puck" 
+        },
+        { 
             title: "Pair Palette (ペアパレット)", 
             desc: "2vs2でNPCと対戦！アクション、囲み、パズル、オセロの4つのモードで遊べる陣取りゲーム🎨✨", 
             url: "https://mofu-mitsu.github.io/PairPalette/", 
