@@ -535,10 +535,12 @@ async function loadStories() {
 
     const cached = safeGetStorage('cache_stories');
     if (cached) {
-        allStories = JSON.parse(cached);
-        filteredStories = allStories;
-        renderStoryFilters();
-        renderStoryCards(allStories);
+        try {
+            allStories = JSON.parse(cached);
+            filteredStories = allStories;
+            renderStoryFilters();
+            renderStoryCards(allStories);
+        } catch(e) {}
     } else {
         list.innerHTML = `<div class="loading-area" style="text-align:center; padding:50px;"><div class="loading-spinner"></div><p>記録を読み込み中...</p></div>`;
     }
@@ -558,6 +560,7 @@ async function loadStories() {
         if (!cached) list.innerHTML = "<p>物語の読み込みに失敗したゾッ。</p>";
     }
 }
+
 // タグボタンを自動で作る魔法の関数
 function renderDynamicTagFilters(stories) {
     const filterArea = document.getElementById('story-filters');
@@ -894,22 +897,21 @@ async function loadBulletin(page = 1) {
     if (!board) return;
 
     const cacheKey = 'cache_bulletin_' + page;
-    const cached = safeGetStorage(cacheKey); // ★安全な記憶引き出し
+    const cached = safeGetStorage(cacheKey);
     
     if (cached) {
-        renderBulletinHTML(JSON.parse(cached));
+        try { drawBulletinHTML(JSON.parse(cached), board); } catch(e) {}
     } else {
         board.innerHTML = "<div style='text-align:center; padding:40px;'><div class='loading-spinner'></div><p>ログを読み込み中...</p></div>";
     }
 
     try {
-        // ★普通のfetchから、絶対諦めないfetchに変更！
         const response = await fetchWithRetry(`${GAS_URL}?type=bulletin&page=${page}`);
         const data = await response.json();
         
         if (JSON.stringify(data) !== cached) {
-            safeSetStorage(cacheKey, JSON.stringify(data)); // ★安全な記憶保存
-            renderBulletinHTML(data);
+            safeSetStorage(cacheKey, JSON.stringify(data));
+            drawBulletinHTML(data, board);
         }
     } catch (e) {
         if (!cached) board.innerHTML = "<p style='text-align:center'>掲示板の読み込みに失敗したゾッ。<br><small>LINEなら右下のボタンから『ブラウザで開く』を試してみてね！</small></p>";
@@ -1863,18 +1865,14 @@ function safeGetStorage(key, isLocal = false) {
     try {
         const storage = isLocal ? localStorage : sessionStorage;
         return storage.getItem(key);
-    } catch (e) {
-        return null; // 記憶できない環境ならnullを返してエラーを防ぐ！
-    }
+    } catch (e) { return null; }
 }
 
 function safeSetStorage(key, value, isLocal = false) {
     try {
         const storage = isLocal ? localStorage : sessionStorage;
         storage.setItem(key, value);
-    } catch (e) {
-        // 記憶できなくても文句を言わずスルーする！
-    }
+    } catch (e) {}
 }
 // ==========================================
 // 11. はじめての方へ（Welcomeガイド）の開閉
@@ -1897,17 +1895,78 @@ async function fetchWithRetry(url, options = {}, maxRetries = 3) {
     for (let i = 0; i < maxRetries; i++) {
         try {
             const response = await fetch(url, options);
-            if (!response.ok) throw new Error("HTTP Status Error");
+            // POST（no-cors）の時はエラー判定をスルーする（バグ防止！）
+            if (options.mode !== 'no-cors' && !response.ok) {
+                throw new Error(`HTTP Error: ${response.status}`);
+            }
             return response;
         } catch (error) {
             console.warn(`通信エラー ${i + 1}回目...`, error);
             if (i === maxRetries - 1) throw error; 
-            
-            // GET（読み込み）の時はトーストを出さないで裏でひっそり頑張る
             if (options.method === "POST") {
                 showToast(`通信が不安定みたい…再接続するゾッ（${i + 1}/2回目）`);
             }
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // 待機して再アタック
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); 
         }
     }
+}
+function drawBulletinHTML(data, board) {
+    const allPosts = data.posts;
+    if (!allPosts || allPosts.length === 0) {
+        board.innerHTML = "<p style='text-align:center'>まだ書き込みはないゾッ。</p>";
+        return;
+    }
+
+    const mainPosts = allPosts.filter(p => !p.parentId);
+    const replies = allPosts.filter(p => p.parentId);
+    const myPosts = JSON.parse(safeGetStorage('my_bulletin_posts', true) || '[]');
+
+    board.innerHTML = mainPosts.map(p => {
+        const threadReplies = replies.filter(r => r.parentId === p.date);
+        const replyCount = threadReplies.length;
+        const postId = p.date.replace(/[:\s/]/g, '');
+
+        let reacts = {}; try { reacts = JSON.parse(p.reactions) || {}; } catch(e) {}
+        const myDeleteBtn = myPosts.includes(p.myPostId) ? `<button class="req-btn delete-req" onclick="deleteMyPost('${p.date}')"><i class="fas fa-trash"></i> 削除(自分)</button>` : '';
+
+        return `
+            <div class="bulletin-post thread-style">
+                <div class="post-header">
+                    <span class="post-date">${p.date}</span>
+                    <div class="post-actions">
+                        ${myDeleteBtn}
+                        <button class="req-btn" onclick="sendBulletin('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
+                        <button id="btn-replies-${postId}" class="req-btn" data-count="${replyCount}" onclick="toggleReplies('${p.date}')">
+                            <i class="fas fa-comments"></i> スレを開く (${replyCount})
+                        </button>
+                        <button class="req-btn" style="color:#aaa; border-color:#eee;" onclick="requestDelete('${p.date}', '${p.content}')">削除要請</button>
+                    </div>
+                </div>
+                <p class="post-content" style="white-space: pre-wrap;">${p.content}</p>
+                <div class="post-reactions">
+                    <span class="reaction-btn" onclick="sendReaction(this, '${p.date}', '👍')">👍 ${reacts['👍'] || 0}</span>
+                    <span class="reaction-btn" onclick="sendReaction(this, '${p.date}', '❤️')">❤️ ${reacts['❤️'] || 0}</span>
+                    <span class="reaction-btn" onclick="sendReaction(this, '${p.date}', '😂')">😂 ${reacts['😂'] || 0}</span>
+                    <span class="reaction-btn" onclick="sendReaction(this, '${p.date}', '👀')">👀 ${reacts['👀'] || 0}</span>
+                </div>
+                <div id="replies-${postId}" class="replies-container" style="display:none;">
+                    ${threadReplies.length > 0 ? threadReplies.map(r => {
+                        let rReacts = {}; try { rReacts = JSON.parse(r.reactions) || {}; } catch(e) {}
+                        const myReplyDelBtn = myPosts.includes(r.myPostId) ? `<button class="req-btn delete-req" style="padding:2px 8px; font-size:0.7rem;" onclick="deleteMyPost('${r.date}')">削除</button>` : '';
+                        return `
+                        <div class="reply-item">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <small>${r.date}</small>
+                                ${myReplyDelBtn}
+                            </div>
+                            <p style="white-space: pre-wrap;">${r.content}</p>
+                            <div class="post-reactions" style="margin-top: 5px;">
+                                <span class="reaction-btn" onclick="sendReaction(this, '${r.date}', '👍')">👍 ${rReacts['👍'] || 0}</span>
+                                <span class="reaction-btn" onclick="sendReaction(this, '${r.date}', '❤️')">❤️ ${rReacts['❤️'] || 0}</span>
+                            </div>
+                        </div>`
+                    }).join('') : '<p style="font-size:0.8rem; color:#888;">まだ返信はないゾッ。</p>'}
+                </div>
+            </div>`;
+    }).join('');
 }
