@@ -34,11 +34,16 @@ document.addEventListener('DOMContentLoaded', () => {
         renderVoteClassButtons(classList); 
         initLetterClassSelect(classList);  
         showTodayPickup();
-        loadReplies();
-        loadRanking();
         showTodayMenu();
-        loadBulletin();
         renderNews();
+
+        // ★【渋滞解消】同時に通信させず、1つずつ順番に読み込んでGoogleを休ませる！
+        const loadHomeDataSafely = async () => {
+            await loadRanking();
+            await loadBulletin();
+            await loadReplies();
+        };
+        loadHomeDataSafely();
     }
 
     // --- 生徒名簿 (chara.html) ---
@@ -112,28 +117,39 @@ function scheduleNextGohobi() {
 }
 
 async function silentPreload() {
-    // 1回の訪問につき1度だけ裏読み込みを行う
+    // 1回の訪問につき1度だけ実行
     if (sessionStorage.getItem('is_preloaded')) return;
     sessionStorage.setItem('is_preloaded', 'true');
 
-    console.log("【システム】裏でこっそりデータを準備中だゾッ...");
+    console.log("【システム】Googleサーバーが渋滞しないように、1つずつ順番に裏でデータを取ってくるゾッ...");
+    
     try {
-        // 順番にGASからデータを取ってきて、ブラウザの短期記憶（sessionStorage）に叩き込む！
-        const resBulletin = await fetch(GAS_URL + "?type=bulletin&page=1");
+        // 1. 掲示板を取得
+        const resBulletin = await fetchWithRetry(GAS_URL + "?type=bulletin&page=1");
         sessionStorage.setItem('cache_bulletin_1', JSON.stringify(await resBulletin.json()));
+        
+        // ★ 1秒休む（Googleのサーバーの警戒を解く）
+        await new Promise(r => setTimeout(r, 1000)); 
 
-        const resStories = await fetch(GAS_URL + "?type=stories");
+        // 2. ストーリーを取得
+        const resStories = await fetchWithRetry(GAS_URL + "?type=stories");
         sessionStorage.setItem('cache_stories', JSON.stringify(await resStories.json()));
 
-        const resRanking = await fetch(GAS_URL + "?type=ranking");
+        await new Promise(r => setTimeout(r, 1000)); 
+
+        // 3. ランキングを取得
+        const resRanking = await fetchWithRetry(GAS_URL + "?type=ranking");
         sessionStorage.setItem('cache_ranking', JSON.stringify(await resRanking.json()));
 
-        const resReplies = await fetch(GAS_URL + "?type=replies");
+        await new Promise(r => setTimeout(r, 1000)); 
+
+        // 4. お返事を取得
+        const resReplies = await fetchWithRetry(GAS_URL + "?type=replies");
         sessionStorage.setItem('cache_replies', JSON.stringify(await resReplies.json()));
 
-        console.log("【システム】裏読み込み完了！これで次から0秒で開くゾッ！");
+        console.log("【システム】裏読み込み完了！これで他のページを開いた時に0秒で表示されるゾッ！");
     } catch (e) {
-        console.error("裏読み込み失敗（気にしなくてOK）", e);
+        console.warn("裏読み込みが一部失敗したけど、メインの動作には影響ないゾッ", e);
     }
 }
 
@@ -837,37 +853,22 @@ function showVoteCharsByClass(className) {
 async function loadRanking() {
     const rankingArea = document.getElementById('ranking-display');
     if (!rankingArea) return;
+
+    const cached = safeGetStorage('cache_ranking');
+    if (cached) renderRankingHTML(JSON.parse(cached));
+    else toggleLoading('ranking-display', true);
+
     try {
-        const response = await fetch(GAS_URL + "?type=ranking");
+        const response = await fetchWithRetry(GAS_URL + "?type=ranking");
         const ranking = await response.json();
-        rankingArea.innerHTML = '';
-
-        if (!ranking || ranking.length === 0) {
-            rankingArea.innerHTML = "<p>まだ集計はありません。</p>"; // 文言変更
-            return;
+        
+        if (JSON.stringify(ranking) !== cached) {
+            safeSetStorage('cache_ranking', JSON.stringify(ranking));
+            renderRankingHTML(ranking);
         }
-
-        rankingArea.innerHTML = ranking.map((r, i) => {
-            const char = schoolData.characters.find(c => c.name === r.name);
-            let imgFile = char ? char.img : "";
-            if (char && char.imgIllust) { imgFile = char.imgIllust; }
-            const imgHTML = getCharImgHTML({ ...char, img: imgFile }, 'rank-img');
-            let rankMsg = "";
-            if (i === 0) rankMsg = char?.rankQuote1 || "応援ありがとうございます！";
-            else if (i === 1) rankMsg = char?.rankQuote2 || "2位、嬉しいです！";
-            else if (i === 2) rankMsg = char?.rankQuote3 || "3位、感謝です！";
-
-            return `
-                <div class="ranking-item rank-${i+1}">
-                    <div class="rank-badge">${i + 1}</div>
-                    <div class="rank-img-wrap">${imgHTML}</div>
-                    <div class="rank-content">
-                        <span class="rank-name-text">${r.name} ${r.count} 票</span>
-                        <p class="rank-quote">${rankMsg}</p>
-                    </div>
-                </div>`;
-        }).join('');
-    } catch (e) { console.error("ランキング取得失敗"); }
+    } catch (e) {
+        if (!cached) rankingArea.innerHTML = "<p>ランキング取得に失敗しました</p>";
+    }
 }
 function renderCharacterCards(characters) {
     const grid = document.getElementById('char-grid');
