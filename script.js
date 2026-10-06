@@ -533,24 +533,24 @@ async function loadStories() {
     const list = document.getElementById('story-list');
     if (!list) return;
 
-    const cached = sessionStorage.getItem('cache_stories');
+    const cached = safeGetStorage('cache_stories');
     if (cached) {
         allStories = JSON.parse(cached);
         filteredStories = allStories;
         renderStoryFilters();
         renderStoryCards(allStories);
     } else {
-        list.innerHTML = `<div class="loading-area"><div class="loading-spinner"></div><p>記録を読み込み中...</p></div>`;
+        list.innerHTML = `<div class="loading-area" style="text-align:center; padding:50px;"><div class="loading-spinner"></div><p>記録を読み込み中...</p></div>`;
     }
 
     try {
-        const response = await fetch(GAS_URL + "?type=stories");
+        const response = await fetchWithRetry(GAS_URL + "?type=stories");
         const freshData = await response.json();
         
         if (JSON.stringify(allStories) !== JSON.stringify(freshData)) {
             allStories = freshData;
             filteredStories = allStories;
-            sessionStorage.setItem('cache_stories', JSON.stringify(allStories));
+            safeSetStorage('cache_stories', JSON.stringify(allStories));
             renderStoryFilters();
             renderStoryCards(allStories);
         }
@@ -558,7 +558,6 @@ async function loadStories() {
         if (!cached) list.innerHTML = "<p>物語の読み込みに失敗したゾッ。</p>";
     }
 }
-
 // タグボタンを自動で作る魔法の関数
 function renderDynamicTagFilters(stories) {
     const filterArea = document.getElementById('story-filters');
@@ -895,29 +894,28 @@ async function loadBulletin(page = 1) {
     if (!board) return;
 
     const cacheKey = 'cache_bulletin_' + page;
-    const cached = sessionStorage.getItem(cacheKey);
-
-    // ★ 記憶があれば、ローディングを出さずに0秒で表示！
+    const cached = safeGetStorage(cacheKey); // ★安全な記憶引き出し
+    
     if (cached) {
         renderBulletinHTML(JSON.parse(cached));
     } else {
         board.innerHTML = "<div style='text-align:center; padding:40px;'><div class='loading-spinner'></div><p>ログを読み込み中...</p></div>";
     }
 
-    // 裏側で最新のデータを確認しに行く
     try {
-        const response = await fetch(`${GAS_URL}?type=bulletin&page=${page}`);
+        // ★普通のfetchから、絶対諦めないfetchに変更！
+        const response = await fetchWithRetry(`${GAS_URL}?type=bulletin&page=${page}`);
         const data = await response.json();
         
-        // 記憶と違う（新しい書き込みがあった）場合だけ、画面をコッソリ塗り替える
         if (JSON.stringify(data) !== cached) {
-            sessionStorage.setItem(cacheKey, JSON.stringify(data));
+            safeSetStorage(cacheKey, JSON.stringify(data)); // ★安全な記憶保存
             renderBulletinHTML(data);
         }
     } catch (e) {
-        if (!cached) board.innerHTML = "<p>掲示板の読み込みに失敗したゾッ。</p>";
+        if (!cached) board.innerHTML = "<p style='text-align:center'>掲示板の読み込みに失敗したゾッ。<br><small>LINEなら右下のボタンから『ブラウザで開く』を試してみてね！</small></p>";
     }
 }
+
 
 // 掲示板のHTMLを作る部分（分離してスッキリさせたよ）
 function renderBulletinHTML(data) {
@@ -1089,22 +1087,22 @@ async function loadReplies() {
     const replyArea = document.getElementById('reply-display');
     if (!replyArea) return;
 
-    const cached = sessionStorage.getItem('cache_replies');
+    const cached = safeGetStorage('cache_replies');
     if (cached) {
         allRepliesData = JSON.parse(cached);
-        setupReplyFilter(); // プルダウンを準備
+        setupReplyFilter();
         renderRepliesHTML(allRepliesData);
     } else {
         replyArea.innerHTML = `<div style="text-align:center; padding:40px;"><div class="loading-spinner"></div><p>お返事を探しています...</p></div>`;
     }
 
     try {
-        const response = await fetch(GAS_URL + "?type=replies");
+        const response = await fetchWithRetry(GAS_URL + "?type=replies");
         const freshData = await response.json();
         
         if (JSON.stringify(freshData) !== cached) {
             allRepliesData = freshData;
-            sessionStorage.setItem('cache_replies', JSON.stringify(freshData));
+            safeSetStorage('cache_replies', JSON.stringify(freshData));
             setupReplyFilter();
             renderRepliesHTML(allRepliesData);
         }
@@ -1861,7 +1859,23 @@ function openImageModal(imgSrc) {
     `;
     modal.style.display = "block";
 }
+function safeGetStorage(key, isLocal = false) {
+    try {
+        const storage = isLocal ? localStorage : sessionStorage;
+        return storage.getItem(key);
+    } catch (e) {
+        return null; // 記憶できない環境ならnullを返してエラーを防ぐ！
+    }
+}
 
+function safeSetStorage(key, value, isLocal = false) {
+    try {
+        const storage = isLocal ? localStorage : sessionStorage;
+        storage.setItem(key, value);
+    } catch (e) {
+        // 記憶できなくても文句を言わずスルーする！
+    }
+}
 // ==========================================
 // 11. はじめての方へ（Welcomeガイド）の開閉
 // ==========================================
@@ -1879,25 +1893,21 @@ function toggleWelcome() {
         arrow.style.transform = 'rotate(0deg)';
     }
 }
-async function fetchWithRetry(url, options, maxRetries = 3) {
+async function fetchWithRetry(url, options = {}, maxRetries = 3) {
     for (let i = 0; i < maxRetries; i++) {
         try {
-            // 通信アタック開始！
             const response = await fetch(url, options);
-            return response; // 成功したらループを抜けて終了
+            if (!response.ok) throw new Error("HTTP Status Error");
+            return response;
         } catch (error) {
             console.warn(`通信エラー ${i + 1}回目...`, error);
+            if (i === maxRetries - 1) throw error; 
             
-            // もし最後の1回（3回目）もダメだったら、諦めてエラーを出す
-            if (i === maxRetries - 1) {
-                throw error; 
+            // GET（読み込み）の時はトーストを出さないで裏でひっそり頑張る
+            if (options.method === "POST") {
+                showToast(`通信が不安定みたい…再接続するゾッ（${i + 1}/2回目）`);
             }
-            
-            // ユーザーを不安にさせないための実況トースト
-            showToast(`通信が不安定みたい…再接続するゾッ（${i + 1}/2回目）`);
-            
-            // 少しだけ待機（1回目は1秒、2回目は2秒待ってから再アタック）
-            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1))); // 待機して再アタック
         }
     }
 }
