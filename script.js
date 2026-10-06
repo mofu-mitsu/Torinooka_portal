@@ -955,12 +955,12 @@ function renderBulletinHTML(data) {
                     </div>
                 </div>
                 <p class="post-content" style="white-space: pre-wrap;">${p.content}</p>
-                <div class="post-reactions">
-                    <span class="reaction-btn" onclick="sendReaction('${p.date}', '👍')">👍 ${reacts['👍'] || 0}</span>
-                    <span class="reaction-btn" onclick="sendReaction('${p.date}', '❤️')">❤️ ${reacts['❤️'] || 0}</span>
-                    <span class="reaction-btn" onclick="sendReaction('${p.date}', '😂')">😂 ${reacts['😂'] || 0}</span>
-                    <span class="reaction-btn" onclick="sendReaction('${p.date}', '👀')">👀 ${reacts['👀'] || 0}</span>
-                </div>
+                    <div class="post-reactions">
+                        <span class="reaction-btn" onclick="sendReaction(this, '${p.date}', '👍')">👍 ${reacts['👍'] || 0}</span>
+                        <span class="reaction-btn" onclick="sendReaction(this, '${p.date}', '❤️')">❤️ ${reacts['❤️'] || 0}</span>
+                        <span class="reaction-btn" onclick="sendReaction(this, '${p.date}', '😂')">😂 ${reacts['😂'] || 0}</span>
+                        <span class="reaction-btn" onclick="sendReaction(this, '${p.date}', '👀')">👀 ${reacts['👀'] || 0}</span>
+                    </div>
                 <div id="replies-${postId}" class="replies-container" style="display:none;">
                     ${threadReplies.length > 0 ? threadReplies.map(r => {
                         let rReacts = {}; try { rReacts = JSON.parse(r.reactions) || {}; } catch(e) {}
@@ -972,10 +972,10 @@ function renderBulletinHTML(data) {
                                 ${myReplyDelBtn}
                             </div>
                             <p style="white-space: pre-wrap;">${r.content}</p>
-                            <div class="post-reactions" style="margin-top: 5px;">
-                                <span class="reaction-btn" onclick="sendReaction('${r.date}', '👍')">👍 ${rReacts['👍'] || 0}</span>
-                                <span class="reaction-btn" onclick="sendReaction('${r.date}', '❤️')">❤️ ${rReacts['❤️'] || 0}</span>
-                            </div>
+                                <div class="post-reactions" style="margin-top: 5px;">
+                                    <span class="reaction-btn" onclick="sendReaction(this, '${r.date}', '👍')">👍 ${rReacts['👍'] || 0}</span>
+                                    <span class="reaction-btn" onclick="sendReaction(this, '${r.date}', '❤️')">❤️ ${rReacts['❤️'] || 0}</span>
+                                </div>
                         </div>`
                     }).join('') : '<p style="font-size:0.8rem; color:#888;">まだ返信はないゾッ。</p>'}
                 </div>
@@ -983,22 +983,35 @@ function renderBulletinHTML(data) {
     }).join('');
 }
 
-async function sendReaction(dateStr, emoji) {
-    showToast("リアクション送信中...");
+async function sendReaction(btnElement, dateStr, emoji) {
+    // 1. 【即時反映】画面上の数字を先に「+1」しちゃう！
+    const text = btnElement.innerText; 
+    const match = text.match(/\d+/); // 数字の部分だけを取り出す
+    
+    if (match) {
+        const currentCount = parseInt(match[0], 10);
+        btnElement.innerText = `${emoji} ${currentCount + 1}`;
+    } else {
+        btnElement.innerText = `${emoji} 1`;
+    }
+
+    // ★ 連打防止コードを削除！
+    // その代わり、押した時に「ポヨンッ！」と少し大きくなるアニメーションをつけて「押した感」を出すゾッ
+    btnElement.style.transform = 'scale(1.2)';
+    btnElement.style.transition = 'transform 0.1s';
+    setTimeout(() => { btnElement.style.transform = 'scale(1)'; }, 100);
+
+    // 2. 【裏側で通信】何度連打されても、裏で一生懸命GASへ送り続ける！
     try {
-        await fetch(GAS_URL, { 
+        // 先ほど作った最強通信関数（リトライ付き）で送るゾッ！
+        await fetchWithRetry(GAS_URL, { 
             method: "POST", 
             mode: "no-cors", 
             body: JSON.stringify({ type: "reaction", date: dateStr, emoji: emoji }) 
         });
-        showToast("リアクションしたゾッ！");
-        
-        // 数値を最新にするために少し待ってから読み込み直す
-        setTimeout(() => {
-            if (typeof currentBulletinPage !== 'undefined') loadBulletin(currentBulletinPage);
-            else loadBulletin();
-        }, 500);
-    } catch (e) { showToast("失敗したゾ..."); }
+    } catch (e) {
+        console.error("リアクションの送信に失敗したゾ…");
+    }
 }
 
 // ==========================================
