@@ -235,13 +235,18 @@ function renderUniforms() {
     `).join('');
 }
 // 削除要請（みつきにメールが飛ぶ）
-async function requestDelete(date) {
-    showToast("管理者に削除要請を送りました...");
-    await fetch(GAS_URL, { 
-        method: "POST", 
-        mode: "no-cors", 
-        body: JSON.stringify({ type: "delete_request", date: date }) 
-    });
+async function requestDelete(date, content) {
+    if(!confirm("この投稿の削除要請を管理者に送りますか？")) return;
+    
+    showToast("要請を送信中...");
+    try {
+        // ★ fetchWithRetry を使う！
+        await fetchWithRetry(GAS_URL, { 
+            method: "POST", mode: "no-cors", 
+            body: JSON.stringify({ type: "delete_request", date: date, content: content.substring(0, 50) }) 
+        });
+        showToast("管理者に通知したゾッ！");
+    } catch (e) { showToast("送信失敗だゾ..."); }
 }
 // ストーリー用フィルター初期化
 function renderStoryFilters() {
@@ -392,18 +397,15 @@ async function executeSendBulletin(content, parentId) {
 
     showToast("掲示板に刻んでいます...");
     try {
-        await fetch(GAS_URL, { 
-            method: "POST", 
-            mode: "no-cors", 
-            // ★ 超重要：これがないとブラウザが通信をブロックする！
-            headers: { "Content-Type": "text/plain" },
+        // ★ 普通の fetch ではなく、fetchWithRetry を使う！
+        await fetchWithRetry(GAS_URL, { 
+            method: "POST", mode: "no-cors", 
             body: JSON.stringify({ type: "bulletin", content: content, parentId: parentId, myPostId: myPostId }) 
         });
         showToast("投稿成功だゾッ！");
-        setTimeout(() => { location.reload(); }, 1000); // 1秒待って確実にリロード
+        setTimeout(() => { location.reload(); }, 1000); 
     } catch (e) { 
-        showToast("失敗したゾ..."); 
-        console.error("POSTエラー:", e);
+        showToast("何度か試したけどダメだったゾ…LINE等のアプリ内ブラウザならSafariで開いてみてね！"); 
     }
 }
 
@@ -499,7 +501,6 @@ async function sendStory() {
     const chars = document.getElementById('story-chars').value;
     const tag = document.getElementById('story-tag').value;
     const content = document.getElementById('story-content').value;
-    // チェックボックスから取得（HTMLに id="story-use-illust" を追加してね）
     const useIllust = document.getElementById('story-use-illust') ? document.getElementById('story-use-illust').checked : false;
 
     if (!title || !content) return alert("タイトルと内容は必須だゾ！");
@@ -508,11 +509,11 @@ async function sendStory() {
     if (!adminKey) return;
 
     showToast("物語を紡いでいます...");
-    
     const data = { type: "story", title, stage, chars, tag, content, adminKey, useIllust: useIllust };
 
     try {
-        const response = await fetch(GAS_URL, { method: "POST", mode: "cors", body: JSON.stringify(data) });
+        // ★ fetchWithRetry を使う！
+        const response = await fetchWithRetry(GAS_URL, { method: "POST", mode: "cors", body: JSON.stringify(data) });
         const result = await response.json();
         
         if (result === "success") {
@@ -523,7 +524,7 @@ async function sendStory() {
             showToast("合言葉が違うみたいだゾ…");
         }
     } catch (e) {
-        showToast("エラーで投稿できなかったゾ...");
+        showToast("通信エラーで投稿できなかったゾ...");
     }
 }
 
@@ -1347,16 +1348,17 @@ function closeProfile() {
 async function sendVote(charId, charName) {
     const char = schoolData.characters.find(c => c.id === charId);
     showToast(`${charName}にエールを送信中...`);
-
     try {
-        await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ type: "vote", charId, charName, charClass: char.class }) });
-        
-        // 【新機能】キャラからのお礼セリフをトーストで出す
-        // quote（セリフ）の代わりに、お礼専用のデータがなければquoteを使うよ
+        // ★ fetchWithRetry を使う！
+        await fetchWithRetry(GAS_URL, { 
+            method: "POST", mode: "no-cors", 
+            body: JSON.stringify({ type: "vote", charId, charName, charClass: char.class }) 
+        });
         const thanksMsg = char.thanks || `${charName}「投票ありがとう！嬉しいゾッ！」`;
         showToast(thanksMsg); 
-        
-    } catch (e) { showToast("通信エラーだゾ..."); }
+    } catch (e) { 
+        showToast("通信エラーだゾ…。"); 
+    }
 }
 function showCalendar() {
     const calArea = document.getElementById('calendar-display');
@@ -1671,25 +1673,20 @@ async function sendLetter() {
     const select = document.getElementById('letter-to');
     const selectedOpt = select.options[select.selectedIndex];
     const content = document.getElementById('letter-content').value;
-    const btn = document.querySelector('.premium-btn'); // 送信ボタン
+    const btn = document.querySelector('.premium-btn'); 
 
     if (!selectedOpt.value || !content) return alert("宛先と内容を入力してね！");
 
-    // 処理開始：通知とボタン無効化
     showToast(`${selectedOpt.dataset.name}へお手紙を届けています...`);
     const originalBtnText = btn.innerText;
     btn.innerText = "送信中...";
     btn.disabled = true;
 
-    const data = { 
-        type: "letter", 
-        toName: selectedOpt.dataset.name, 
-        toClass: selectedOpt.dataset.class, 
-        content: content 
-    };
+    const data = { type: "letter", toName: selectedOpt.dataset.name, toClass: selectedOpt.dataset.class, content: content };
 
     try {
-        await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(data) });
+        // ★ fetchWithRetry を使う！
+        await fetchWithRetry(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(data) });
         showToast("お手紙を届けたゾ！");
         document.getElementById('letter-content').value = "";
     } catch (e) {
@@ -1699,6 +1696,7 @@ async function sendLetter() {
         btn.disabled = false;
     }
 }
+
 function openStoryModal(title) {
     const s = allStories.find(story => story.title === title);
     const modal = document.getElementById('profile-modal'); // 名簿のモーダルを再利用！
@@ -1866,5 +1864,27 @@ function toggleWelcome() {
         content.style.display = 'none';
         // 矢印を下に戻す
         arrow.style.transform = 'rotate(0deg)';
+    }
+}
+async function fetchWithRetry(url, options, maxRetries = 3) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            // 通信アタック開始！
+            const response = await fetch(url, options);
+            return response; // 成功したらループを抜けて終了
+        } catch (error) {
+            console.warn(`通信エラー ${i + 1}回目...`, error);
+            
+            // もし最後の1回（3回目）もダメだったら、諦めてエラーを出す
+            if (i === maxRetries - 1) {
+                throw error; 
+            }
+            
+            // ユーザーを不安にさせないための実況トースト
+            showToast(`通信が不安定みたい…再接続するゾッ（${i + 1}/2回目）`);
+            
+            // 少しだけ待機（1回目は1秒、2回目は2秒待ってから再アタック）
+            await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+        }
     }
 }
