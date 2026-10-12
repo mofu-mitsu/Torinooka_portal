@@ -7058,7 +7058,7 @@ news:[
     },
     {
         "id": "natsue",
-        "fullName": "虻崎 捺江（あぶさき なつえ）",
+        "fullName": "虻崎 夏江（あぶさき なつえ）",
         "name": "なつえ先生",
         "gender": "女子",
         "stage": "高等部",
