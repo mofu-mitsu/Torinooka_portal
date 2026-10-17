@@ -1990,7 +1990,7 @@ function drawBulletinHTML(data, board) {
                     <span class="post-date">${p.date}</span>
                     <div class="post-actions">
                         ${myDeleteBtn}
-                        <button class="req-btn" onclick="sendBulletin('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
+                        <button class="req-btn" onclick="openReplyModal('${p.date}')"><i class="fas fa-reply"></i> 返信</button>
                         <button id="btn-replies-${postId}" class="req-btn" data-count="${replyCount}" onclick="toggleReplies('${p.date}')">
                             <i class="fas fa-comments"></i> スレを開く (${replyCount})
                         </button>
