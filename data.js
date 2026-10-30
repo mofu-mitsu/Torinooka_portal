@@ -3463,7 +3463,7 @@ news:[
             "motif": "クマ",
             "birthday": "6/21",
             "bloodType": "A",
-            "mbti": "ENFJ",
+            "mbti": "ENFP",
             "socio": "EIE",
             "ennea": "4w3",
             "hometown": "千葉県",
