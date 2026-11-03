@@ -98,8 +98,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('bulletin-board-display')) {
         loadBulletin();
     }
-    if (document.getElementById('letter-class-select')) {
-        initLetterClassSelect(classList);
+    if (document.getElementById('reply-display')) {
+        // もし「お手紙を送るフォーム」があれば初期化
+        if (document.getElementById('letter-class-select')) {
+            initLetterClassSelect(classList);
+        }
+        // お返事の読み込みは絶対に実行する！
         loadReplies();
     }
     setInterval(spawnGohobi, 15000); // これを追加！
