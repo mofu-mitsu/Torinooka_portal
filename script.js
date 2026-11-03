@@ -1146,9 +1146,11 @@ async function loadReplies() {
 
     const cached = safeGetStorage('cache_replies');
     if (cached) {
-        allRepliesData = JSON.parse(cached);
-        setupReplyFilter();
-        renderRepliesHTML(allRepliesData);
+        try {
+            allRepliesData = JSON.parse(cached);
+            setupReplyFilter();
+            executeReplySearch(); // ★いきなり描画せず、検索・ソートを通す！
+        } catch(e) {}
     } else {
         replyArea.innerHTML = `<div style="text-align:center; padding:40px;"><div class="loading-spinner"></div><p>お返事を探しています...</p></div>`;
     }
@@ -1161,17 +1163,44 @@ async function loadReplies() {
             allRepliesData = freshData;
             safeSetStorage('cache_replies', JSON.stringify(freshData));
             setupReplyFilter();
-            renderRepliesHTML(allRepliesData);
+            executeReplySearch(); // ★最新データで検索・ソートを実行！
         }
     } catch (e) {
-        if (!cached) replyArea.innerHTML = "<p>お返事の取得に失敗したゾッ。</p>";
+        if (!cached) replyArea.innerHTML = "<p style='text-align:center'>お返事の取得に失敗したゾッ。</p>";
     }
+}
+function executeReplySearch() {
+    const textQuery = document.getElementById('reply-search-text') ? document.getElementById('reply-search-text').value.toLowerCase() : '';
+    const classQuery = document.getElementById('reply-class-filter') ? document.getElementById('reply-class-filter').value : 'all';
+    const sortOrder = document.getElementById('reply-sort-order') ? document.getElementById('reply-sort-order').value : 'new';
+
+    // 1. 検索ワードとクラスで絞り込み
+    const filtered = allRepliesData.filter(r => {
+        // キャラ名、質問内容、お返事内容のどこかに文字が含まれていればOK！
+        const matchText = r.toName.toLowerCase().includes(textQuery) || 
+                          r.content.toLowerCase().includes(textQuery) || 
+                          (r.reply && r.reply.toLowerCase().includes(textQuery));
+        
+        const char = schoolData.characters.find(c => c.name === r.toName);
+        const matchClass = (classQuery === 'all' || (char && char.class === classQuery));
+        
+        return matchText && matchClass;
+    });
+
+    // 2. 日付で並び替え（新着順 or 古い順）
+    filtered.sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        return sortOrder === 'new' ? dateB - dateA : dateA - dateB; // newなら新しい順(降順)
+    });
+
+    // 3. 画面に描画！
+    renderRepliesHTML(filtered);
 }
 function setupReplyFilter() {
     const filterSelect = document.getElementById('reply-class-filter');
     if (!filterSelect) return;
 
-    // スプレッドシートには「クラス」データがないので、宛先名(toName)から逆引きしてクラス一覧を作る
     const classSet = new Set();
     allRepliesData.forEach(r => {
         const char = schoolData.characters.find(c => c.name === r.toName);
@@ -1179,7 +1208,7 @@ function setupReplyFilter() {
     });
 
     const sortedClasses = Array.from(classSet).sort();
-    filterSelect.innerHTML = '<option value="all">すべてのお返事を見る</option>' + 
+    filterSelect.innerHTML = '<option value="all">すべてのクラス</option>' + 
                              sortedClasses.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 // --- プルダウンで選ばれた時の絞り込み実行 ---
@@ -1199,19 +1228,17 @@ function filterReplies(className) {
 function renderRepliesHTML(replies) {
     const replyArea = document.getElementById('reply-display');
     if (!replyArea) return;
-
     replyArea.innerHTML = '';
+    
     if (!replies || replies.length === 0) {
-        replyArea.innerHTML = "<p style='text-align:center;'>まだお返事はないみたいだゾッ。</p>";
+        replyArea.innerHTML = "<p style='text-align:center;'>該当するお返事はないみたいだゾッ。</p>";
         return;
     }
 
     replyArea.innerHTML = replies.map(r => {
         const dateStr = r.date instanceof Date ? r.date.toLocaleDateString() : r.date;
-        
-        // アイコンを取得（なければComing Soon）
         const charObj = schoolData.characters.find(c => c.name === r.toName);
-        const iconHTML = getCharImgHTML(charObj, 'char-circle-mini'); // ストーリーで使ったミニ丸枠を再利用
+        const iconHTML = getCharImgHTML(charObj, 'char-circle-mini'); 
 
         return `
         <div class="reply-card">
