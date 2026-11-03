@@ -31,29 +31,24 @@
     </header>
 
     <main class="container">
-        <section class="luxury-section">
-            <h2 class="gold-title"><i class="fas fa-envelope"></i> 生徒へのお手紙</h2>
-            <p style="text-align:center">応援メッセージや質問を匿名で送れるゾッ！</p>
-            <div class="letter-form">
-                <select id="letter-class-select" onchange="updateLetterCharSelect()" class="premium-select">
-                    <option value="">クラスを選択</option>
-                </select>
-                <select id="letter-to" class="premium-select">
-                    <option value="">先にクラスを選んでね</option>
-                </select>
-                <textarea id="letter-content" placeholder="メッセージをどうぞ..."></textarea>
-                <button onclick="sendLetter()" class="premium-btn">手紙を送る</button>
-            </div>
-        </section>
-
-        <section class="luxury-section">
+            <section class="luxury-section">
             <h2 class="gold-title"><i class="fas fa-reply-all"></i> 学園からのお返事</h2>
-            <!-- ★追加：お返事を探すためのプルダウン -->
-            <div style="text-align: center; margin-bottom: 20px;">
-                <select id="reply-class-filter" class="premium-select" style="max-width: 300px;" onchange="filterReplies(this.value)">
-                    <option value="all">すべてのお返事を見る</option>
-                    <!-- JSでクラス一覧が自動追加されます -->
-                </select>
+            
+            <!-- ★追加：お返事を探すための高度な検索パネル -->
+            <div class="story-search-grid" style="margin-bottom: 30px;">
+                <input type="text" id="reply-search-text" placeholder="宛先（キャラ名）や内容で検索..." onkeyup="executeReplySearch()" class="premium-select" style="border-radius:30px; margin-bottom:10px;">
+                
+                <div style="display:flex; gap:10px;">
+                    <select id="reply-class-filter" class="premium-select" onchange="executeReplySearch()">
+                        <option value="all">すべてのクラス</option>
+                        <!-- JSで自動追加 -->
+                    </select>
+                    
+                    <select id="reply-sort-order" class="premium-select" onchange="executeReplySearch()" style="width: auto;">
+                        <option value="new">新着順</option>
+                        <option value="old">古い順</option>
+                    </select>
+                </div>
             </div>
 
             <div id="reply-display">
